@@ -11,7 +11,7 @@
   - **Backend**: Supabase tables, RLS, RPCs, Edge Functions, Storage, and Realtime
   - **AI**: anything touching the LLM or Document Intelligence
   - **Tests**: what proves it works
-- **Refs**: PRD requirement IDs and sections, [TEAM_PLAN](TEAM_PLAN.md) task IDs, and the owning person (A Platform · B AI · C Candidate · D Recruiter).
+- **Refs**: PRD requirement IDs and sections, [TEAM_PLAN](TEAM_PLAN.md) task IDs, and the **backend** and **frontend** owners (A Backend: DB & API · B Backend: AI · C Frontend: candidate + design system · D Frontend: recruiter + auth). "—" means that layer has no work for the story.
 
 **Priority:**
 - **Must** is MVP, required for the course demo.
@@ -27,63 +27,63 @@
 
 ## Index
 
-| ID | Title | Priority | Owner |
-|---|---|---|---|
-| US-01 | Choose my path at sign-up | Must | A |
-| US-02 | Sign up with email or Google | Must | A |
-| US-03 | Stay signed in, land on my home | Must | A |
-| US-04 | Sign out | Must | A |
-| US-05 | Reset forgotten password | Should | A |
-| US-06 | Role-separated access | Must | A |
-| US-07 | Upload resume | Must | C + B |
-| US-08 | Live parse progress | Must | C + B |
-| US-09 | Review & edit extracted skills | Must | C |
-| US-10 | See evidence for each skill | Should | C + B |
-| US-11 | Manual fallback when parsing fails | Must | C |
-| US-12 | Set job preferences / hard filters | Must | C + A |
-| US-13 | Re-upload resume (versioned) | Should | C + B |
-| US-14 | Ranked job deck | Must | C + B |
-| US-15 | Swipe right to apply | Must | C + A |
-| US-16 | Undo an apply within 5 s | Must | C + A |
-| US-17 | Swipe left to pass (+ reason) | Must | C + A |
-| US-18 | Button alternatives to swiping | Must | C |
-| US-19 | Warn before low-match apply | Should | C |
-| US-20 | Empty-deck guidance | Must | C |
-| US-21 | Daily apply cap | Should | A + C |
-| US-22 | Offline swipe sync | Could | C |
-| US-23 | Radar chart deep-dive | Must | C + B |
-| US-24 | Plain-language gap list | Must | C |
-| US-25 | Application pipeline | Must | C |
-| US-26 | Live status updates | Must | A + C |
-| US-27 | Push notification on interview | Should | A |
-| US-28 | Withdraw an application | Should | A + C |
-| US-29 | Recruiter contact on interview | Must | C + A |
-| US-30 | Create company workspace | Must | A + D |
-| US-31 | Generate invite codes | Must | A + D |
-| US-32 | Join company by code | Must | A + D |
-| US-33 | Verified company badge | Should | A + C + D |
-| US-34 | Paste JD → extracted requirements | Must | B + D |
-| US-35 | Edit requirements | Must | D |
-| US-36 | Set job hard filters | Must | D |
-| US-37 | Publish / pause / close job | Must | D + A |
-| US-38 | Jobs list with counts | Must | D |
-| US-39 | Re-score on requirement edit | Should | B |
-| US-40 | Board sorted by Match Score | Must | B + D |
-| US-41 | Blind tiles | Must | B + D |
-| US-42 | Candidate detail view | Must | D + B |
-| US-43 | One-click advance | Must | A + D |
-| US-44 | One-click reject with undo | Must | A + D |
-| US-45 | Touch-friendly tile actions | Must | D |
-| US-46 | Board filters | Should | D + B |
-| US-47 | Interview list | Must | D + A |
-| US-48 | Keyboard triage shortcuts | Should | D |
-| US-49 | Resume privacy until advanced | Must | A |
-| US-50 | Delete my account | Should | A |
-| US-51 | Skills-only AI (no personal traits) | Must | B |
-| US-52 | Mock AI provider | Must | B |
-| US-53 | Switchable LLM provider | Must | B |
-| US-54 | Realistic seed data | Must | B + A |
-| US-55 | Fake repositories in Flutter | Must | C + D |
+| ID | Title | Priority | Backend | Frontend |
+|---|---|---|---|---|
+| US-01 | Choose my path at sign-up | Must | A | D |
+| US-02 | Sign up with email or Google | Must | A | D |
+| US-03 | Stay signed in, land on my home | Must | A | D |
+| US-04 | Sign out | Must | — | D |
+| US-05 | Reset forgotten password | Should | A | D |
+| US-06 | Role-separated access | Must | A | D |
+| US-07 | Upload resume | Must | A + B | C |
+| US-08 | Live parse progress | Must | B | C |
+| US-09 | Review & edit extracted skills | Must | A | C |
+| US-10 | See evidence for each skill | Should | B | C |
+| US-11 | Manual fallback when parsing fails | Must | B | C |
+| US-12 | Set job preferences / hard filters | Must | A + B | C |
+| US-13 | Re-upload resume (versioned) | Should | A | C |
+| US-14 | Ranked job deck | Must | B | C |
+| US-15 | Swipe right to apply | Must | A | C |
+| US-16 | Undo an apply within 5 s | Must | A | C |
+| US-17 | Swipe left to pass (+ reason) | Must | A + B | C |
+| US-18 | Button alternatives to swiping | Must | — | C |
+| US-19 | Warn before low-match apply | Should | — | C |
+| US-20 | Empty-deck guidance | Must | B | C |
+| US-21 | Daily apply cap | Should | A | C |
+| US-22 | Offline swipe sync | Could | — | C |
+| US-23 | Radar chart deep-dive | Must | B | C |
+| US-24 | Plain-language gap list | Must | — | C |
+| US-25 | Application pipeline | Must | A | C |
+| US-26 | Live status updates | Must | A | C |
+| US-27 | Push notification on interview | Should | A | C |
+| US-28 | Withdraw an application | Should | A | C |
+| US-29 | Recruiter contact on interview | Must | A | C |
+| US-30 | Create company workspace | Must | A | D |
+| US-31 | Generate invite codes | Must | A | D |
+| US-32 | Join company by code | Must | A | D |
+| US-33 | Verified company badge | Should | A | C + D |
+| US-34 | Paste JD → extracted requirements | Must | B | D |
+| US-35 | Edit requirements | Must | A + B | D |
+| US-36 | Set job hard filters | Must | A | D |
+| US-37 | Publish / pause / close job | Must | A | D |
+| US-38 | Jobs list with counts | Must | A | D |
+| US-39 | Re-score on requirement edit | Should | B | D |
+| US-40 | Board sorted by Match Score | Must | A | D |
+| US-41 | Blind tiles | Must | A | D |
+| US-42 | Candidate detail view | Must | A | D |
+| US-43 | One-click advance | Must | A | D |
+| US-44 | One-click reject with undo | Must | A | D |
+| US-45 | Touch-friendly tile actions | Must | — | D |
+| US-46 | Board filters | Should | A | D |
+| US-47 | Interview list | Must | A | D |
+| US-48 | Keyboard triage shortcuts | Should | — | D |
+| US-49 | Resume privacy until advanced | Must | A | — |
+| US-50 | Delete my account | Should | A | C |
+| US-51 | Skills-only AI (no personal traits) | Must | B | — |
+| US-52 | Mock AI provider | Must | B | — |
+| US-53 | Switchable LLM provider | Must | B | — |
+| US-54 | Realistic seed data | Must | B + A | — |
+| US-55 | Fake repositories in Flutter | Must | — | C + D |
 
 ---
 
@@ -111,7 +111,7 @@
   - Widget test: selecting a card updates the provider.
   - pgTAP: the trigger creates a profile with the correct role, and an invalid role raises an error.
 
-**Refs:** PRD §4, A-1, A-2 · Tasks PL-04, PL-07, PL-10 · Owner A
+**Refs:** PRD §4, A-1, A-2 · Tasks PL-04, PL-07, PL-10 · **Backend:** A · **Frontend:** D
 
 ### US-02 · Sign up with email or Google · Must
 > As a **new user**, I want to sign up with email and password or Google, so I can create an account in under a minute.
@@ -137,7 +137,7 @@
   - Repository unit test with a mocked client.
   - Manual test on the Android emulator and Chrome.
 
-**Refs:** PRD §4, A-6, X-1 · Tasks PL-07, PL-09, PL-10 · Owner A
+**Refs:** PRD §4, A-6, X-1 · Tasks PL-07, PL-09, PL-10 · **Backend:** A · **Frontend:** D
 
 ### US-03 · Stay signed in, land on my home · Must
 > As a **returning user**, I want to stay signed in and land on my own home screen, so I can pick up where I left off.
@@ -160,7 +160,7 @@
 - **Tests:**
   - Unit tests on the pure redirect function, covering every combination of session, role, and onboarding state.
 
-**Refs:** PRD A-5 · Tasks PL-09, PL-11 · Owner A
+**Refs:** PRD A-5 · Tasks PL-09, PL-11 · **Backend:** A · **Frontend:** D
 
 ### US-04 · Sign out · Must
 > As a **user**, I want to sign out, so others using my device can't get into my account.
@@ -177,7 +177,7 @@
 - **Tests:**
   - Widget test: after sign-out, the router is on `/welcome` and the providers are reset.
 
-**Refs:** — · Tasks PL-09 · Owner A
+**Refs:** — · Tasks PL-09 · **Backend:** — · **Frontend:** D
 
 ### US-05 · Reset forgotten password · Should
 > As a **user**, I want to reset a forgotten password, so I don't lose my account.
@@ -195,7 +195,7 @@
   - Customize the email template in Supabase.
   - Local email testing uses the built-in Inbucket/Mailpit at `localhost:54324`.
 
-**Refs:** X-1 · Tasks PL-09, PL-10 · Owner A
+**Refs:** X-1 · Tasks PL-09, PL-10 · **Backend:** A · **Frontend:** D
 
 ### US-06 · Role-separated access · Must
 > As a **candidate**, I want recruiter screens to be unreachable from my account, and the reverse for recruiters, so each role only sees what it should.
@@ -216,7 +216,7 @@
 - **Tests:**
   - pgTAP matrix for each table: owner can, other same-role user can't, other role can't, anon can't.
 
-**Refs:** PRD A-5, §9.5 · Tasks PL-08, PL-11, PL-12, PL-20 · Owner A
+**Refs:** PRD A-5, §9.5 · Tasks PL-08, PL-11, PL-12, PL-20 · **Backend:** A · **Frontend:** D
 
 ---
 
@@ -246,7 +246,7 @@
   - Unit tests for the validators.
   - Integration test against local Supabase: upload succeeds into your own folder and fails for another user's folder.
 
-**Refs:** PRD C-ON-1 · Tasks CA-03, CA-07, PL-14 · Owner C (+B for the function)
+**Refs:** PRD C-ON-1 · Tasks CA-03, CA-07, PL-14 · **Backend:** A + B · **Frontend:** C
 
 ### US-08 · Live parse progress · Must
 > As a **candidate**, I want to see live progress while my resume is processed, so I know the app is working.
@@ -271,7 +271,7 @@
   - Widget test with a fake stream emitting every status.
   - Deno test of the function with mocked DI and LLM.
 
-**Refs:** PRD C-ON-2, §8.1 · Tasks CA-04, CA-07, AI-05, AI-07, PL-21 · Owner C + B
+**Refs:** PRD C-ON-2, §8.1 · Tasks CA-04, CA-07, AI-05, AI-07, PL-21 · **Backend:** B · **Frontend:** C
 
 ### US-09 · Review & edit extracted skills · Must
 > As a **candidate**, I want to review and edit the skills and years the AI found, so my profile is accurate before anyone sees it.
@@ -299,7 +299,7 @@
   - Controller unit tests for add, edit, and remove.
   - pgTAP: an unconfirmed profile can't swipe.
 
-**Refs:** PRD C-ON-4, C-ON-5 · Tasks CA-05a, CA-05b, CA-08, PL-17 · Owner C
+**Refs:** PRD C-ON-4, C-ON-5 · Tasks CA-05a, CA-05b, CA-08, PL-17 · **Backend:** A · **Frontend:** C
 
 ### US-10 · See evidence for each skill · Should
 > As a **candidate**, I want to see the line in my resume each skill came from, so I can trust the extraction.
@@ -317,7 +317,7 @@
 - **Tests:**
   - Deno unit test for the evidence validator (exact match, normalized whitespace, fabricated quote rejected).
 
-**Refs:** PRD C-ON-3, §8.5 · Tasks CA-05b, AI-08 · Owner C + B
+**Refs:** PRD C-ON-3, §8.5 · Tasks CA-05b, AI-08 · **Backend:** B · **Frontend:** C
 
 ### US-11 · Manual fallback when parsing fails · Must
 > As a **candidate**, I want to add skills by hand if my resume can't be read, so I'm never stuck at onboarding.
@@ -334,7 +334,7 @@
   - The function catches every error and always writes `FAILED` plus a reason. It never leaves a row stuck in `PARSING`.
   - A `pg_cron` sweep (optional) marks rows stuck in `PARSING` for more than 2 minutes as `FAILED`.
 
-**Refs:** PRD §8.5 · Tasks CA-09 · Owner C
+**Refs:** PRD §8.5 · Tasks CA-09 · **Backend:** B · **Frontend:** C
 
 ### US-12 · Set job preferences / hard filters · Must
 > As a **candidate**, I want to set my location, remote preference, job type, work authorization, and minimum salary, so I only see jobs I can actually take.
@@ -358,7 +358,7 @@
 - **Tests:**
   - pgTAP: a seeded job that fails each filter never appears in `get_feed`.
 
-**Refs:** PRD §5.1, C-SW-1 · Tasks CA-06, CA-08, PL-17, AI-15 · Owner C + A
+**Refs:** PRD §5.1, C-SW-1 · Tasks CA-06, CA-08, PL-17, AI-15 · **Backend:** A + B · **Frontend:** C
 
 ### US-13 · Re-upload resume (versioned) · Should
 > As a **candidate**, I want to upload a newer resume later, so my profile stays current without changing applications I already sent.
@@ -378,7 +378,7 @@
 - **Tests:**
   - pgTAP: an application keeps its old `profile_version_id` and old score after a new version is confirmed.
 
-**Refs:** PRD C-ON-6 · Tasks CA-07, CA-08 · Owner C + B
+**Refs:** PRD C-ON-6 · Tasks CA-07, CA-08 · **Backend:** A · **Frontend:** C
 
 ---
 
@@ -409,7 +409,7 @@
   - pgTAP with seed data: the ordering is deterministic and swiped jobs are excluded.
   - The scoring regression fixture (AI-17).
 
-**Refs:** PRD §5.2, §8.4, §8.6 · Tasks CA-10, CA-14, AI-14, AI-15 · Owner C + B
+**Refs:** PRD §5.2, §8.4, §8.6 · Tasks CA-10, CA-14, AI-14, AI-15 · **Backend:** B · **Frontend:** C
 
 ### US-15 · Swipe right to apply · Must
 > As a **candidate**, I want to swipe right to apply instantly, so I can apply to a job in one gesture.
@@ -432,7 +432,7 @@
 - **Tests:**
   - pgTAP: an application is created with a score, a duplicate swipe errors, and a closed job errors.
 
-**Refs:** PRD C-SW-2 · Tasks CA-11, CA-14, PL-18 · Owner C + A
+**Refs:** PRD C-SW-2 · Tasks CA-11, CA-14, PL-18 · **Backend:** A · **Frontend:** C
 
 ### US-16 · Undo an apply within 5 s · Must
 > As a **candidate**, I want 5 seconds to undo an accidental right swipe, so a slip doesn't send an application.
@@ -452,7 +452,7 @@
 - **Tests:**
   - pgTAP: undo within the window succeeds, and undo after the window fails. Use `set local` time or `pg_sleep` in the test.
 
-**Refs:** PRD C-SW-2, §9.4 · Tasks CA-12, PL-18 · Owner C + A
+**Refs:** PRD C-SW-2, §9.4 · Tasks CA-12, PL-18 · **Backend:** A · **Frontend:** C
 
 ### US-17 · Swipe left to pass (+ reason) · Must
 > As a **candidate**, I want to swipe left to pass and optionally say why, so the deck learns what I don't want.
@@ -474,7 +474,7 @@
 - **Tests:**
   - pgTAP: passing jobs from one company lowers that company's later jobs in feed order, while `match_score` stays the same.
 
-**Refs:** PRD C-SW-4, §1.3, §8.6 · Tasks CA-13, PL-18, AI-15 · Owner C + A
+**Refs:** PRD C-SW-4, §1.3, §8.6 · Tasks CA-13, PL-18, AI-15 · **Backend:** A + B · **Frontend:** C
 
 ### US-18 · Button alternatives to swiping · Must
 > As a **candidate using a screen reader or limited motor control**, I want Apply and Pass buttons, so I can use the deck without swiping.
@@ -492,7 +492,7 @@
   - Widget test: tapping ✓ calls `swipe(right)`.
   - Semantics test: the custom actions exist (`tester.getSemantics`).
 
-**Refs:** PRD §3.2 · Tasks CA-12, CA-21 · Owner C
+**Refs:** PRD §3.2 · Tasks CA-12, CA-21 · **Backend:** — · **Frontend:** C
 
 ### US-19 · Warn before low-match apply · Should
 > As a **candidate**, I want a warning before applying to a job where I'm missing a required skill, so I don't waste my application.
@@ -506,7 +506,7 @@
   - If true, it pauses the fly-out at the threshold, shows a dialog ("You're missing Kubernetes (required). Apply anyway?"), then commits or springs back.
 - **Backend:** None. `breakdown` is already in the feed payload.
 
-**Refs:** PRD §5.2 · Tasks CA-19 · Owner C
+**Refs:** PRD §5.2 · Tasks CA-19 · **Backend:** — · **Frontend:** C
 
 ### US-20 · Empty-deck guidance · Must
 > As a **candidate**, I want a helpful message when I run out of cards, so I know what to do next.
@@ -520,7 +520,7 @@
   - The actions route to `/c/preferences` and `/c/profile/resume`.
   - Optionally show a count of "stretch" jobs hidden below 50 with a "Show stretch roles" toggle, using a `p_include_stretch` parameter on `get_feed`.
 
-**Refs:** PRD §5.2 · Tasks CA-15 · Owner C
+**Refs:** PRD §5.2 · Tasks CA-15 · **Backend:** B · **Frontend:** C
 
 ### US-21 · Daily apply cap · Should
 > As a **recruiter**, I want candidates limited to 25 applications a day, so my board isn't flooded with low-effort applications.
@@ -540,7 +540,7 @@
 - **Tests:**
   - pgTAP: 25 succeed and the 26th raises.
 
-**Refs:** PRD C-SW-3 · Tasks PL-18, CA-14 · Owner A + C
+**Refs:** PRD C-SW-3 · Tasks PL-18, CA-14 · **Backend:** A · **Frontend:** C
 
 ### US-22 · Offline swipe sync · Could
 > As a **candidate**, I want swipes I make offline to sync when I reconnect, so a spotty connection doesn't lose my decisions.
@@ -558,7 +558,7 @@
   - The deck uses the cached last feed page.
 - **Backend:** None. `swipe()` is already idempotent through the unique constraint.
 
-**Refs:** PRD C-SW-6 · Tasks — (Phase 2) · Owner C
+**Refs:** PRD C-SW-6 · Tasks CA-22 (Later) · **Backend:** — · **Frontend:** C
 
 ---
 
@@ -583,7 +583,7 @@
   - Unit tests on the axis builder (2, 5, and 12 requirements).
   - A golden test of the widget.
 
-**Refs:** PRD §5.3, §8.4 · Tasks CA-16, AI-14 · Owner C + B
+**Refs:** PRD §5.3, §8.4 · Tasks CA-16, AI-14 · **Backend:** B · **Frontend:** C
 
 ### US-24 · Plain-language gap list · Must
 > As a **candidate**, I want a plain-language list of my gaps, such as "AWS: 1 of 3 years", so I know what to learn or highlight.
@@ -603,7 +603,7 @@
 - **Tests:**
   - Unit test for the breakdown-to-row mapping.
 
-**Refs:** PRD §5.3 · Tasks CA-16 · Owner C
+**Refs:** PRD §5.3 · Tasks CA-16 · **Backend:** — · **Frontend:** C
 
 ---
 
@@ -625,7 +625,7 @@
   - RLS on `applications`: the candidate can select where the profile belongs to `auth.uid()`.
   - `status_events(application_id, from_status, to_status, actor, created_at)`.
 
-**Refs:** PRD §5.4 · Tasks CA-17 · Owner C
+**Refs:** PRD §5.4 · Tasks CA-17 · **Backend:** A · **Frontend:** C
 
 ### US-26 · Live status updates · Must
 > As a **candidate**, I want status changes to show up instantly, so I don't have to keep refreshing.
@@ -644,7 +644,7 @@
 - **Tests:**
   - Manual two-device test: recruiter advances, and the candidate's chip updates within about 1 s.
 
-**Refs:** PRD X-2 · Tasks PL-21, CA-17 · Owner A + C
+**Refs:** PRD X-2 · Tasks PL-21, CA-17 · **Backend:** A · **Frontend:** C
 
 ### US-27 · Push notification on interview · Should
 > As a **candidate**, I want a push notification when a recruiter requests an interview, so I can respond quickly.
@@ -665,7 +665,7 @@
 - **Tests:**
   - Manual test on the emulator with Google Play services.
 
-**Refs:** PRD X-2 · Tasks PL-22 · Owner A
+**Refs:** PRD X-2 · Tasks PL-22 · **Backend:** A · **Frontend:** C
 
 ### US-28 · Withdraw an application · Should
 > As a **candidate**, I want to withdraw an application, so recruiters don't spend time on a job I no longer want.
@@ -683,7 +683,7 @@
 - **Tests:**
   - pgTAP: valid transitions pass, invalid ones (from `NOT_SELECTED`) raise.
 
-**Refs:** PRD §5.4 · Tasks PL-19, CA-17 · Owner A + C
+**Refs:** PRD §5.4 · Tasks PL-19, CA-17 · **Backend:** A · **Frontend:** C
 
 ### US-29 · Recruiter contact on interview · Must
 > As a **candidate**, I want to see the recruiter's contact info when I'm invited to interview, so I can arrange the next step.
@@ -697,7 +697,7 @@
   - A `get_application_contact(application_id)` RPC returns the recruiter's name and email (from `auth.users` through `security definer`) **only** when the caller owns the application and the status is `INTERVIEW_REQUESTED`.
 - **Flutter:** The pipeline detail card shows contact info with "Copy email" and a `mailto:` link (`url_launcher`).
 
-**Refs:** PRD §5.4 · Tasks CA-18, PL-19 · Owner C + A
+**Refs:** PRD §5.4 · Tasks CA-18, PL-19 · **Backend:** A · **Frontend:** C
 
 ---
 
@@ -724,7 +724,7 @@
     5. Returns the company.
   - RLS: companies are readable by authenticated users (for job cards) and updatable by the owner.
 
-**Refs:** PRD A-3 · Tasks RC-07, PL-13, PL-15 · Owner A + D
+**Refs:** PRD A-3 · Tasks RC-07, PL-13, PL-15 · **Backend:** A · **Frontend:** D
 
 ### US-31 · Generate invite codes · Must
 > As a **company owner**, I want to generate invite codes, so my teammates can join our workspace.
@@ -741,7 +741,7 @@
 - **Flutter:** The Company settings screen lists active codes with Copy (`Clipboard.setData`) and Revoke buttons.
 - **Tests:** pgTAP: a member (non-owner) can't create invites.
 
-**Refs:** PRD A-3 · Tasks PL-13, RC-18 · Owner A + D
+**Refs:** PRD A-3 · Tasks PL-13, RC-18 · **Backend:** A · **Frontend:** D
 
 ### US-32 · Join company by code · Must
 > As a **recruiter**, I want to join my company with an invite code, so I can work on the same jobs as my team.
@@ -759,7 +759,7 @@
   - The join screen has a code field (auto-uppercase, 8 characters) and maps errors to messages.
   - On success, refresh `profileProvider`, and the router moves to `/r/jobs`.
 
-**Refs:** PRD A-3 · Tasks PL-13, RC-07, PL-15 · Owner A + D
+**Refs:** PRD A-3 · Tasks PL-13, RC-07, PL-15 · **Backend:** A · **Frontend:** D
 
 ### US-33 · Verified company badge · Should
 > As a **candidate**, I want to see whether a company is verified, so I can avoid fake job postings.
@@ -775,7 +775,7 @@
   - `get_feed` includes `company_verified` in the card JSON.
 - **Flutter:** The `CompanyBadge` component appears on `JobCard` and the recruiter header.
 
-**Refs:** PRD A-4 · Tasks PL-26 · Owner A (+C, D for UI)
+**Refs:** PRD A-4 · Tasks PL-26, RC-22 · **Backend:** A · **Frontend:** C + D
 
 ---
 
@@ -804,7 +804,7 @@
   - There's no Document Intelligence step, because the input is plain text.
 - **Tests:** Deno test using the mock provider with fixture job descriptions.
 
-**Refs:** PRD §6.1 · Tasks AI-12, RC-08 · Owner B + D
+**Refs:** PRD §6.1 · Tasks AI-12, RC-08 · **Backend:** B · **Frontend:** D
 
 ### US-35 · Edit requirements · Must
 > As a **recruiter**, I want to mark each skill Required or Preferred and set minimum years, so the Match Score reflects what I actually need.
@@ -826,7 +826,7 @@
   - Controller unit tests for the limits.
   - pgTAP: a 9th required skill is rejected.
 
-**Refs:** PRD R-JOB-1, R-JOB-2 · Tasks RC-09a, RC-09b · Owner D
+**Refs:** PRD R-JOB-1, R-JOB-2 · Tasks RC-09a, RC-09b · **Backend:** A + B · **Frontend:** D
 
 ### US-36 · Set job hard filters · Must
 > As a **recruiter**, I want to set location, remote, work authorization, and a salary range, so only eligible candidates see the job.
@@ -838,7 +838,7 @@
 - **Flutter:** `JobDetailsForm`: location text, remote chips, job type, a "sponsorship available" toggle, and salary min and max (validated min ≤ max). The LLM's guesses (US-34) are pre-filled.
 - **Backend:** Columns on `jobs` (`location`, `remote`, `job_type`, `sponsorship`, `salary_min`, `salary_max`), mirrored in the `get_feed` filters (US-12).
 
-**Refs:** PRD §6.1 · Tasks RC-10 · Owner D
+**Refs:** PRD §6.1 · Tasks RC-10 · **Backend:** A · **Frontend:** D
 
 ### US-37 · Publish / pause / close job · Must
 > As a **recruiter**, I want to publish, pause, and close a job, so I control when it accepts applicants.
@@ -856,7 +856,7 @@
 - **Flutter:** The job header has a status menu, with a confirm dialog for Close.
 - **Tests:** pgTAP: closing cascades, and an invalid transition (CLOSED → OPEN) raises.
 
-**Refs:** PRD R-JOB-4 · Tasks RC-11, PL-19 · Owner D + A
+**Refs:** PRD R-JOB-4 · Tasks RC-11, PL-19 · **Backend:** A · **Frontend:** D
 
 ### US-38 · Jobs list with counts · Must
 > As a **recruiter**, I want a list of my company's jobs with applicant counts, so I can see where to focus.
@@ -869,7 +869,7 @@
   - A `company_jobs_overview` view (`security_invoker = true`) with `count(*) filter (where status = 'APPLIED' and committed_at <= now())` as `new_count` and the total, scoped by RLS to the recruiter's company.
 - **Flutter:** `JobsListScreen` uses a `ListView` (compact) or a table (expanded) with `StatusChip` and count badges, plus a "New job" FAB or button and pull-to-refresh.
 
-**Refs:** PRD §6 nav · Tasks RC-06, RC-11 · Owner D
+**Refs:** PRD §6 nav · Tasks RC-06, RC-11 · **Backend:** A · **Frontend:** D
 
 ### US-39 · Re-score on requirement edit · Should
 > As a **recruiter**, I want scores to update when I edit a live job's requirements, so the ranking stays fair.
@@ -886,7 +886,7 @@
 - **Flutter:** The board shows a dismissible banner when `jobs.rescored_at > last_viewed_at`.
 - **Tests:** pgTAP: changing a weight changes the stored scores and the order.
 
-**Refs:** PRD R-JOB-3 · Tasks AI-18 · Owner B
+**Refs:** PRD R-JOB-3 · Tasks AI-18 · **Backend:** B · **Frontend:** D
 
 ---
 
@@ -910,7 +910,7 @@
   - Removing a tile animates through a keyed `AnimatedSwitcher` or `implicitly_animated` list.
   - A Realtime subscription on `applications` filtered by `job_id` inserts new applicants live, keeping the sort.
 
-**Refs:** PRD R-TRI-2 · Tasks AI-16, RC-12, RC-14 · Owner B + D
+**Refs:** PRD R-TRI-2 · Tasks AI-16, RC-12, RC-14 · **Backend:** A · **Frontend:** D
 
 ### US-41 · Blind tiles · Must
 > As a **recruiter**, I want tiles to hide names, photos, and schools, so I judge candidates on skills without bias.
@@ -926,7 +926,7 @@
 - **Flutter:** The `CandidateTile` model simply has no name field before advance. The interview list (US-47) uses a different model.
 - **Tests:** pgTAP: a recruiter selecting from `candidates` or `profiles` of applicants returns 0 rows, and the `get_board` JSON keys are exactly the allowed set.
 
-**Refs:** PRD R-TRI-1 · Tasks AI-16, RC-12 · Owner B + D
+**Refs:** PRD R-TRI-1 · Tasks AI-16, RC-12 · **Backend:** A · **Frontend:** D
 
 ### US-42 · Candidate detail view · Must
 > As a **recruiter**, I want to open a candidate's detail with the radar chart and skill evidence, so I can verify the match.
@@ -943,7 +943,7 @@
   - `CandidateDetailScreen` (or a side panel on expanded layouts) reuses `RadarDeepDive` (from US-23) with the "Candidate" legend, plus an evidence list and the advance and reject actions.
 - **Tests:** pgTAP: opening twice writes only one event.
 
-**Refs:** PRD §6.2 · Tasks RC-15, AI-16, PL-19 · Owner D + B
+**Refs:** PRD §6.2 · Tasks RC-15, AI-16, PL-19 · **Backend:** A · **Frontend:** D
 
 ### US-43 · One-click advance · Must
 > As a **recruiter**, I want to advance a candidate to interview with one click, so I can move fast on good fits.
@@ -960,7 +960,7 @@
   - The `TriangleActions` ▲ tap opens an optional note popover ("Add a note?", skippable). The call is optimistic: the tile flies to the Interview list and rolls back on error.
 - **Tests:** pgTAP: transitions, and a recruiter from another company is denied.
 
-**Refs:** PRD §6.2 · Tasks PL-19, RC-13, RC-14 · Owner A + D
+**Refs:** PRD §6.2 · Tasks PL-19, RC-13, RC-14 · **Backend:** A · **Frontend:** D
 
 ### US-44 · One-click reject with undo · Must
 > As a **recruiter**, I want to reject a candidate with one click and a short undo window, so I can clear my board quickly without mistakes.
@@ -981,7 +981,7 @@
   - pgTAP: undo within and after the window.
   - A candidate can't read `reject_reason`.
 
-**Refs:** PRD R-TRI-4, R-TRI-5 · Tasks PL-19, RC-13, RC-14 · Owner A + D
+**Refs:** PRD R-TRI-4, R-TRI-5 · Tasks PL-19, RC-13, RC-14 · **Backend:** A · **Frontend:** D
 
 ### US-45 · Touch-friendly tile actions · Must
 > As a **recruiter on a phone**, I want to tap tiles to show the action buttons, so I can triage without a mouse.
@@ -997,7 +997,7 @@
   - The mode is picked by pointer kind and breakpoint, not by `Platform`.
 - **Tests:** Widget tests for tap → actions visible and long-press → navigates.
 
-**Refs:** PRD §6 platform · Tasks RC-13 · Owner D
+**Refs:** PRD §6 platform · Tasks RC-13 · **Backend:** — · **Frontend:** D
 
 ### US-46 · Board filters · Should
 > As a **recruiter**, I want to filter the board by skill or years, so I can narrow a big pool without losing the ranking.
@@ -1009,7 +1009,7 @@
 - **Backend:** `get_board`'s `p_filters` (`{has_skill_ids: [], min_total_years: n, min_score: n}`) are applied as `WHERE` clauses using `breakdown @> …` / jsonb path queries. The `ORDER BY` is unchanged.
 - **Flutter:** A filter chip row above the grid (skills drawn from the job's requirements). The filter state is stored in the query parameters so it survives refresh on web.
 
-**Refs:** PRD R-TRI-2 · Tasks RC-17, AI-16 · Owner D + B
+**Refs:** PRD R-TRI-2 · Tasks RC-17, AI-16 · **Backend:** A · **Frontend:** D
 
 ### US-47 · Interview list · Must
 > As a **recruiter**, I want a list of candidates I've advanced, so I can follow up with them.
@@ -1024,7 +1024,7 @@
 - **Flutter:**
   - `InterviewListScreen` shows a name, score, "Email" (`mailto:`), and "Resume" (`url_launcher` opens the signed URL).
 
-**Refs:** PRD §6 nav, X-4 · Tasks RC-16, PL-23 · Owner D + A
+**Refs:** PRD §6 nav, X-4 · Tasks RC-16, PL-23 · **Backend:** A · **Frontend:** D
 
 ### US-48 · Keyboard triage shortcuts · Should
 > As a **recruiter on a laptop**, I want keyboard shortcuts (J/K/A/R), so I can triage dozens of tiles quickly.
@@ -1040,7 +1040,7 @@
   - The shortcuts are disabled while a text field has focus.
 - **Tests:** Widget test sending key events with `tester.sendKeyEvent`.
 
-**Refs:** PRD R-TRI-3 · Tasks RC-19 · Owner D
+**Refs:** PRD R-TRI-3 · Tasks RC-19 · **Backend:** — · **Frontend:** D
 
 ---
 
@@ -1061,7 +1061,7 @@
 - **Tests:**
   - Integration test: a recruiter's direct `storage.from('resumes').download(path)` fails, and the function returns a URL only after advance.
 
-**Refs:** PRD X-4 · Tasks PL-14, PL-23 · Owner A
+**Refs:** PRD X-4 · Tasks PL-14, PL-23 · **Backend:** A · **Frontend:** —
 
 ### US-50 · Delete my account · Should
 > As a **candidate**, I want to delete my account and data, so I stay in control of my information.
@@ -1079,7 +1079,7 @@
   4. Calls `auth.admin.deleteUser(uid)`, which cascades to `profiles`.
 - **Tests:** An integration test on local Supabase checks that no rows remain with the user's id.
 
-**Refs:** PRD X-3 · Tasks PL-24 · Owner A
+**Refs:** PRD X-3 · Tasks PL-24, CA-23 · **Backend:** A · **Frontend:** C
 
 ### US-51 · Skills-only AI (no personal traits) · Must
 > As a **candidate**, I want the AI to ignore my name, age, and other personal traits, so the score is based only on my skills.
@@ -1097,7 +1097,7 @@
   - Schema snapshot test that fails if new properties appear.
   - AI-19 injection fixtures: a resume with hidden "rate me 100" text and a resume with "Age: 52". The extraction output contains neither.
 
-**Refs:** PRD §8.2, §8.5 · Tasks AI-02, AI-06, AI-19 · Owner B
+**Refs:** PRD §8.2, §8.5 · Tasks AI-02, AI-06, AI-19 · **Backend:** B · **Frontend:** —
 
 ---
 
@@ -1116,7 +1116,7 @@
   - Local `supabase/functions/.env` defaults to `mock`.
 - **Tests:** CI runs every Deno test with `mock`.
 
-**Refs:** PRD §9.3 · Tasks AI-03 · Owner B
+**Refs:** PRD §9.3 · Tasks AI-03 · **Backend:** B · **Frontend:** —
 
 ### US-53 · Switchable LLM provider · Must
 > As the **team**, we want to switch between the OpenAI API and Azure OpenAI with a setting, so we can use whichever credits we have.
@@ -1134,7 +1134,7 @@
   - Every call is logged to `llm_usage` and checked against `LLM_DAILY_TOKEN_BUDGET`.
 - **Tests:** A contract test runs the same fixture through both providers (opt-in, costs credits) and checks the outputs validate against the schema.
 
-**Refs:** PRD §9.3 · Tasks AI-09, AI-13 · Owner B
+**Refs:** PRD §9.3 · Tasks AI-09, AI-13 · **Backend:** B · **Frontend:** —
 
 ### US-54 · Realistic seed data · Must
 > As a **presenter**, I want realistic fake candidates, jobs, and applications, so the demo looks alive from the first screen.
@@ -1152,7 +1152,7 @@
 - **Data:** Every seed row has `is_seed = true`.
 - **Tests:** CI runs `supabase db reset` followed by a `select` smoke check that counts per status are at least 1.
 
-**Refs:** PRD §9.8 · Tasks PL-16, AI-11, AI-20 · Owner B + A
+**Refs:** PRD §9.8 · Tasks PL-16, AI-11, AI-20 · **Backend:** B + A · **Frontend:** —
 
 ### US-55 · Fake repositories in Flutter · Must
 > As a **developer**, I want fake repositories in the Flutter app, so I can build screens before the backend is finished.
@@ -1168,4 +1168,4 @@
   - Fakes use in-memory lists, an artificial delay (300 ms), and a toggle to simulate errors, so every UI state can be built.
   - Tests reuse the same fakes.
 
-**Refs:** TEAM_PLAN §2 · Tasks CA-02, RC-03 · Owner C + D
+**Refs:** TEAM_PLAN §1 · Tasks CA-02, RC-03 · **Backend:** — · **Frontend:** C + D
