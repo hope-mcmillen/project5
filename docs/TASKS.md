@@ -3,152 +3,105 @@
 **Companion to:** [TEAM_PLAN.md](TEAM_PLAN.md) (roles, rules) · [SCHEMA.md](SCHEMA.md) + [schema.sql](schema.sql) (database) · [USER_STORIES.md](USER_STORIES.md) · [PRD.md](PRD.md)
 
 **How to read this**
-- **Work order:** Each person works **top to bottom** through **Core**. **Later** holds features to add once the core works. New features get a story in USER_STORIES.md first, then a task in the owner's Later list.
-- **Task fields:**
-  - **Title:** an action-style name you can paste straight into a GitHub issue title, e.g. `[PL-18] Build the swipe, undo, and daily apply cap functions`.
-  - **Build:** the technical work.
-  - **Enables:** what can be done once it's merged.
-  - **Needs:** what must exist before it can use real data. Until then, build against the fake (frontend) or mock (AI).
-  - **Size:** S is half a day or less, M is about 1 day, L is about 2 days.
-- **Task IDs** are stable references, also used in the scaffold pages and USER_STORIES.md. The section a task is in tells you its owner, not its prefix.
+- **Blocks, not tiny tasks.** Each block combines several related small tasks into one piece of work you can build, test, and review together. The original task IDs (`PL-18`, `CA-11`, …) are kept in each block's **Covers** line, so USER_STORIES.md, the scaffold pages, and TEAM_PLAN.md still resolve (see the [ID lookup](#id-lookup) at the bottom).
+- **Work order:** Each person works **top to bottom** through **Core**. **Later** holds features to add once the core works. New features get a story in USER_STORIES.md first, then a block in the owner's Later list.
+- **Block fields:**
+  - **Title:** a user story you can paste straight into a GitHub issue, e.g. `[A7] As a candidate, I want to apply or pass…`.
+  - **Covers:** the original task IDs folded into this block.
+  - **Size:** rough days (S ≈ ½, M ≈ 1, L ≈ 2 per original task).
+  - **Needs:** blocks that must exist before this one can use real data. Until then, build against the fake (frontend) or mock (AI).
+  - **Stories:** the `US-xx` stories it delivers.
+  - **Build:** the technical work, grouped by original task.
+  - **Done when:** the check that closes the block.
 
-| Person | Silo | Core tasks | Later |
-|---|---|---|---|
-| [A](#person-a-backend-database--api) | Backend: database & API | 19 | 3 |
-| [B](#person-b-backend-ai--matching) | Backend: AI & matching | 19 | 2 |
-| [C](#person-c-frontend-candidate-app--design-system) | Frontend: candidate app + design system | 22 | 4 |
-| [D](#person-d-frontend-recruiter-app--auth--routing) | Frontend: recruiter app + auth & routing | 23 | 3 |
-| [Everyone](#everyone) | Shared checkpoints | 4 | — |
+| Person | Silo | Core blocks | Core size | Later blocks |
+|---|---|---|---|---|
+| [A](#person-a-backend-database--api) | Backend: database & API | 9 | ≈ 15 days | 2 |
+| [B](#person-b-backend-ai--matching) | Backend: AI & matching | 10 | ≈ 20 days | 2 |
+| [C](#person-c-frontend-candidate-app--design-system) | Frontend: candidate app + design system | 11 | ≈ 22 days | 3 |
+| [D](#person-d-frontend-recruiter-app--auth--routing) | Frontend: recruiter app + auth & routing | 10 | ≈ 22 days | 2 |
+| [Everyone](#everyone) | Shared checkpoints | 3 | — | — |
 
----
+A has the lightest load, so A has room to pair with B, review across the boundary, and run the integration checkpoints.
 
 ## Task index
-Every task by person, in work order. Full technical details for each task are in the person sections below.
 
 ### A · Backend (database & API)
 
-| ID | Title | Size | List |
+| ID | Title | Days | List |
 |---|---|---|---|
-| PL-01 | Set up the Supabase project and local backend | S | Core |
-| PL-03 | Set up the GitHub board, PR rules, CI, and CODEOWNERS | S | Core |
-| PL-04 | Create the identity and company tables with RLS | M | Core |
-| PL-05 | Create the candidate, resume, and skill tables with RLS | M | Core |
-| PL-06 | Create the job, swipe, and application tables with RLS | M | Core |
-| PL-27 | Write the API contract for every backend function | M | Core |
-| PL-07 | Create user profiles automatically on sign-up | S | Core |
-| PL-08 | Add the role helper and refactor role-based policies | S | Core |
-| PL-12 | Test account and company access rules | M | Core |
-| PL-13 | Build company create, invite, and join functions | M | Core |
-| PL-14 | Create the resume and company logo storage buckets | S | Core |
-| PL-17 | Build the confirm-profile and save-preferences functions | S | Core |
-| PL-16 | Seed the database with skills, companies, and demo accounts | M | Core |
-| PL-18 | Build the swipe, undo, and daily apply cap functions | M | Core |
-| PL-19 | Build the application status change functions | M | Core |
-| AI-16 | Build the blind applicant board and candidate detail functions | M | Core |
-| PL-20 | Test the swipe and status rules | M | Core |
-| PL-21 | Enable live updates for resumes, applications, and jobs | S | Core |
-| PL-23 | Build the secure resume download link function | S | Core |
-| PL-25 | Write the README for local setup and demo accounts | S | Core |
-| PL-26 | Verify companies by email domain | S | Later |
-| PL-22 | Send push notifications on status changes | M | Later |
-| PL-24 | Build the delete-account function | M | Later |
+| A1 | As a teammate, I want the backend, repo rules, and CI set up once, so I can run the whole stack locally and trust every PR. | 1 | Core |
+| A2 | As a teammate, I want one agreed database schema and API contract, so I can build my part against stable interfaces. | 4 | Core |
+| A3 | As a user, I want my account created with the role I chose and kept separate from everyone else's, so I can sign up safely and only see my own data. | 2 | Core |
+| A4 | As a recruiter, I want to create a company, invite teammates, and join with a code, so my team can post jobs from one workspace. | 1 | Core |
+| A5 | As a candidate, I want my resume stored privately and my reviewed profile and preferences saved, so only I control what is used for matching. | 1 | Core |
+| A6 | As a presenter, I want demo accounts, realistic starter data, and a clear README, so anyone can run and demo the project in minutes. | 1.5 | Core |
+| A7 | As a candidate, I want to apply or pass on a job in one gesture and undo within 5 seconds, so I can move fast without fear of mistakes. | 1 | Core |
+| A8 | As a recruiter, I want to see applicants ranked by score without identities and advance or reject them, so I can triage on skills alone and move fast. | 2 | Core |
+| A9 | As a teammate, I want live updates, secure resume links, and automated tests of the loop's rules, so the core flow is fast, private, and doesn't regress. | 2 | Core |
+| A10 | As a candidate, I want verified companies marked and a way to delete my account, so I can trust postings and control my data. | 1.5 | Later |
+| A11 | As a candidate, I want a push notification when a recruiter acts on my application, so I can respond quickly. | 1 | Later |
 
 ### B · Backend (AI & matching)
 
-| ID | Title | Size | List |
+| ID | Title | Days | List |
 |---|---|---|---|
-| AI-01 | Build the skill taxonomy and related-skill list | M | Core |
-| AI-02 | Define the resume and job extraction schemas | M | Core |
-| AI-03 | Build the LLM adapter with a free mock provider | M | Core |
-| AI-04 | Create fake resumes and job descriptions for testing | M | Core |
-| PL-27 | Write the API contract for every backend function | M | Core |
-| AI-05 | Build the Document Intelligence client | M | Core |
-| AI-06 | Sanitize resume text before it reaches the AI | S | Core |
-| AI-08 | Calculate years of experience and verify skill evidence | M | Core |
-| AI-07 | Build the resume parsing function | L | Core |
-| AI-09 | Add the OpenAI and Azure OpenAI providers | M | Core |
-| AI-13 | Log AI usage and enforce the daily token budget | S | Core |
-| AI-10 | Match extracted skills to the skill taxonomy | M | Core |
-| AI-11 | Precompute skill embeddings for the seed data | S | Core |
-| AI-12 | Build the job description parsing function | M | Core |
-| AI-14 | Build the Match Score calculation | L | Core |
-| AI-15 | Build the ranked candidate job feed | L | Core |
-| AI-17 | Add a scoring regression test with labeled examples | M | Core |
-| AI-19 | Test that resumes can't manipulate the AI | S | Core |
-| AI-20 | Generate realistic demo data for every status and score band | L | Core |
-| AI-18 | Re-score applicants when job requirements change | M | Later |
-| AI-21 | Measure and tune AI extraction accuracy | M | Later |
+| B1 | As a developer, I want a curated skill list and realistic fake resumes and job descriptions, so I can test matching and demo without anyone's real data. | 2 | Core |
+| B2 | As a developer, I want locked extraction schemas and an LLM adapter with a free mock, so I can build and test every AI feature without spending credits. | 2.5 | Core |
+| B3 | As a developer, I want real OpenAI and Azure providers with a usage log and daily budget, so I can switch providers with one setting and never overspend. | 1.5 | Core |
+| B4 | As a candidate, I want my resume turned into clean, safe text with calculated years and verified evidence, so the AI only extracts real skills and can't be tricked. | 2.5 | Core |
+| B5 | As a candidate, I want the skills on my resume mapped to a standard skill list, so jobs recognize "ReactJS" and "React" as the same skill. | 1.5 | Core |
+| B6 | As a candidate, I want to upload a resume and get a draft profile with live progress, so I don't have to type my history. | 2.5 | Core |
+| B7 | As a recruiter, I want to paste a job description and get draft requirements, so I don't have to tag skills by hand. | 1 | Core |
+| B8 | As a recruiter or candidate, I want an explainable 0–100 Match Score for every candidate and job pair, so I can trust the ranking and see why. | 3 | Core |
+| B9 | As a candidate, I want a ranked deck of jobs I'm eligible for, so I see my best opportunities first. | 2 | Core |
+| B10 | As a presenter, I want generated demo data covering every status and score band, so the demo looks alive without live AI. | 2 | Core |
+| B11 | As a recruiter, I want applicant scores to update when I edit a live job's requirements, so the ranking stays fair. | 1 | Later |
+| B12 | As a developer, I want measured extraction accuracy and a tuned matching threshold, so AI quality improves with evidence. | 1 | Later |
 
 ### C · Frontend (candidate app + design system)
 
-| ID | Title | Size | List |
+| ID | Title | Days | List |
 |---|---|---|---|
-| CA-01 | Create the shared Dart data models | M | Core |
-| CA-02 | Create candidate repositories with fake data | M | Core |
-| RC-01 | Build the app theme from the design tokens | M | Core |
-| RC-02 | Build the shared UI components and gallery | M | Core |
-| CA-03 | Build the resume upload screen | M | Core |
-| CA-04 | Build the resume parsing progress screen | M | Core |
-| CA-05a | Build the skill review list with years editing | M | Core |
-| CA-05b | Add skill add, remove, and evidence views to review | M | Core |
-| CA-06 | Build the job preferences screen | M | Core |
-| CA-07 | Connect resume upload and progress to the backend | M | Core |
-| CA-08 | Connect skill review and preferences to the backend | M | Core |
-| CA-09 | Handle parse failures with a manual skill fallback | S | Core |
-| CA-10 | Build the job card widget | M | Core |
-| CA-11 | Build the swipe deck | L | Core |
-| CA-12 | Add apply/pass buttons and the undo toast | M | Core |
-| CA-13 | Add optional pass reason chips | S | Core |
-| CA-15 | Build the empty deck state | S | Core |
-| CA-14 | Connect the swipe deck to the live feed | M | Core |
-| CA-16 | Build the radar chart match details view | L | Core |
-| CA-17 | Build the applications pipeline screen | M | Core |
-| CA-18 | Show recruiter contact info for interview requests | S | Core |
-| CA-21 | Run the candidate accessibility and performance pass | M | Core |
-| CA-19 | Warn before applying to low-match jobs | S | Later |
-| CA-20 | Add the animated geometric background | M | Later |
-| CA-22 | Queue swipes made offline and sync them later | M | Later |
-| CA-23 | Build the delete account screen | S | Later |
+| C1 | As a developer, I want shared Dart models and fake repositories, so I can build candidate screens before the backend exists. | 2 | Core |
+| C2 | As a user, I want one consistent branded look and reusable components, so every screen feels polished and readable. | 2 | Core |
+| C3 | As a candidate, I want to pick my resume and watch a branded progress screen, so I know it is uploading and being read. | 2 | Core |
+| C4 | As a candidate, I want to review and fix the AI's skills and set my job preferences, so my profile is accurate and my deck only has jobs I can take. | 3 | Core |
+| C5 | As a candidate, I want onboarding to work end to end with real data and a manual fallback, so I can finish even when a resume can't be read. | 2.5 | Core |
+| C6 | As a candidate, I want job cards I can swipe right to apply or left to pass, so applying takes a single gesture. | 3 | Core |
+| C7 | As a candidate, I want buttons, an undo toast, optional pass reasons, and a helpful empty state, so I can use the deck without swiping, fix mistakes, and know what to do next. | 2 | Core |
+| C8 | As a candidate, I want my deck to show real ranked jobs and my swipes to become real applications, so recruiters can see me. | 1 | Core |
+| C9 | As a candidate, I want a radar chart and gap list for each job, so I understand why I matched and what I'm missing. | 2 | Core |
+| C10 | As a candidate, I want to track every application with live status and see interview contact details, so I know where I stand and can reach the recruiter. | 1.5 | Core |
+| C11 | As a candidate using a screen reader or large text, I want an accessible, smooth app, so I can use it as easily as anyone. | 1 | Core |
+| C12 | As a candidate, I want a warning before a low-match apply and offline swipes that sync later, so I don't waste applications or lose decisions. | 1.5 | Later |
+| C13 | As a candidate, I want a subtle animated geometric background, so the app feels playful without hurting performance. | 1 | Later |
+| C14 | As a candidate, I want to delete my account from inside the app, so I control my data. | 0.5 | Later |
 
 ### D · Frontend (recruiter app + auth & routing)
 
-| ID | Title | Size | List |
+| ID | Title | Days | List |
 |---|---|---|---|
-| PL-02 | Connect the Flutter app to Supabase and Riverpod | S | Core |
-| RC-03 | Create recruiter and auth repositories with fake data | S | Core |
-| RC-04 | Create wireframes for every screen | M | Core |
-| PL-09 | Build real sign-up, sign-in, and password reset | M | Core |
-| PL-10 | Build the welcome, role choice, and sign-in screens | M | Core |
-| PL-11 | Replace fake routing with real auth-based routing | M | Core |
-| RC-05 | Build the responsive recruiter navigation shell | M | Core |
-| RC-07 | Build the company create and join screens | M | Core |
-| PL-15 | Connect company screens to the backend | M | Core |
-| RC-18 | Build company settings with invite code management | S | Core |
-| RC-06 | Build the recruiter jobs list | M | Core |
-| RC-08 | Build the paste-job-description screen | M | Core |
-| RC-09a | Build the requirement editor table | M | Core |
-| RC-09b | Add requirement limits, skill search, and evidence highlights | M | Core |
-| RC-10 | Build the job details form | M | Core |
-| RC-11 | Connect jobs to the backend with publish, pause, and close | M | Core |
-| RC-12 | Build the Mosaic grid of blind candidate tiles | L | Core |
-| RC-13 | Add advance and reject triangle actions to tiles | M | Core |
-| RC-14 | Connect the applicant board to the backend with live updates | M | Core |
-| RC-15 | Build the recruiter candidate detail view | M | Core |
-| RC-16 | Build the interview list with resume links | M | Core |
-| RC-20 | Run the recruiter accessibility and responsive pass | M | Core |
-| RC-21 | Build and host the recruiter web app | S | Core |
-| RC-17 | Add applicant board filters | M | Later |
-| RC-19 | Add keyboard shortcuts for board triage | M | Later |
-| RC-22 | Show the verified badge in the recruiter header | S | Later |
+| D1 | As a developer, I want the app connected to Supabase with fake repositories and agreed wireframes, so I can build auth and recruiter screens in parallel with the backend. | 2 | Core |
+| D2 | As a new user, I want to choose my role and sign up, sign in, or reset my password, so I can get into the right experience. | 2 | Core |
+| D3 | As a signed-in user, I want to stay signed in and land on a home the other role can't reach, with navigation that fits my phone or laptop, so the app routes me correctly. | 2 | Core |
+| D4 | As a recruiter, I want to create or join a company and manage invite codes, so my team shares one workspace. | 2.5 | Core |
+| D5 | As a recruiter, I want a list of my company's jobs with applicant counts and the ability to publish, pause, or close them, so I control what is live. | 2 | Core |
+| D6 | As a recruiter, I want to paste a job description, review the extracted requirements, and set job details, so I can publish a job in minutes. | 4 | Core |
+| D7 | As a recruiter, I want a ranked grid of skill-only tiles with one-click advance and reject, so I can triage fast on any device. | 3 | Core |
+| D8 | As a recruiter, I want the board connected to live data, so new applicants appear in score order and my decisions reach candidates instantly. | 1 | Core |
+| D9 | As a recruiter, I want a candidate detail view and an interview list with resume links, so I can verify a match and follow up. | 2 | Core |
+| D10 | As a recruiter on a phone or laptop, I want an accessible, responsive portal at a public URL, so I can use and demo it anywhere. | 1.5 | Core |
+| D11 | As a recruiter, I want board filters and keyboard shortcuts, so I can triage large applicant pools quickly. | 2 | Later |
+| D12 | As a recruiter, I want to see my company's verified status, so I know candidates can trust it. | 0.5 | Later |
 
 ### All · Everyone
 
 | ID | Title |
 |---|---|
-| ALL-01 | Review and freeze the API contract as a team |
-| ALL-02 | Test the full candidate-to-recruiter loop together |
-| ALL-03 | Run a cross-team bug bash |
-| ALL-04 | Rehearse the demo |
+| T1 | As a team, we want to review and freeze the API contract together, so everyone builds on the same agreement. |
+| T2 | As a team, we want to test the full candidate-to-recruiter loop together, so we know the silos actually connect. |
+| T3 | As a team, we want a cross-team bug bash and a demo rehearsal, so the demo goes smoothly. |
 
 ---
 
@@ -158,1127 +111,632 @@ Folders: `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, non-AI 
 
 ### Core
 
-#### PL-01 · Supabase project setup · S
-**Title:** Set up the Supabase project and local backend
+#### A1 · As a teammate, I want the backend, repo rules, and CI set up once, so I can run the whole stack locally and trust every PR.
+**Covers:** PL-01, PL-03 · **Size:** ≈ 1 day · **Needs:** — · **Stories:** —
 
-**Build:**
-- Install the Supabase CLI and run `supabase init`. Commit `supabase/config.toml`.
-- In `config.toml`, enable the Email and Google auth providers. Set `site_url` and the redirect URLs (`http://localhost:*`, `io.resurhombus.app://login-callback`).
-- Create the hosted dev project and share its URL and anon key privately.
-- Add `supabase/functions/.env` to `.gitignore`.
+**Build**
+- **PL-01 Supabase:** Install the CLI, run `supabase init`, and commit `supabase/config.toml`. Enable the Email and Google auth providers and set `site_url` and redirect URLs (`http://localhost:*`, `io.resurhombus.app://login-callback`). Create the hosted dev project and share its URL and anon key privately. Gitignore `supabase/functions/.env`.
+- **PL-03 Repo & CI:** Create the GitHub Project board (To do / In progress / In review / Done), labels (`owner:A..D`, `story:US-xx`), and `.github/pull_request_template.md` (task ID, stories, test notes). Protect `master` (1 review, green CI). Add `flutter analyze`, `supabase db reset`, and `supabase test db` to the workflow. Add `.github/CODEOWNERS` (template in TEAM_PLAN §1).
 
-**Enables:** `supabase start` runs Postgres, Auth, Storage, Realtime, and Studio locally for everyone.
-**Needs:** — · **Stories:** —
+**Done when:** `supabase start` runs Postgres, Auth, Storage, Realtime, and Studio for everyone. PRs auto-request the right reviewer and can't merge with failing CI.
 
-#### PL-03 · Repo & CI setup · S
-**Title:** Set up the GitHub board, PR rules, CI, and CODEOWNERS
+#### A2 · As a teammate, I want one agreed database schema and API contract, so I can build my part against stable interfaces.
+**Covers:** PL-04, PL-05, PL-06, PL-27 (shared with B) · **Size:** ≈ 4 days · **Needs:** A1 · **Stories:** US-01, US-07, US-09, US-14, US-25, US-30, US-55
 
-**Build:**
-- Create a GitHub Project board with the columns To do / In progress / In review / Done.
-- Add labels `owner:A..D` and `story:US-xx`, plus `.github/pull_request_template.md` (task ID, stories, test notes).
-- Turn on branch protection for `master`: require 1 review and green CI.
-- Add `flutter analyze` and the `supabase db reset` + `supabase test db` steps to `.github/workflows`.
-- Add `.github/CODEOWNERS` (template in TEAM_PLAN §1).
+**Build**
+- **PL-04 Identity & companies:** `supabase migration new identity_companies`. From [schema.sql](schema.sql), copy the enums, `touch_updated_at()`, `profiles`, `companies`, `recruiters`, `company_invites`, and `app_config`. Write RLS per [SCHEMA.md §4](SCHEMA.md#4-row-level-security-summary): profiles are self-only, and `role` can't be changed by update (`with check` or a trigger).
+- **PL-05 Candidates & skills:** Create `vector` and `pgcrypto` in the `extensions` schema. Add `skills` (GIN on aliases, HNSW on embedding), `skill_relations`, `candidates`, `resumes`, `profile_versions`, `candidate_skills`, and the circular `active_version_id` foreign key. RLS: candidates own their rows, recruiters get **none**, skills are readable by everyone.
+- **PL-06 Jobs & the loop:** Add `jobs`, `job_requirements`, `swipes`, `applications`, `application_reject_reasons`, `status_events`, `llm_usage`, `device_tokens`, plus the `company_jobs_overview` and `my_applications` views (`security_invoker`). RLS: candidates read jobs that are `OPEN` **or** that they've applied to. Recruiters read applications for their own company's jobs where `committed_at <= now()`. Reject reasons are recruiter-only.
+- **PL-27 API contract (with B):** Write `docs/API_CONTRACT.md`. For every RPC and Edge Function in [SCHEMA.md §5](SCHEMA.md#5-functions-the-api-surface), give the exact parameters and types, one realistic example JSON response, the error codes (`P0001` messages like `daily_cap_reached`), and who can call it. A writes the database and status RPCs. B writes `get_feed`, `compute_match`, `parse-*`, and the `breakdown` shape.
 
-**Enables:** Every task becomes an issue, PRs auto-request the right reviewer, and broken code can't merge.
-**Needs:** — · **Stories:** —
+**Done when:** `supabase db reset` applies all three migrations, and the contract is merged so C and D can build fakes that return its examples.
 
-#### PL-04 · Migration: identity & companies · M
-**Title:** Create the identity and company tables with RLS
+#### A3 · As a user, I want my account created with the role I chose and kept separate from everyone else's, so I can sign up safely and only see my own data.
+**Covers:** PL-07, PL-08, PL-12 · **Size:** ≈ 2 days · **Needs:** A2 · **Stories:** US-01, US-02, US-06
 
-**Build:**
-- `supabase migration new identity_companies`.
-- From [schema.sql](schema.sql), copy the enum types, `touch_updated_at()`, `profiles`, `companies`, `recruiters`, `company_invites`, and `app_config`.
-- Write the RLS policies for these tables per [SCHEMA.md §4](SCHEMA.md#4-row-level-security-summary). Profiles are self-only, and `role` can't be changed by update (compare it in a `with check` or use a trigger).
+**Build**
+- **PL-07 Sign-up trigger:** `handle_new_user()` is `security definer`, runs `after insert on auth.users`, and inserts a `profiles` row with `role` from `raw_user_meta_data->>'role'` **only** when it is `candidate` or `recruiter`. Otherwise it leaves `role` null and never raises (Google sign-in may have no metadata). For candidates it also inserts a `candidates` row. Add `set_initial_role(p_role)`, which only works while `role is null` and creates the `candidates` row if needed.
+- **PL-08 Role helpers:** `current_app_role()` (`stable security definer set search_path = public`) returns the caller's `profiles.role`. Add `my_company_id()` in the same style. Refactor policies to use them, wrapping `(select auth.uid())` so it's evaluated once per query.
+- **PL-12 Access tests:** pgTAP tests in `supabase/tests/rls_identity.test.sql` with 2 candidates, 2 recruiters in different companies, and an anon user (`set local role` plus `request.jwt.claims`). Assert that users read and update only their own profile, role changes are blocked, and companies are readable by all but only updatable by the owner.
 
-**Enables:** Users, roles, companies, and invite codes can be stored safely.
-**Needs:** PL-01 · **Stories:** US-01, US-30
+**Done when:** Signing up gives the chosen role, nobody can make themselves an admin, and the RLS tests pass in CI.
 
-#### PL-05 · Migration: candidates & skills · M
-**Title:** Create the candidate, resume, and skill tables with RLS
+#### A4 · As a recruiter, I want to create a company, invite teammates, and join with a code, so my team can post jobs from one workspace.
+**Covers:** PL-13 · **Size:** ≈ 1 day · **Needs:** A3 · **Stories:** US-30, US-31, US-32
 
-**Build:**
-- Create `vector` and `pgcrypto` in the `extensions` schema.
-- Add `skills` (GIN index on aliases, HNSW index on embedding), `skill_relations`, `candidates`, `resumes`, `profile_versions`, `candidate_skills`, and the circular `active_version_id` foreign key.
-- RLS: candidates have owner-only access, recruiters have **none**, and skills are readable by everyone.
+**Build**
+- `create_company(p_name, p_website)`: the role must be recruiter with no existing company. Inserts the company and a `recruiters(owner)` row, and sets `verified` (a simple version is fine; see A10).
+- `create_invite(p_expires_in_days)`: owner only. Generates a code from `gen_random_bytes` mapped to the unambiguous alphabet and retries on collision.
+- `join_company(p_code)`: locks the invite with `select … for update`, checks it isn't expired or revoked and `uses < max_uses`, inserts a `member` row, and increments `uses`.
+- `revoke_invite(p_code)`. Add pgTAP tests for all four.
 
-**Enables:** Resumes, versioned profiles, and the skill taxonomy have a home.
-**Needs:** PL-04 · **Stories:** US-07, US-09, US-13
+**Done when:** A recruiter creates a company and becomes its owner, generates a code, and a teammate joins with it. Bad or expired codes return `invalid_invite`.
 
-#### PL-06 · Migration: jobs & the loop · M
-**Title:** Create the job, swipe, and application tables with RLS
+#### A5 · As a candidate, I want my resume stored privately and my reviewed profile and preferences saved, so only I control what is used for matching.
+**Covers:** PL-14, PL-17 · **Size:** ≈ 1 day · **Needs:** A2, A3 · **Stories:** US-07, US-09, US-11, US-12, US-49
 
-**Build:**
-- Add `jobs`, `job_requirements`, `swipes`, `applications`, `application_reject_reasons`, `status_events`, `llm_usage`, and `device_tokens`.
-- Add the `company_jobs_overview` and `my_applications` views (`security_invoker`).
-- RLS:
-  - Candidates can read jobs that are `OPEN` **or** that they've applied to.
-  - Recruiters can read applications for their own company's jobs where `committed_at <= now()`.
-  - Reject reasons are recruiter-only.
+**Build**
+- **PL-14 Storage:** A migration inserting into `storage.buckets`: private `resumes` (5 MB limit, PDF and DOCX only) and public `company-logos`. Policies on `storage.objects`: for `resumes`, `(storage.foldername(name))[1] = auth.uid()::text` for select and insert. For logos, write only if the caller owns that company. Add a test that a user can't read another user's folder.
+- **PL-17 Profile RPCs:**
+  - `confirm_profile(p_version_id, p_skills jsonb)`: in one transaction, check ownership, replace the version's `candidate_skills` (edited rows get `source = 'user'`), set `confirmed`, `confirmed_at`, and `total_years`, and set `candidates.active_version_id`. The profile embedding is filled by B's parse step.
+  - `create_manual_profile()`: an empty version with `source = 'manual'`.
+  - `save_preferences(p_prefs)`: validates keys and types against the [SCHEMA.md §6](SCHEMA.md#6-json-shapes) shape and rejects unknown keys.
 
-**Enables:** Jobs, swipes, applications, and a full status history can be stored.
-**Needs:** PL-05 · **Stories:** US-14, US-25, US-38
+**Done when:** A candidate can upload only into their own folder, confirm a reviewed profile, and save preferences. Swiping later requires the confirmed profile.
 
-#### PL-27 · API contract (with B) · M
-**Title:** Write the API contract for every backend function
+#### A6 · As a presenter, I want demo accounts, realistic starter data, and a clear README, so anyone can run and demo the project in minutes.
+**Covers:** PL-16, PL-25 · **Size:** ≈ 1.5 days · **Needs:** A4, B1, B5 · **Stories:** US-54
 
-**Build:** Write `docs/API_CONTRACT.md`. For every RPC and Edge Function in [SCHEMA.md §5](SCHEMA.md#5-functions-the-api-surface), include:
-- the exact parameter names and types
-- one realistic example response as JSON
-- the error codes (`P0001` messages such as `daily_cap_reached`)
-- who can call it
+**Build**
+- **PL-16 Seed v1:** In `supabase/seed.sql`, import the taxonomy from B1's CSV with B5's embeddings as `'[…]'::vector` literals, insert 3 companies (one verified), and insert demo users into `auth.users` (`crypt(password, gen_salt('bf'))`, `email_confirmed_at = now()`) with matching `auth.identities` rows. Every row has `is_seed = true`.
+- **PL-25 README:** Rewrite `README.md`: prerequisites (Flutter, Supabase CLI), `supabase start`, copying `env/example.json` to `env/dev.json`, the emulator URL `http://10.0.2.2:54321`, `flutter run` and `-d chrome`, how to switch `LLM_PROVIDER`, how to run tests. Put the demo credentials **only** in the README's local-dev section.
 
-A writes the database and status RPCs. B writes `get_feed`, `compute_match`, `parse-*`, and the `breakdown` shape.
+**Done when:** `supabase db reset` gives working demo logins and real skills, and a new teammate can run everything from the README alone.
 
-**Enables:** C and D build fake repositories that return exactly these examples, so every screen can be finished before the backend.
-**Needs:** PL-04..06, AI-02 · **Stories:** US-55
+#### A7 · As a candidate, I want to apply or pass on a job in one gesture and undo within 5 seconds, so I can move fast without fear of mistakes.
+**Covers:** PL-18 · **Size:** ≈ 1 day · **Needs:** A2, B8 (use a stub `compute_match` returning 50 until it lands) · **Stories:** US-15, US-16, US-17, US-21
 
-#### PL-07 · Sign-up trigger · S
-**Title:** Create user profiles automatically on sign-up
-
-**Build:**
-- Write `handle_new_user()` as `security definer`, run `after insert on auth.users`.
-- It inserts into `profiles` with `role` from `raw_user_meta_data->>'role'` only when that value is `candidate` or `recruiter`. Otherwise it leaves `role` null and never raises an error (Google sign-in may have no metadata).
-- When the role is `candidate`, it also inserts a `candidates` row.
-- Add `set_initial_role(p_role)`. It only works when `role is null`, and it creates the `candidates` row if needed.
-
-**Enables:** Signing up automatically sets up the right kind of account. Nobody can make themselves an admin.
-**Needs:** PL-04, PL-05 · **Stories:** US-01, US-02
-
-#### PL-08 · Role helper · S
-**Title:** Add the role helper and refactor role-based policies
-
-**Build:**
-- Write `current_app_role()` as `stable security definer set search_path = public`, returning `profiles.role` for `auth.uid()`.
-- Refactor the policies to use it, wrapping `(select auth.uid())` so it's evaluated once per query.
-- Add a `my_company_id()` helper in the same style.
-
-**Enables:** Consistent, fast role and company checks in every policy and RPC.
-**Needs:** PL-07 · **Stories:** US-06
-
-#### PL-12 · RLS tests: accounts & companies · M
-**Title:** Test account and company access rules
-
-**Build:**
-- Write pgTAP tests in `supabase/tests/rls_identity.test.sql`.
-- Create 2 candidates, 2 recruiters in different companies, and an anon user using `set local role` plus `request.jwt.claims`.
-- Assert:
-  - users can select and update their own profile only
-  - role changes are blocked
-  - companies are readable by everyone but only updatable by the owner
-- Run with `supabase test db`.
-
-**Enables:** Proof that accounts are isolated. Regressions get caught in CI.
-**Needs:** PL-08 · **Stories:** US-06
-
-#### PL-13 · Company RPCs · M
-**Title:** Build company create, invite, and join functions
-
-**Build:**
-- `create_company(p_name, p_website)`: the role must be recruiter with no existing company. Inserts the company and a `recruiters(owner)` row, and sets `verified` (see PL-26, a simple version is OK).
-- `create_invite(p_expires_in_days)`: owner only. Generates the code from `gen_random_bytes` mapped onto the unambiguous alphabet, retrying on collision.
-- `join_company(p_code)`: locks the invite with `select … for update`, checks that it isn't expired or revoked and `uses < max_uses`, inserts a `member` row, and increments `uses`.
-- `revoke_invite(p_code)`.
-- Add pgTAP tests.
-
-**Enables:** Recruiters create company workspaces, owners invite teammates, and teammates join by code.
-**Needs:** PL-08 · **Stories:** US-30, US-31, US-32
-
-#### PL-14 · Storage buckets · S
-**Title:** Create the resume and company logo storage buckets
-
-**Build:**
-- A migration that inserts into `storage.buckets`:
-  - private `resumes`: `file_size_limit` 5 MB, `allowed_mime_types` PDF and DOCX
-  - public `company-logos`
-- Policies on `storage.objects`:
-  - `resumes`: `(storage.foldername(name))[1] = auth.uid()::text` for select and insert
-  - logos: write only if the caller owns that company
-- Add a test that a user can't read another user's folder.
-
-**Enables:** Candidates upload resumes only they can access, and companies get logos.
-**Needs:** PL-07 · **Stories:** US-07, US-49
-
-#### PL-17 · Profile RPCs · S
-**Title:** Build the confirm-profile and save-preferences functions
-
-**Build:**
-- `confirm_profile(p_version_id, p_skills jsonb)` in one transaction:
-  - checks ownership
-  - replaces the version's `candidate_skills` with the submitted list, setting `source = 'user'` for edited rows
-  - sets `confirmed = true`, `confirmed_at`, and `total_years`
-  - sets `candidates.active_version_id`
-  - The profile embedding is filled in by B's `parse-resume` / `embed` helper.
-- `create_manual_profile()`: creates an empty version with `source = 'manual'`.
-- `save_preferences(p_prefs)`: validates keys and types against the [SCHEMA.md §6](SCHEMA.md#6-json-shapes) shape and rejects unknown keys.
-
-**Enables:** Candidates lock in their reviewed skills and job filters. Swiping requires a confirmed profile.
-**Needs:** PL-05 · **Stories:** US-09, US-11, US-12
-
-#### PL-16 · Seed v1 · M
-**Title:** Seed the database with skills, companies, and demo accounts
-
-**Build:**
-- In `supabase/seed.sql`:
-  - import the taxonomy from AI-01's CSV, with embeddings from AI-11 as `'[…]'::vector` literals
-  - insert 3 companies, one verified
-  - insert demo users into `auth.users` (`crypt(password, gen_salt('bf'))`, `email_confirmed_at = now()`) and matching `auth.identities` rows
-- Every row has `is_seed = true`.
-- Write the demo credentials only in the README's local-dev section.
-
-**Enables:** `supabase db reset` gives everyone working demo logins and real skills.
-**Needs:** AI-01, AI-11, PL-13 · **Stories:** US-54
-
-#### PL-18 · Swipe RPCs · M
-**Title:** Build the swipe, undo, and daily apply cap functions
-
-**Build:**
+**Build**
 - `swipe(p_job_id, p_direction, p_reason)`:
-  1. Checks the role is candidate, the profile is confirmed (`profile_not_confirmed`), and the job is `OPEN` (`job_not_open`).
-  2. For a right swipe, counts today's right swipes against `app_config.daily_apply_cap` (`daily_cap_reached`).
-  3. Inserts the `swipes` row.
-  4. For a right swipe, calls B's `compute_match` and inserts the `applications` row with `committed_at = now() + undo_seconds`, plus a `status_events` row.
-  5. Returns `{swipe_id, application_id, committed_at}`.
+  1. Check the role is candidate, the profile is confirmed (`profile_not_confirmed`), and the job is `OPEN` (`job_not_open`).
+  2. For a right swipe, count today's right swipes against `app_config.daily_apply_cap` (`daily_cap_reached`).
+  3. Insert the `swipes` row.
+  4. For a right swipe, call `compute_match` and insert the `applications` row with `committed_at = now() + undo_seconds` plus a `status_events` row.
+  5. Return `{swipe_id, application_id, committed_at}`.
 - `undo_swipe(p_swipe_id)`: deletes only while `now() < committed_at` (`undo_window_expired`).
 - `set_pass_reason(p_swipe_id, p_reason)`.
 
-**Enables:** Candidates apply and pass. Accidental applies can be undone, and the 25-per-day cap holds.
-**Needs:** PL-06, AI-14 (use a stub `compute_match` returning 50 until it lands) · **Stories:** US-15, US-16, US-17, US-21
+**Done when:** Candidates apply and pass, an accidental apply can be undone for 5 s, and the 26th apply of a day is rejected.
 
-#### PL-19 · Status RPCs · M
-**Title:** Build the application status change functions
+#### A8 · As a recruiter, I want to see applicants ranked by score without identities and advance or reject them, so I can triage on skills alone and move fast.
+**Covers:** PL-19, AI-16 · **Size:** ≈ 2 days · **Needs:** A2, B8 · **Stories:** US-28, US-29, US-40, US-41, US-42, US-43, US-44, US-47
 
-**Build:**
-- `open_application`, `advance(p_note)`, `reject(p_reason)`, `undo_reject`, and `withdraw`.
-- Each one:
-  - locks the row
-  - checks the caller (recruiter of the job's company, or the owning candidate)
-  - validates the transition against the table in [SCHEMA.md §3](SCHEMA.md#3-enum-types)
-  - writes `previous_status`, `rejected_at`, or `advanced_by` as needed
-  - inserts a `status_events` row
-- `reject` writes its reason to `application_reject_reasons`.
-- `get_application_contact` returns recruiter info only when the status is INTERVIEW_REQUESTED.
+**Build**
+- **PL-19 Status RPCs:** `open_application`, `advance(p_note)`, `reject(p_reason)`, `undo_reject`, `withdraw`, and `get_application_contact`. Each locks the row, checks the caller (recruiter of the job's company, or the owning candidate), validates the transition against the table in [SCHEMA.md §3](SCHEMA.md#3-enum-types), sets `previous_status`, `rejected_at`, or `advanced_by` as needed, and inserts a `status_events` row. `reject` writes its reason to `application_reject_reasons`. `get_application_contact` returns recruiter info only at INTERVIEW_REQUESTED.
+- **AI-16 Blind board:**
+  - `get_board(p_job_id, p_filters, p_limit, p_offset)`: checks own company, selects committed non-terminal applications ordered by `match_score desc, committed_at asc`, and builds tile JSON ([SCHEMA.md §6](SCHEMA.md#6-json-shapes)) from safe fields only. `handle` = `'◆ ' || upper(substr(md5(id::text), 1, 4))`. Top skills and gaps come from `breakdown`.
+  - `get_candidate_detail(p_application_id)`: the tile plus the full `breakdown` and each skill's evidence. Identity (`display_name`, email) appears only at INTERVIEW_REQUESTED.
+  - `get_interview_list(p_job_id)`.
+  - Add a test that the tile's JSON keys are exactly the allowed set.
 
-**Enables:** Recruiters advance or reject (with undo), candidates withdraw, and invalid status jumps are impossible.
-**Needs:** PL-06 · **Stories:** US-28, US-29, US-42, US-43, US-44
+**Done when:** Recruiters see ranked, nameless tiles and can advance or reject (with undo). Candidates can withdraw. Invalid status jumps are impossible.
 
-#### AI-16 · Blind board RPCs · M
-**Title:** Build the blind applicant board and candidate detail functions
+#### A9 · As a teammate, I want live updates, secure resume links, and automated tests of the loop's rules, so the core flow is fast, private, and doesn't regress.
+**Covers:** PL-20, PL-21, PL-23 · **Size:** ≈ 2 days · **Needs:** A5, A7, A8 · **Stories:** US-06, US-08, US-21, US-26, US-47, US-49
 
-**Build:**
-- `get_board(p_job_id, p_filters, p_limit, p_offset)`:
-  - checks own company
-  - selects committed, non-terminal applications ordered by `match_score desc, committed_at asc`
-  - builds tile JSON ([SCHEMA.md §6](SCHEMA.md#6-json-shapes)) using only safe fields. `handle` = `'◆ ' || upper(substr(md5(id::text), 1, 4))`. Top skills and gaps come from `breakdown`.
-- `get_candidate_detail(p_application_id)`: the tile plus the full `breakdown` and each skill's evidence. Identity (`display_name`, email) is included only at INTERVIEW_REQUESTED.
-- `get_interview_list(p_job_id)`.
-- Add a test that the JSON keys are exactly the allowed set.
+**Build**
+- **PL-21 Realtime:** Make sure the migration includes `alter publication supabase_realtime add table resumes, applications, jobs`. Confirm with two signed-in clients in Studio that a candidate only receives their own application changes.
+- **PL-23 `resume-url`:** `supabase/functions/resume-url/index.ts` (Deno). Verify the JWT, use a user-scoped client to confirm the caller is a recruiter of the application's company and the status is INTERVIEW_REQUESTED, then use an admin client for `storage.from('resumes').createSignedUrl(path, 600)` and return `{url}`.
+- **PL-20 Loop tests:** pgTAP tests asserting the 26th right swipe raises `daily_cap_reached`, `undo_swipe` fails after the window (simulate with `update … set committed_at = now() - interval '1s'`), every invalid transition raises, recruiter B can't read or advance company A's applications, and candidates can't read `application_reject_reasons`.
 
-**Enables:** Recruiters see applicants ranked by score with no names or photos, enforced in the database.
-**Needs:** PL-19, AI-14 · **Stories:** US-40, US-41, US-47
-
-#### PL-20 · RLS & rules tests: the loop · M
-**Title:** Test the swipe and status rules
-
-**Build:** pgTAP tests asserting that:
-- the 26th right swipe raises `daily_cap_reached`
-- `undo_swipe` fails after the window (simulate with an `update … set committed_at = now() - interval '1s'`)
-- every invalid transition raises
-- recruiter B can't read or advance company A's applications
-- candidates can't read `application_reject_reasons`
-
-**Enables:** Proof the core loop's rules hold, guarded in CI.
-**Needs:** PL-18, PL-19, AI-16 · **Stories:** US-06, US-21
-
-#### PL-21 · Realtime · S
-**Title:** Enable live updates for resumes, applications, and jobs
-
-**Build:**
-- Make sure the migration includes `alter publication supabase_realtime add table resumes, applications, jobs`.
-- Test with two signed-in clients in Studio that a candidate only receives their own application changes.
-
-**Enables:** Parse progress, pipeline statuses, and new applicants update live in the app.
-**Needs:** PL-19 · **Stories:** US-08, US-26
-
-#### PL-23 · `resume-url` Edge Function · S
-**Title:** Build the secure resume download link function
-
-**Build:**
-- Write `supabase/functions/resume-url/index.ts` (Deno).
-- Verify the JWT, then use a user-scoped client to confirm the caller is a recruiter of the application's company and the status is INTERVIEW_REQUESTED.
-- Use an admin client to run `storage.from('resumes').createSignedUrl(path, 600)` and return `{url}`.
-
-**Enables:** Recruiters open a candidate's resume only after advancing them.
-**Needs:** PL-14, PL-19 · **Stories:** US-47, US-49
-
-#### PL-25 · README · S
-**Title:** Write the README for local setup and demo accounts
-
-**Build:**
-- Rewrite `README.md` covering the prerequisites (Flutter, Supabase CLI), `supabase start`, copying `env/example.json` to `env/dev.json`, the emulator URL `http://10.0.2.2:54321`, and `flutter run` / `-d chrome`.
-- Include the demo accounts, how to switch `LLM_PROVIDER`, and how to run the tests.
-
-**Enables:** A new teammate or grader can run everything from the README alone.
-**Needs:** PL-16 · **Stories:** —
+**Done when:** Parse progress and statuses update live, a resume link works only after advancing, and the loop's rules are guarded in CI.
 
 ### Later
 
-#### PL-26 · Verified company badge · S
-**Title:** Verify companies by email domain
+#### A10 · As a candidate, I want verified companies marked and a way to delete my account, so I can trust postings and control my data.
+**Covers:** PL-26, PL-24 · **Size:** ≈ 1.5 days · **Needs:** A4, A8 · **Stories:** US-33, US-50
 
-**Build:** In `create_company`, compare `split_part(auth.email(), '@', 2)` with the host of `website` (lowercased, `www.` stripped), using a free-mail denylist (gmail.com, outlook.com, yahoo.com, …). Expose `verified` in feed cards.
-**Enables:** Candidates can tell verified companies from unverified ones.
-**Needs:** PL-13 · **Stories:** US-33
+**Build**
+- **PL-26 Verified badge:** In `create_company`, compare `split_part(auth.email(), '@', 2)` with the host of `website` (lowercased, `www.` stripped), with a free-mail denylist (gmail.com, outlook.com, yahoo.com, …). Expose `verified` in feed cards.
+- **PL-24 `delete-account`:** With an admin client: delete `resumes/{uid}/*` from Storage, set the candidate's applications to `anonymized = true` with `candidate_id` and `profile_version_id` null, delete the candidate rows, then `auth.admin.deleteUser(uid)` (cascades to `profiles`). Add an integration test that no rows remain.
 
-#### PL-22 · Push notifications · M
-**Title:** Send push notifications on status changes
+**Done when:** Candidates can tell verified companies from unverified ones, and can permanently delete their data.
 
-**Build:**
-- `register_device(p_token, p_platform)`.
-- A database webhook on `status_events` insert (to_status INTERVIEW_REQUESTED / NOT_SELECTED) calls the `notify` Edge Function.
-- `notify` sends through the FCM HTTP v1 API using a service-account JSON stored in function secrets.
+#### A11 · As a candidate, I want a push notification when a recruiter acts on my application, so I can respond quickly.
+**Covers:** PL-22 · **Size:** ≈ 1 day · **Needs:** A9 · **Stories:** US-27
 
-**Enables:** Candidates get a phone notification with the app closed.
-**Needs:** PL-21 · **Stories:** US-27
+**Build:** `register_device(p_token, p_platform)`. A database webhook on `status_events` insert (to_status INTERVIEW_REQUESTED or NOT_SELECTED) calls the `notify` Edge Function, which sends through the FCM HTTP v1 API using a service-account JSON stored in function secrets.
 
-#### PL-24 · `delete-account` Edge Function · M
-**Title:** Build the delete-account function
-
-**Build:** With an admin client:
-1. Delete `resumes/{uid}/*` from Storage.
-2. Update the candidate's applications to `anonymized = true`, with `candidate_id` and `profile_version_id` null.
-3. Delete the candidate rows.
-4. Call `auth.admin.deleteUser(uid)`, which cascades to `profiles`.
-
-Add an integration test that no rows remain.
-**Enables:** Candidates permanently delete their data.
-**Needs:** PL-19 · **Stories:** US-50
+**Done when:** A candidate gets a phone notification with the app closed.
 
 ---
 
 ## Person B: Backend (AI & matching)
 
-Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, the scoring SQL migrations, `scripts/`. Skill: `resurhombus-matching`.
+Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL migrations, `scripts/`. Skill: `resurhombus-matching`.
 
 ### Core
 
-#### AI-01 · Skill taxonomy · M
-**Title:** Build the skill taxonomy and related-skill list
+#### B1 · As a developer, I want a curated skill list and realistic fake resumes and job descriptions, so I can test matching and demo without anyone's real data.
+**Covers:** AI-01, AI-04 · **Size:** ≈ 2 days · **Needs:** — · **Stories:** US-14, US-54
 
-**Build:**
-- Write `supabase/seed/skills.csv` with about 300 rows (`name, category, aliases`), using categories from [SCHEMA.md](SCHEMA.md) (Languages, Frameworks, Data, Cloud/DevOps, Tools, Domain) and lowercase, `|`-separated aliases.
-- Write `skill_relations.csv` with about 80 rows (`skill, related, credit`).
-- Cover the stacks in the fake job descriptions (mobile/Flutter, backend/Python, data, DevOps, frontend).
+**Build**
+- **AI-01 Taxonomy:** `supabase/seed/skills.csv` with about 300 rows (`name, category, aliases`), using the categories from [SCHEMA.md](SCHEMA.md) (Languages, Frameworks, Data, Cloud/DevOps, Tools, Domain) and lowercase `|`-separated aliases. Add `skill_relations.csv` with about 80 rows (`skill, related, credit`). Cover the stacks in the fake job descriptions (mobile/Flutter, backend/Python, data, DevOps, frontend).
+- **AI-04 Fake inputs:** 10 fake resume PDFs in `supabase/seed/resumes/` with varied layouts (single column, two-column, table-based, one DOCX, one scanned-style image PDF to test failure, one with hidden white text for injection tests). Add 6 fake job descriptions as `.txt`. Hand-label the expected skills for each in `fixtures/labels.json`.
 
-**Enables:** "ReactJS" and "React" count as the same skill, and related skills get partial credit.
-**Needs:** — · **Stories:** US-14
+**Done when:** The CSVs load, and every fixture has labels.
 
-#### AI-02 · Extraction schemas · M
-**Title:** Define the resume and job extraction schemas
+#### B2 · As a developer, I want locked extraction schemas and an LLM adapter with a free mock, so I can build and test every AI feature without spending credits.
+**Covers:** AI-02, AI-03, PL-27 (AI parts, shared with A) · **Size:** ≈ 2.5 days · **Needs:** — · **Stories:** US-51, US-52, US-55
 
-**Build:**
-- In `supabase/functions/_shared/schemas.ts`, write JSON Schemas for `resume` and `job` that follow the OpenAI strict rules (every property listed in `required`, `additionalProperties: false`, `["string","null"]` for optional values).
-- Write matching Zod validators.
-- Export `EXTRACTION_SCHEMA_VERSION`.
-- The resume schema has **no** name, contact, age, or graduation-year fields.
+**Build**
+- **AI-02 Schemas:** In `_shared/schemas.ts`, JSON Schemas for `resume` and `job` following the OpenAI strict rules (every property in `required`, `additionalProperties: false`, `["string","null"]` for optional values) with matching Zod validators and an exported `EXTRACTION_SCHEMA_VERSION`. The resume schema has **no** name, contact, age, or graduation-year fields.
+- **AI-03 Adapter + mock:** In `_shared/llm.ts`, define `LlmProvider` with `extract<T>({schemaName, schema, system, untrustedText})` and `embed(texts)`. `getProvider()` reads `LLM_PROVIDER`. `MockProvider.extract` returns `_shared/fixtures/extract/<sha256(text)>.json` or a default fixture. `MockProvider.embed` returns deterministic unit vectors seeded from a hash of the text. Add Deno tests.
+- **PL-27 (AI parts):** Contribute the `parse-resume`, `parse-job`, `get_feed` (card JSON plus cursor), `compute_match`, and `breakdown` sections of `API_CONTRACT.md`, with example payloads from the fixtures.
 
-**Enables:** Defines exactly what the AI may return. Personal traits are impossible by construction.
-**Needs:** — · **Stories:** US-51
+**Done when:** All AI code can run with `LLM_PROVIDER=mock`, and C can build the deck and radar from the contract examples.
 
-#### AI-03 · LLM adapter + mock · M
-**Title:** Build the LLM adapter with a free mock provider
+#### B3 · As a developer, I want real OpenAI and Azure providers with a usage log and daily budget, so I can switch providers with one setting and never overspend.
+**Covers:** AI-09, AI-13 · **Size:** ≈ 1.5 days · **Needs:** B2, A2 · **Stories:** US-53
 
-**Build:**
-- In `_shared/llm.ts`, define the `LlmProvider` interface with `extract<T>({schemaName, schema, system, untrustedText})` and `embed(texts)`.
-- `getProvider()` reads `LLM_PROVIDER`.
-- `MockProvider`:
-  - `extract` returns `_shared/fixtures/extract/<sha256(text)>.json`, or a default fixture
-  - `embed` returns deterministic unit vectors seeded from a hash of the text
-- Write Deno tests.
+**Build**
+- **AI-09 Providers:** `OpenAIProvider` uses `new OpenAI({apiKey})`. `AzureOpenAIProvider` uses `new AzureOpenAI({endpoint, apiKey, apiVersion, deployment})`. Both come from `npm:openai` and use `chat.completions.create` with `response_format: {type: 'json_schema', json_schema: {name, schema, strict: true}}` and temperature 0, plus `embeddings.create({model: LLM_EMBED_MODEL})`. Assert the embedding model is `text-embedding-3-small`.
+- **AI-13 Usage & budget:** Wrap every provider call to insert into `llm_usage`. Before each call, sum today's tokens and throw `BudgetExceeded` at or above `LLM_DAILY_TOKEN_BUDGET`. `parse-*` turns that into `FAILED` with `budget_exceeded`.
 
-**Enables:** All AI code can be built and tested without spending credits.
-**Needs:** AI-02 · **Stories:** US-52
+**Done when:** Real AI works, switching between OpenAI and Azure is one setting, and parsing stops cleanly before credits run out.
 
-#### AI-04 · Fake resumes & job descriptions · M
-**Title:** Create fake resumes and job descriptions for testing
+#### B4 · As a candidate, I want my resume turned into clean, safe text with calculated years and verified evidence, so the AI only extracts real skills and can't be tricked.
+**Covers:** AI-05, AI-06, AI-08 · **Size:** ≈ 2.5 days · **Needs:** B2 · **Stories:** US-07, US-09, US-10, US-51
 
-**Build:**
-- Write 10 fake resume PDFs in `supabase/seed/resumes/`, with varied layouts: single column, two-column, table-based, one DOCX, one scanned-style image PDF (to test failure), and one with hidden white text (for the injection test).
-- Write 6 fake job descriptions as `.txt`.
-- Hand-label the expected skills for each in `fixtures/labels.json`.
+**Build**
+- **AI-05 Document Intelligence client:** `_shared/azure_di.ts`. `analyzeLayout(bytes, mime)` POSTs to `{AZURE_DI_ENDPOINT}/documentintelligence/documentModels/prebuilt-layout:analyze?api-version=…`, polls the `Operation-Location` header with backoff (max 45 s), and returns `{ lines: [{ text, page, polygon, height }] }`. Test with a recorded response fixture.
+- **AI-06 Sanitizer:** `sanitize(lines)` drops lines with near-zero polygon area or a height below the threshold (hidden text), strips control characters, collapses whitespace, truncates at about 15k tokens (characters ÷ 4) with a marker, and strips email and phone patterns from the contact block. Unit tests.
+- **AI-08 Years & evidence:** Pure functions in `_shared/profile.ts` with Deno tests. `mergeYears(roles)` takes, per skill, the union of role date ranges, merges overlaps, treats "present" as today, and rounds to 0.5. `validateEvidence(skill, text)` does a case- and whitespace-normalized substring check. `totalYears(roles)`.
 
-**Enables:** Realistic test inputs and demo material with no real people.
-**Needs:** — · **Stories:** US-54
+**Done when:** PDFs and DOCX files become clean text, hidden "score me 100%" text is removed, years are computed by code, and any skill without a real quote is dropped.
 
-#### PL-27 · API contract (with A) · M
-**Title:** Write the API contract for every backend function
+#### B5 · As a candidate, I want the skills on my resume mapped to a standard skill list, so jobs recognize "ReactJS" and "React" as the same skill.
+**Covers:** AI-10, AI-11 · **Size:** ≈ 1.5 days · **Needs:** B3, A2 · **Stories:** US-14, US-54
 
-**Build:** Write the parts of `docs/API_CONTRACT.md` covering `parse-resume`, `parse-job`, `get_feed` (card JSON plus cursor), `compute_match`, and the `breakdown` shape, with example payloads taken from the fixtures.
-**Enables:** C builds the deck and radar against the exact data format.
-**Needs:** AI-02 · **Stories:** US-55
+**Build**
+- **AI-10 Normalization:** Migration for `match_skills(p_embedding, p_threshold, p_k)`, returning `skill_id` and similarity via `1 - (embedding <=> p_embedding)` ordered by distance. `_shared/normalize.ts` tries (1) a lowercase exact or alias match (`aliases @> array[x]`), then (2) batch-embeds the unmatched strings and calls `match_skills` at threshold 0.88, then (3) leaves `skill_id = null` (unmapped).
+- **AI-11 Taxonomy embeddings:** `scripts/embed_taxonomy.ts` (Deno) reads `skills.csv`, embeds `name + aliases` in batches of 100, and writes `supabase/seed/skills_embeddings.sql` with vector literals. Run once and commit the output.
 
-#### AI-05 · Document Intelligence client · M
-**Title:** Build the Document Intelligence client
+**Done when:** Free-text skills map onto the taxonomy, and seeding never calls the AI for embeddings.
 
-**Build:** In `_shared/azure_di.ts`:
-- `analyzeLayout(bytes, mime)` POSTs to `{AZURE_DI_ENDPOINT}/documentintelligence/documentModels/prebuilt-layout:analyze?api-version=…`.
-- It polls the `Operation-Location` header with backoff (max 45 s) and returns `{ lines: [{ text, page, polygon, height }] }`.
-- Add a test using a recorded response fixture.
+#### B6 · As a candidate, I want to upload a resume and get a draft profile with live progress, so I don't have to type my history.
+**Covers:** AI-07, AI-19 · **Size:** ≈ 2.5 days · **Needs:** B2, B4, B5, A2 · **Stories:** US-07, US-08, US-11, US-51
 
-**Enables:** PDF and DOCX resumes, including multi-column ones, become clean text with positions.
-**Needs:** — · **Stories:** US-07
+**Build**
+- **AI-07 `parse-resume`:**
+  1. Verify the JWT and ownership of `resume_id`.
+  2. Check for a cached extraction with the same `file_hash` and schema version.
+  3. Set the status at each step (PARSING_LAYOUT, then EXTRACTING, then NORMALIZING) with an admin client.
+  4. Download from Storage, `analyzeLayout`, `sanitize`, then `llm.extract(resumeSchema)` with the resume inside `<resume>` tags.
+  5. Drop skills without valid evidence, then `mergeYears` and normalize.
+  6. Insert `profile_versions` (next version) and `candidate_skills`. Save `extraction` and the provider and model.
+  7. Set `READY`, or `FAILED` with a `failure_reason`. Never leave a row in a parsing state. Hard timeout at 60 s.
+- **AI-19 Injection tests:** Deno tests run `parse-resume` (mock and, optionally, real) on the hidden-text fixture and on fixtures containing "ignore previous instructions" and "Age: 52". Assert no extra skills, no personal fields, and schema-valid output.
 
-#### AI-06 · Text sanitizer · S
-**Title:** Sanitize resume text before it reaches the AI
+**Done when:** An upload becomes a draft profile with live status, and the injection tests prove a resume can't manipulate the AI.
 
-**Build:**
-- `sanitize(lines)` drops lines with near-zero polygon area or a height below the threshold (hidden text), strips control characters, collapses whitespace, and truncates at about 15k tokens (estimated as characters ÷ 4) with a marker.
-- Strip email and phone patterns from the contact block.
-- Add unit tests.
+#### B7 · As a recruiter, I want to paste a job description and get draft requirements, so I don't have to tag skills by hand.
+**Covers:** AI-12 · **Size:** ≈ 1 day · **Needs:** B3, B5, A2 · **Stories:** US-34
 
-**Enables:** Hidden "score me 100%" text is removed and token cost is capped.
-**Needs:** AI-05 · **Stories:** US-51
-
-#### AI-08 · Years & evidence logic · M
-**Title:** Calculate years of experience and verify skill evidence
-
-**Build:** Pure TypeScript functions in `_shared/profile.ts`, with Deno tests:
-- `mergeYears(roles)`: per skill, takes the union of role date ranges, merges overlaps, treats "present" as today, and rounds to 0.5.
-- `validateEvidence(skill, text)`: case- and whitespace-normalized substring check.
-- `totalYears(roles)`.
-
-**Enables:** Experience is calculated by code, not guessed, and invented skills are dropped.
-**Needs:** AI-02 · **Stories:** US-09, US-10
-
-#### AI-07 · `parse-resume` Edge Function · L
-**Title:** Build the resume parsing function
-
-**Build:**
-1. Verify the JWT and ownership of `resume_id`.
-2. Check for a cached extraction with the same `file_hash` and schema version.
-3. Set the status at each step (PARSING_LAYOUT, then EXTRACTING, then NORMALIZING) using an admin client.
-4. Download from Storage, then `analyzeLayout`, then `sanitize`, then `llm.extract(resumeSchema)` with the resume inside `<resume>` tags.
-5. Drop skills without valid evidence, then `mergeYears`.
-6. Insert `profile_versions` (next version) and `candidate_skills` (normalization is wired in after AI-10). Save `extraction` and the provider/model.
-7. Set `READY`, or `FAILED` with a `failure_reason`. Never leave a row in a parsing state. Hard timeout at 60 s.
-
-**Enables:** An upload becomes a draft profile, with live progress in the app.
-**Needs:** AI-03, AI-06, AI-08, PL-05 · **Stories:** US-07, US-08, US-11
-
-#### AI-09 · Real providers · M
-**Title:** Add the OpenAI and Azure OpenAI providers
-
-**Build:**
-- `OpenAIProvider`: `new OpenAI({apiKey})`.
-- `AzureOpenAIProvider`: `new AzureOpenAI({endpoint, apiKey, apiVersion, deployment})`.
-- Both come from `npm:openai` and use `chat.completions.create` with `response_format: {type: 'json_schema', json_schema: {name, schema, strict: true}}` and temperature 0, plus `embeddings.create({model: LLM_EMBED_MODEL})`.
-- Assert the embedding model is `text-embedding-3-small`.
-
-**Enables:** Real AI works, and switching between OpenAI and Azure is one setting.
-**Needs:** AI-03 · **Stories:** US-53
-
-#### AI-13 · Usage log & budget guard · S
-**Title:** Log AI usage and enforce the daily token budget
-
-**Build:**
-- Wrap every provider call to insert into `llm_usage`.
-- Before each call, sum today's tokens. If the total is at or above `LLM_DAILY_TOKEN_BUDGET`, throw `BudgetExceeded`, which `parse-*` turns into `FAILED` with `budget_exceeded`.
-
-**Enables:** Spend is visible, and parsing stops cleanly before credits run out.
-**Needs:** AI-09, PL-06 · **Stories:** US-53
-
-#### AI-10 · Skill normalization · M
-**Title:** Match extracted skills to the skill taxonomy
-
-**Build:**
-- Migration: `match_skills(p_embedding, p_threshold, p_k)` returns `skill_id` and similarity, using `1 - (embedding <=> p_embedding)` ordered by distance.
-- `_shared/normalize.ts`:
-  1. lowercase exact or alias match (`aliases @> array[x]`)
-  2. otherwise, batch-embed the unmatched strings, then `match_skills` with a threshold of 0.88
-  3. otherwise, `skill_id = null` (unmapped)
-- Wire it into `parse-resume`.
-
-**Enables:** Free-text skills map onto the taxonomy, so candidates and jobs can be compared.
-**Needs:** AI-09, PL-05 · **Stories:** US-14
-
-#### AI-11 · Precompute taxonomy embeddings · S
-**Title:** Precompute skill embeddings for the seed data
-
-**Build:** `scripts/embed_taxonomy.ts` (Deno) reads `skills.csv`, embeds `name + aliases` in batches of 100, and writes `supabase/seed/skills_embeddings.sql` with vector literals. Run it once and commit the output.
-**Enables:** Seeding and local development never call the AI for embeddings.
-**Needs:** AI-09, AI-01 · **Stories:** US-54
-
-#### AI-12 · `parse-job` Edge Function · M
-**Title:** Build the job description parsing function
-
-**Build:**
+**Build**
 1. Verify the JWT and that the caller is a recruiter of the job's company.
-2. Sanitize `raw_description`, then `llm.extract(jobSchema)`. The output has title, requirements with `required_hint` / `min_years` / evidence, and location, remote, and salary if stated.
-3. Normalize the requirement skills. Unmapped ones are returned in the response as `unmapped[]` so the UI can show them.
+2. Sanitize `raw_description`, then `llm.extract(jobSchema)`: title, requirements (`required_hint`, `min_years`, evidence), and location, remote, and salary if stated.
+3. Normalize the requirement skills. Return unmapped ones as `unmapped[]` so the UI can show them.
 4. Insert draft `job_requirements` (weight 2 if required, 1 if preferred) and pre-fill the job fields.
 5. Set `parse_status = READY`.
 
-**Enables:** Recruiters paste a job description and get draft requirements automatically.
-**Needs:** AI-09, AI-10, PL-06 · **Stories:** US-34
+**Done when:** A pasted description becomes draft requirements ready for the recruiter to review.
 
-#### AI-14 · `compute_match()` · L
-**Title:** Build the Match Score calculation
+#### B8 · As a recruiter or candidate, I want an explainable 0–100 Match Score for every candidate and job pair, so I can trust the ranking and see why.
+**Covers:** AI-14, AI-17 · **Size:** ≈ 3 days · **Needs:** B5 · **Stories:** US-14, US-23
 
-**Build:** Migration with a SQL function implementing PRD §8.4:
-- For each requirement:
-  - `coverage` is 1 for an exact match, else the best `skill_relations.credit`, else 0
-  - `depth = min(1, years / min_years)` (1 if `min_years` is 0, 0.5 if years is null)
-  - `score = coverage × (0.6 + 0.4 × depth)`
-- `raw` is the weighted average of the scores.
-- The penalty is 0.15 per missing required skill.
-- `score = round(100 × clamp(raw − penalty, 0, 1))`.
-- Returns `{score, breakdown}` ([SCHEMA.md §6](SCHEMA.md#6-json-shapes)).
-- Mark it `stable`.
+**Build**
+- **AI-14 `compute_match()`:** A SQL function implementing PRD §8.4. Per requirement: `coverage` is 1 for an exact match, else the best `skill_relations.credit`, else 0. `depth = min(1, years / min_years)` (1 if `min_years` is 0, 0.5 if years is null). `score = coverage × (0.6 + 0.4 × depth)`. `raw` is the weighted average. The penalty is 0.15 per missing required skill. `score = round(100 × clamp(raw − penalty, 0, 1))`. Returns `{score, breakdown}` ([SCHEMA.md §6](SCHEMA.md#6-json-shapes)). Mark it `stable`.
+- **AI-17 Regression test:** `supabase/tests/fixtures/match_pairs.json` with about 50 hand-labeled resume × job pairs and expected bands. A pgTAP or Deno test computes scores, asserts at least 80% band agreement, and prints a confusion table.
 
-**Enables:** Every candidate-job pair gets an explainable 0–100 score, plus the per-skill data behind the radar.
-**Needs:** AI-10 · **Stories:** US-14, US-23
+**Done when:** Every pair gets an explainable score plus the per-skill data behind the radar, and formula changes are checked against human judgment.
 
-#### AI-15 · `get_feed()` · L
-**Title:** Build the ranked candidate job feed
+#### B9 · As a candidate, I want a ranked deck of jobs I'm eligible for, so I see my best opportunities first.
+**Covers:** AI-15 · **Size:** ≈ 2 days · **Needs:** B8 · **Stories:** US-12, US-14, US-17, US-20
 
 **Build:** Migration for `get_feed(p_limit, p_cursor)` (security definer, scoped to `auth.uid()`):
 1. Read the candidate's active version and preferences.
 2. Hard filters: OPEN jobs, not already swiped, remote/type/sponsorship/salary compatible.
 3. Vector prefilter: `order by jobs.embedding <=> pv.embedding limit 500`.
 4. `compute_match` for each remaining job.
-5. Feed Rank = `0.70·match + 0.15·freshness + 0.10·affinity + 0.05·exploration`. Affinity comes from pass-reason counts and exploration from a hash of the job id and today's date. Drop jobs with a score below 50 unless `include_stretch` is set.
+5. Feed Rank = `0.70·match + 0.15·freshness + 0.10·affinity + 0.05·exploration`. Affinity comes from pass-reason counts, and exploration from a hash of the job id and today's date. Drop scores below 50 unless `include_stretch` is set.
 6. Diversity: no more than 2 cards in a row from the same company.
 7. Return cards plus `next_cursor = (rank, job_id)`.
 
-**Enables:** Candidates get a deck of eligible jobs with the best matches first, loaded page by page.
-**Needs:** AI-14 · **Stories:** US-12, US-14, US-17, US-20
+**Done when:** Candidates get eligible jobs best match first, page by page, and pass reasons nudge the order without changing any score.
 
-#### AI-17 · Scoring regression test · M
-**Title:** Add a scoring regression test with labeled examples
+#### B10 · As a presenter, I want generated demo data covering every status and score band, so the demo looks alive without live AI.
+**Covers:** AI-20 · **Size:** ≈ 2 days · **Needs:** B8, A6 · **Stories:** US-54
 
-**Build:** `supabase/tests/fixtures/match_pairs.json` holds about 50 hand-labeled resume × job pairs with expected bands. A pgTAP or Deno test computes the scores and asserts band agreement of at least 80%, and prints a confusion table.
-**Enables:** Any change to weights or the formula is checked against human judgment.
-**Needs:** AI-14 · **Stories:** —
+**Build:** `scripts/generate_seed.ts` with a fixed random seed generates about 30 candidates, with skills chosen to hit Strong, Good, Stretch, and Low bands against each of the 6 jobs. Also generate about 60 applications across **every** status (with matching `status_events`), about 150 swipes with pass reasons, and precomputed scores and embeddings. Output `supabase/seed/demo_data.sql`, which A6's `seed.sql` includes.
 
-#### AI-19 · Prompt-injection tests · S
-**Title:** Test that resumes can't manipulate the AI
-
-**Build:** Deno tests run `parse-resume` (mock and, optionally, real) on the hidden-text fixture and on fixtures containing "ignore previous instructions" and "Age: 52". Assert that no extra skills appear, that no personal fields exist, and that the output validates against the schema.
-**Enables:** Proof the AI can't be manipulated by a resume.
-**Needs:** AI-07 · **Stories:** US-51
-
-#### AI-20 · Seed generator · L
-**Title:** Generate realistic demo data for every status and score band
-
-**Build:**
-- `scripts/generate_seed.ts` with a fixed random seed generates about 30 candidates.
-  - Each candidate's skills are chosen to hit Strong, Good, Stretch, and Low bands against each of the 6 jobs.
-- Also generate about 60 applications across **every** status (with matching `status_events`), about 150 swipes with pass reasons, and precomputed scores and embeddings.
-- Write the output to `supabase/seed/demo_data.sql`, which PL-16 includes.
-
-**Enables:** The demo has a full board and real pipelines from the first screen, with no live AI.
-**Needs:** AI-14, PL-16 · **Stories:** US-54
+**Done when:** The demo has a full board and real pipelines from the first screen.
 
 ### Later
 
-#### AI-18 · Re-score on requirement edit · M
-**Title:** Re-score applicants when job requirements change
+#### B11 · As a recruiter, I want applicant scores to update when I edit a live job's requirements, so the ranking stays fair.
+**Covers:** AI-18 · **Size:** ≈ 1 day · **Needs:** B8 · **Stories:** US-39
 
-**Build:** Inside `save_requirements` (with A), when the job is OPEN or PAUSED, run `update applications set (match_score, breakdown, scoring_version) = …compute_match(...)` for non-terminal rows, and set `jobs.rescored_at`. Add a test that changing a weight changes both the score and the order.
-**Enables:** Editing a live job's requirements keeps the ranking fair.
-**Needs:** AI-14 · **Stories:** US-39
+**Build:** Inside `save_requirements` (with A), when the job is OPEN or PAUSED, run `update applications set (match_score, breakdown, scoring_version) = …compute_match(...)` for non-terminal rows and set `jobs.rescored_at`. Test that changing a weight changes both the score and the order.
 
-#### AI-21 · Real-AI evaluation · M
-**Title:** Measure and tune AI extraction accuracy
+**Done when:** Editing requirements updates every applicant's score and the board order.
 
-**Build:** `deno task eval:extract` runs real extraction on the AI-04 resumes, compares against the labels, and prints per-skill precision and recall. Sweep the normalization threshold (0.80–0.92) and pick the best. Ask the team before running, because it costs credits.
-**Enables:** Measurably better extraction and skill matching.
-**Needs:** AI-10 · **Stories:** —
+#### B12 · As a developer, I want measured extraction accuracy and a tuned matching threshold, so AI quality improves with evidence.
+**Covers:** AI-21 · **Size:** ≈ 1 day · **Needs:** B5 · **Stories:** —
+
+**Build:** `deno task eval:extract` runs real extraction on the B1 resumes, compares against the labels, and prints per-skill precision and recall. Sweep the normalization threshold (0.80–0.92) and pick the best. Ask the team before running, because it costs credits.
+
+**Done when:** There's a precision and recall report and a chosen threshold.
 
 ---
 
 ## Person C: Frontend (candidate app + design system)
 
-Folders: `lib/ui/`, `lib/core/models/`, `lib/features/{onboarding,deck,deep_dive,pipeline,profile}/`. Skills: `resurhombus-ui`, `resurhombus-flutter`. Each scaffold page lists the task IDs that replace it.
+Folders: `lib/ui/`, `lib/core/models/`, `lib/features/{onboarding,deck,deep_dive,pipeline,profile}/`. Skills: `resurhombus-ui`, `resurhombus-flutter`. Each scaffold page lists the task IDs it will replace.
 
 ### Core
 
-#### CA-01 · Dart models · M
-**Title:** Create the shared Dart data models
+#### C1 · As a developer, I want shared Dart models and fake repositories, so I can build candidate screens before the backend exists.
+**Covers:** CA-01, CA-02 · **Size:** ≈ 2 days · **Needs:** A2 (contract draft) · **Stories:** US-55
 
-**Build:**
-- In `lib/core/models/`, add immutable classes with `fromJson` / `toJson` that map the snake_case columns from [SCHEMA.md](SCHEMA.md): `Profile`, `Skill`, `CandidateSkill`, `ProfileVersion`, `Preferences`, `JobCard`, `BreakdownItem`, `Application`, `StatusEvent`, `CandidateTile`.
-- Add enums mirroring the Postgres enums (`ApplicationStatus`, `JobStatus`, `ResumeStatus`, `PassReason`, …) with `fromDb` / `toDb`.
-- Add `ScoreBand.fromScore(int)`.
-- Write unit tests that round-trip the contract examples.
+**Build**
+- **CA-01 Models:** In `lib/core/models/`, immutable classes with `fromJson` / `toJson` mapping the snake_case columns from [SCHEMA.md](SCHEMA.md): `Profile`, `Skill`, `CandidateSkill`, `ProfileVersion`, `Preferences`, `JobCard`, `BreakdownItem`, `Application`, `StatusEvent`, `CandidateTile`. Enums mirroring the Postgres enums (`ApplicationStatus`, `JobStatus`, `ResumeStatus`, `PassReason`, …) with `fromDb` / `toDb`. `ScoreBand.fromScore(int)`. Unit tests that round-trip the contract examples.
+- **CA-02 Fake repositories:** In `lib/features/*/data/`, abstract `ProfileRepository`, `ResumeRepository`, `FeedRepository`, and `ApplicationRepository`. `Fake…` implementations backed by in-memory lists seeded from the contract JSON, with a 300 ms delay and an error toggle. Riverpod providers plus a `lib/main_fake.dart` that overrides them all.
 
-**Enables:** Both frontends share one set of types that match the database.
-**Needs:** PL-27 draft · **Stories:** —
+**Done when:** Both frontends share one set of types, and every candidate screen can run on fake data.
 
-#### CA-02 · Candidate repositories + fakes · M
-**Title:** Create candidate repositories with fake data
+#### C2 · As a user, I want one consistent branded look and reusable components, so every screen feels polished and readable.
+**Covers:** RC-01, RC-02 · **Size:** ≈ 2 days · **Needs:** — · **Stories:** —
 
-**Build:**
-- In `lib/features/*/data/`, add abstract `ProfileRepository`, `ResumeRepository`, `FeedRepository`, and `ApplicationRepository`.
-- Add `Fake…` implementations backed by in-memory lists seeded from the contract JSON. They use a 300 ms delay and an error toggle.
-- Add Riverpod providers, plus a `lib/main_fake.dart` that overrides them all.
+**Build**
+- **RC-01 Theme:** `lib/ui/theme/rr_tokens.dart`, `rr_theme_ext.dart`, and `rr_theme.dart`, copied from `.claude/skills/resurhombus-ui/references/tokens-and-theme.md`. Add `google_fonts` (Space Grotesk and Inter). Replace the placeholder `ThemeData` in `lib/app/app.dart` (coordinate with D) and add the `context.rr` extension.
+- **RC-02 Components:** In `lib/ui/components/`: `RhombusMark` (a `CustomPainter` with filled, outlined, and dashed variants), `ScoreBadge` (3 sizes, band label, semantics), `EmptyState`, `ShimmerShape`, `StatusChip`, and `CompanyBadge`. A debug-only `/dev/gallery` route showing each one. Golden tests for `ScoreBadge` and `StatusChip`.
 
-**Enables:** Every candidate screen can be built and demoed before the backend exists.
-**Needs:** CA-01, PL-02 · **Stories:** US-55
+**Done when:** The whole app, both roles, gets the brand colors, type, and spacing from one source, and both apps reuse the same components.
 
-#### RC-01 · Theme · M
-**Title:** Build the app theme from the design tokens
+#### C3 · As a candidate, I want to pick my resume and watch a branded progress screen, so I know it is uploading and being read.
+**Covers:** CA-03, CA-04 · **Size:** ≈ 2 days · **Needs:** C1, C2 · **Stories:** US-07, US-08
 
-**Build:**
-- Add `lib/ui/theme/rr_tokens.dart`, `rr_theme_ext.dart`, and `rr_theme.dart`, copied from `.claude/skills/resurhombus-ui/references/tokens-and-theme.md`.
-- Add `google_fonts` (Space Grotesk and Inter).
-- Replace the placeholder `ThemeData` in `lib/app/app.dart` (coordinate with D) and add the `context.rr` extension.
+**Build**
+- **CA-03 Upload screen:** Replace `UploadResumeScreen`'s placeholder. Use `file_picker` (`allowedExtensions: ['pdf','docx']`, `withData: true` so it works on web). Validate size ≤ 5 MB, the extension, and the magic bytes (`%PDF` or the `PK` zip header). Compute a sha256 with the `crypto` package, call `ResumeRepository.upload()` (fake for now), and navigate to `Routes.parseProgress(id)`. Show inline errors.
+- **CA-04 Prism progress:** `PrismUploadProgress` is a `CustomPainter` rhombus splitting a beam into the palette colors, with steps mapped from `ResumeStatus`. `ParseProgressScreen` uses `ref.watch(resumeStatusProvider(id))` (a fake stream for now), navigates to Review on READY, and shows the error state on FAILED. Respect `MediaQuery.disableAnimationsOf`.
 
-**Enables:** The whole app, both roles, gets the brand colors, type, and spacing from one source.
-**Needs:** — · **Stories:** —
+**Done when:** A candidate picks a file, gets clear errors for bad ones, and watches live-style progress.
 
-#### RC-02 · Shared components · M
-**Title:** Build the shared UI components and gallery
+#### C4 · As a candidate, I want to review and fix the AI's skills and set my job preferences, so my profile is accurate and my deck only has jobs I can take.
+**Covers:** CA-05a, CA-05b, CA-06 · **Size:** ≈ 3 days · **Needs:** C1 · **Stories:** US-09, US-10, US-12
 
-**Build:**
-- In `lib/ui/components/`:
-  - `RhombusMark` (a `CustomPainter` with filled, outlined, and dashed variants)
-  - `ScoreBadge` (3 sizes, with the band label and semantics)
-  - `EmptyState`
-  - `ShimmerShape`
-  - `StatusChip`
-  - `CompanyBadge`
-- A `/dev/gallery` route (debug only) that shows each one.
-- Golden tests for `ScoreBadge` and `StatusChip`.
+**Build**
+- **CA-05a Review list:** `ReviewController` (`AsyncNotifier`) loads the latest version and its skills. `SkillReviewList` rows show the name, a years stepper in 0.5 steps, and an "edited" badge. Edits stay local until confirm.
+- **CA-05b Add, remove, evidence:** Swipe-to-remove or ✕ on each row. "Add skill" opens a search sheet querying `skills` (`ilike` on name or aliases, limit 20) through the repository. An evidence bottom sheet shows the quote with the skill highlighted (`TextSpan`). A sticky "Looks right, continue" CTA.
+- **CA-06 Preferences:** Replace `PreferencesScreen`'s placeholder (it has an `editing` flag for onboarding vs. Profile). Location chips with text entry, remote and job type `FilterChip`s, a sponsorship switch, and a salary floor slider. Build the [SCHEMA.md §6](SCHEMA.md#6-json-shapes) `preferences` JSON. On the onboarding finish, mark onboarding complete.
 
-**Enables:** Both apps reuse the same visual pieces, and the gallery lets anyone preview them.
-**Needs:** RC-01 · **Stories:** —
+**Done when:** A candidate can correct what the AI found, add missing skills, see each skill's source, and set the filters that shape the deck.
 
-#### CA-03 · Upload screen · M
-**Title:** Build the resume upload screen
+#### C5 · As a candidate, I want onboarding to work end to end with real data and a manual fallback, so I can finish even when a resume can't be read.
+**Covers:** CA-07, CA-08, CA-09 · **Size:** ≈ 2.5 days · **Needs:** A5, A9 (Realtime), B6 · **Stories:** US-07, US-08, US-09, US-11, US-12, US-13
 
-**Build:**
-- Replace `UploadResumeScreen`'s placeholder.
-- Use `file_picker` (`allowedExtensions: ['pdf','docx']`, `withData: true` so it works on web).
-- Validate that the size is ≤ 5 MB, the extension, and the magic bytes (`%PDF` or the `PK` zip header).
-- Compute a sha256 with the `crypto` package.
-- Call `ResumeRepository.upload()` (fake for now) and navigate to `Routes.parseProgress(id)`.
-- Show inline errors.
+**Build**
+- **CA-07 Upload & progress:** `SupabaseResumeRepository`: `storage.from('resumes').uploadBinary('${uid}/${uuid}.${ext}', bytes)`, insert the `resumes` row, `functions.invoke('parse-resume', body: {resume_id})`, and `watchStatus(id)` = `from('resumes').stream(primaryKey: ['id']).eq('id', id)`. Reuse the flow for Profile → Update resume.
+- **CA-08 Profile & preferences:** `SupabaseProfileRepository`: `latestVersion()` (select with nested `candidate_skills`), `confirm(versionId, skills)` → `rpc('confirm_profile')`, `savePreferences` → `rpc('save_preferences')`, and `searchSkills`. Map `PostgrestException` to `AppFailure`.
+- **CA-09 Failure fallback:** On FAILED, show a `passTint` banner with a message mapped from `failure_reason`. "Try another file" goes to upload. "Add skills manually" calls `rpc('create_manual_profile')` and opens Review in add mode.
 
-**Enables:** Candidates choose a resume and get clear feedback on bad files.
-**Needs:** CA-02 · **Stories:** US-07
+**Done when:** Real resumes upload and parse, onboarding finishes for real, and a failed parse never dead-ends.
 
-#### CA-04 · Prism progress · M
-**Title:** Build the resume parsing progress screen
+#### C6 · As a candidate, I want job cards I can swipe right to apply or left to pass, so applying takes a single gesture.
+**Covers:** CA-10, CA-11 · **Size:** ≈ 3 days · **Needs:** C2 · **Stories:** US-14, US-15, US-17
 
-**Build:**
-- `PrismUploadProgress` widget: a `CustomPainter` rhombus splitting a beam into the palette colors, with steps mapped from `ResumeStatus`.
-- `ParseProgressScreen` uses `ref.watch(resumeStatusProvider(id))`, which is a fake stream for now.
-- On READY it navigates to Review, and on FAILED it shows the error state.
-- Respect `MediaQuery.disableAnimationsOf`.
+**Build**
+- **CA-10 Job card:** `JobCard` per the UI skill's components reference: `deck` surface with `ink` text, logo or `RhombusMark`, title, meta row, `ScoreBadge`, 3 skill chips, and up to 2 gap chips. APPLY and PASS stamps whose opacity follows a `dragProgress` parameter (−1…1). Golden test.
+- **CA-11 Swipe deck:** `SwipeDeck` with 3 stacked cards (back cards scaled 0.94 and 0.88, tilted −3° and +2°). The top card has a `GestureDetector` pan with `Transform.translate` and `rotate` (origin bottom-center, max ±15°). Commit when |dx| > 35% of the width or velocity > 800 px/s: fly out over 250 ms `easeOutCubic`, or spring back over 400 ms `easeOutBack`. Haptics. Exposes `onCommit(direction)` and `commit(direction)` for the buttons. The card subtree is built once and wrapped in a `RepaintBoundary`.
 
-**Enables:** Candidates see branded, live progress while their resume is read.
-**Needs:** RC-01, CA-02 · **Stories:** US-08
+**Done when:** Cards swipe smoothly at 60 fps, with stamps, haptics, and a stacked look.
 
-#### CA-05a · Review skills: list & years · M
-**Title:** Build the skill review list with years editing
+#### C7 · As a candidate, I want buttons, an undo toast, optional pass reasons, and a helpful empty state, so I can use the deck without swiping, fix mistakes, and know what to do next.
+**Covers:** CA-12, CA-13, CA-15 · **Size:** ≈ 2 days · **Needs:** C6 · **Stories:** US-16, US-17, US-18, US-20
 
-**Build:**
-- `ReviewController` (`AsyncNotifier`) loads the latest version and its skills.
-- `SkillReviewList` rows have the name, a years stepper in 0.5 steps, and an "edited" badge when the row changes.
-- The controller keeps edits locally until confirm.
+**Build**
+- **CA-12 Buttons & undo:** `DeckActionBar` with ✕ / ⓘ / ✓ buttons (at least 56 px) calling `deck.commit()`. `UndoToast` counts down to the server's `committed_at` (adjusted for clock offset). "Undo" calls `undoSwipe` and plays the reverse animation. Semantics custom actions on the top card.
+- **CA-13 Pass reasons:** `PassReasonChips` appears for about 3 s after a left swipe and calls `setPassReason(swipeId, reason)` on tap. The next card stays interactive underneath.
+- **CA-15 Empty deck:** When the feed returns no cards and no cursor, show `EmptyState` ("Your deck is all squared away") with actions to `Routes.profilePreferences` and `Routes.profileResume`, plus a "Show stretch roles" toggle that sets `include_stretch`.
 
-**Enables:** Candidates check what the AI found and fix their years.
-**Needs:** CA-02 · **Stories:** US-09
+**Done when:** The deck works with taps or swipes, an accidental apply can be undone, and an empty deck always says what to do next.
 
-#### CA-05b · Review skills: add, remove, evidence · M
-**Title:** Add skill add, remove, and evidence views to review
+#### C8 · As a candidate, I want my deck to show real ranked jobs and my swipes to become real applications, so recruiters can see me.
+**Covers:** CA-14 · **Size:** ≈ 1 day · **Needs:** A7, B9 · **Stories:** US-14, US-15, US-21
 
-**Build:**
-- Swipe-to-remove or an ✕ button on each row.
-- "Add skill" opens a search sheet querying `skills` (`ilike` on name or aliases, limit 20) through the repository.
-- An evidence bottom sheet shows the quote with the skill highlighted (`TextSpan`).
-- A sticky "Looks right, continue" CTA.
+**Build:** `FeedController` (`AsyncNotifier<List<JobCard>>`) calls `rpc('get_feed', {p_limit: 20, p_cursor})` and prefetches when 5 or fewer cards remain. It removes cards optimistically, calls `rpc('swipe')`, and rolls back on error. Map `daily_cap_reached` to a non-blocking banner.
 
-**Enables:** Candidates fix mistakes, add missing skills, and see where each skill came from.
-**Needs:** CA-05a · **Stories:** US-09, US-10
+**Done when:** Real ranked jobs appear, and a right swipe shows up on the recruiter board.
 
-#### CA-06 · Preferences screen · M
-**Title:** Build the job preferences screen
+#### C9 · As a candidate, I want a radar chart and gap list for each job, so I understand why I matched and what I'm missing.
+**Covers:** CA-16 · **Size:** ≈ 2 days · **Needs:** B8 (use the contract sample until then), C2 · **Stories:** US-23, US-24
 
-**Build:**
-- Replace `PreferencesScreen`'s placeholder, which has an `editing` flag for onboarding vs. Profile.
-- Fields: location chips with text entry, remote `FilterChip`s, job type chips, a sponsorship switch, and a salary floor slider.
-- It builds the [SCHEMA.md §6](SCHEMA.md#6-json-shapes) `preferences` JSON. On the onboarding finish it marks onboarding complete.
-
-**Enables:** Candidates rule out jobs they can't take.
-**Needs:** CA-02 · **Stories:** US-12
-
-#### CA-07 · Connect upload & progress · M
-**Title:** Connect resume upload and progress to the backend
-
-**Build:** `SupabaseResumeRepository`:
-1. `storage.from('resumes').uploadBinary('${uid}/${uuid}.${ext}', bytes)`
-2. insert the `resumes` row
-3. `functions.invoke('parse-resume', body: {resume_id})`
-4. `watchStatus(id)` = `from('resumes').stream(primaryKey: ['id']).eq('id', id)`
-
-Also reuse the flow for the Profile → Update resume path.
-**Enables:** Real resumes upload and parse, with progress driven by the actual backend.
-**Needs:** PL-14, AI-07, PL-21 · **Stories:** US-07, US-08, US-13
-
-#### CA-08 · Connect review & preferences · M
-**Title:** Connect skill review and preferences to the backend
-
-**Build:**
-- `SupabaseProfileRepository`:
-  - `latestVersion()` (select with nested `candidate_skills`)
-  - `confirm(versionId, skills)` → `rpc('confirm_profile')`
-  - `savePreferences` → `rpc('save_preferences')`
-  - `searchSkills`
-- Map `PostgrestException` to `AppFailure`.
-
-**Enables:** Candidates finish onboarding for real and become matchable.
-**Needs:** PL-17 · **Stories:** US-09, US-12
-
-#### CA-09 · Parse failure & manual fallback · S
-**Title:** Handle parse failures with a manual skill fallback
-
-**Build:**
-- When the status is FAILED, show a `passTint` banner with a message mapped from `failure_reason`.
-- "Try another file" goes to upload.
-- "Add skills manually" calls `rpc('create_manual_profile')`, then opens Review in add mode.
-
-**Enables:** Onboarding never dead-ends, even when a resume can't be read.
-**Needs:** CA-07, PL-17 · **Stories:** US-11
-
-#### CA-10 · Job card · M
-**Title:** Build the job card widget
-
-**Build:**
-- `JobCard` per the UI skill's components reference: `deck` surface with `ink` text, logo or `RhombusMark`, title, a meta row, `ScoreBadge`, 3 skill chips, and up to 2 gap chips.
-- APPLY / PASS stamps whose opacity is driven by a `dragProgress` parameter (−1…1).
-- Golden test.
-
-**Enables:** Jobs display as on-brand cards with the score and top skills.
-**Needs:** RC-02, CA-01 · **Stories:** US-14
-
-#### CA-11 · Swipe deck · L
-**Title:** Build the swipe deck
-
-**Build:**
-- `SwipeDeck`: 3 stacked cards (back cards scaled 0.94 / 0.88 and tilted −3° / +2°).
-- The top card has a `GestureDetector` pan with `Transform.translate` + `rotate` (origin bottom-center, max ±15°).
-- Commit when |dx| > 35% of the width or the velocity is > 800 px/s. Fly out over 250 ms `easeOutCubic`, or spring back over 400 ms `easeOutBack`.
-- Haptics.
-- Exposes `onCommit(direction)` and `commit(direction)` for the buttons.
-- The card subtree is built once and wrapped in a `RepaintBoundary`.
-
-**Enables:** The core swipe experience, smooth at 60 fps.
-**Needs:** CA-10 · **Stories:** US-15, US-17
-
-#### CA-12 · Action bar & undo toast · M
-**Title:** Add apply/pass buttons and the undo toast
-
-**Build:**
-- `DeckActionBar` has ✕ / ⓘ / ✓ buttons, at least 56 px, calling `deck.commit()`.
-- `UndoToast` counts down to the server's `committed_at` (adjusted for clock offset). "Undo" calls `undoSwipe` and plays the reverse animation.
-- Semantics custom actions on the top card.
-
-**Enables:** Tap-to-apply for accessibility, and an accidental apply can be undone.
-**Needs:** CA-11 · **Stories:** US-16, US-18
-
-#### CA-13 · Pass reasons · S
-**Title:** Add optional pass reason chips
-
-**Build:** `PassReasonChips` appears for about 3 s after a left swipe and calls `setPassReason(swipeId, reason)` on tap. The next card stays interactive underneath.
-**Enables:** Candidates say why they passed, which tunes their future deck order.
-**Needs:** CA-11 · **Stories:** US-17
-
-#### CA-15 · Empty deck · S
-**Title:** Build the empty deck state
-
-**Build:** When the feed returns no cards and no cursor, show `EmptyState` ("Your deck is all squared away") with actions linking to `Routes.profilePreferences` and `Routes.profileResume`, plus a "Show stretch roles" toggle that sets `include_stretch`.
-**Enables:** Candidates always know what to do when the deck runs out.
-**Needs:** CA-11 · **Stories:** US-20
-
-#### CA-14 · Connect the deck · M
-**Title:** Connect the swipe deck to the live feed
-
-**Build:**
-- `FeedController` (`AsyncNotifier<List<JobCard>>`) calls `rpc('get_feed', {p_limit: 20, p_cursor})` and prefetches when 5 or fewer cards remain.
-- It removes cards optimistically, calls `rpc('swipe')`, and rolls back on error.
-- Map `daily_cap_reached` to a non-blocking banner.
-
-**Enables:** Real ranked jobs, and swipes become real applications on the recruiter board.
-**Needs:** PL-18, AI-15 · **Stories:** US-14, US-15, US-21
-
-#### CA-16 · Radar deep-dive (shared widget) · L
-**Title:** Build the radar chart match details view
-
-**Build:**
-- `lib/ui/components/radar_deep_dive.dart`:
-  - an `fl_chart` `RadarChart` with a job polygon (outline at 1.0) and a "You" polygon (teal fill at 25%)
-  - an axis builder: 3–8 required skills each get an axis, more are grouped by category, and fewer than 3 falls back to bars
-  - a gap list (✓ / ◐ / ✕ with text) as the accessible version of the chart
+**Build:** `lib/ui/components/radar_deep_dive.dart`, shared with D:
+- An `fl_chart` `RadarChart` with a job polygon (outline at 1.0) and a "You" polygon (teal fill at 25%).
+- An axis builder: 3–8 required skills each get an axis, more are grouped by category, and fewer than 3 falls back to bars.
+- A gap list (✓ / ◐ / ✕ with text) as the accessible version of the chart.
 - A `legendLabel` parameter so D can show "Candidate".
-- Replace `DeepDiveScreen`'s placeholder, with a Hero / flip transition.
+- Replace `DeepDiveScreen`'s placeholder, with a Hero or flip transition.
 - Unit tests for the axis builder.
 
-**Enables:** Candidates see why they matched and what's missing. D reuses the widget for recruiters.
-**Needs:** AI-14 `breakdown` shape (use the contract sample until then) · **Stories:** US-23, US-24
+**Done when:** Candidates see why they matched and what's missing, and D can reuse the widget for recruiters.
 
-#### CA-17 · Applications pipeline · M
-**Title:** Build the applications pipeline screen
+#### C10 · As a candidate, I want to track every application with live status and see interview contact details, so I know where I stand and can reach the recruiter.
+**Covers:** CA-17, CA-18 · **Size:** ≈ 1.5 days · **Needs:** A8, A9 · **Stories:** US-25, US-26, US-28, US-29
 
-**Build:**
-- `ApplicationRepository.watchMine()` streams `applications` through Realtime and joins job info from `my_applications`.
-- `PipelineScreen` uses `StatusChip`s, grouped or sorted by most recent update.
-- `ApplicationDetailScreen` has a `PipelineTimeline` from `status_events` and a "Withdraw" button (confirm, then `rpc('withdraw')`).
-- Show a "No response yet" hint after 21 days.
-- Announce status changes to screen readers.
+**Build**
+- **CA-17 Pipeline:** `ApplicationRepository.watchMine()` streams `applications` through Realtime and joins job info from `my_applications`. `PipelineScreen` shows `StatusChip`s sorted by most recent update. `ApplicationDetailScreen` has a `PipelineTimeline` from `status_events` and a "Withdraw" button (confirm, then `rpc('withdraw')`). Show a "No response yet" hint after 21 days. Announce status changes to screen readers.
+- **CA-18 Interview contact:** On INTERVIEW_REQUESTED, call `rpc('get_application_contact')` and show the recruiter's name, email, and note, with "Copy" (`Clipboard`) and "Email" (`url_launcher` `mailto:`).
 
-**Enables:** Candidates track every application, with live updates when recruiters act.
-**Needs:** PL-19, PL-21 · **Stories:** US-25, US-26, US-28
+**Done when:** Candidates see status changes the moment a recruiter acts, and invited candidates can reach the recruiter directly.
 
-#### CA-18 · Interview contact · S
-**Title:** Show recruiter contact info for interview requests
+#### C11 · As a candidate using a screen reader or large text, I want an accessible, smooth app, so I can use it as easily as anyone.
+**Covers:** CA-21 · **Size:** ≈ 1 day · **Needs:** C1–C10 · **Stories:** US-18
 
-**Build:** On INTERVIEW_REQUESTED, `ApplicationDetailScreen` calls `rpc('get_application_contact')` and shows the recruiter's name, email, and note, with "Copy" (`Clipboard`) and "Email" (`url_launcher` `mailto:`).
-**Enables:** Invited candidates can reach the recruiter directly.
-**Needs:** CA-17 · **Stories:** US-29
+**Build:** Test with TalkBack on the emulator. Check text scale at 1.3× and 2.0×. Check contrast against the UI skill's table. Turn animations off and verify the reduced-motion behavior. Run `flutter run --profile` and confirm DevTools frame times stay under 16 ms during a fast swipe streak. Fix what you find.
 
-#### CA-21 · Candidate accessibility & performance pass · M
-**Title:** Run the candidate accessibility and performance pass
-
-**Build:**
-- Test with TalkBack on the emulator.
-- Check text scale at 1.3× and 2.0×.
-- Check contrast against the UI skill's table.
-- Turn animations off and verify the reduced-motion behavior.
-- Run `flutter run --profile` and confirm DevTools frame times stay under 16 ms during a fast swipe streak.
-- Fix any issues found.
-
-**Enables:** The candidate app works with screen readers and large text, and stays smooth on mid-range Android.
-**Needs:** all CA · **Stories:** US-18
+**Done when:** The candidate app works with a screen reader and large text, and stays smooth on a mid-range Android.
 
 ### Later
 
-#### CA-19 · Low-match warning · S
-**Title:** Warn before applying to low-match jobs
+#### C12 · As a candidate, I want a warning before a low-match apply and offline swipes that sync later, so I don't waste applications or lose decisions.
+**Covers:** CA-19, CA-22 · **Size:** ≈ 1.5 days · **Needs:** C8 · **Stories:** US-19, US-22
 
-**Build:** Before committing a right swipe, if `score < 50` or any required item has coverage 0, pause at the threshold and show a confirm dialog naming the missing skill.
-**Enables:** Fewer wasted applications.
-**Needs:** CA-14 · **Stories:** US-19
+**Build**
+- **CA-19 Low-match warning:** Before committing a right swipe, if `score < 50` or any required item has coverage 0, pause at the threshold and show a confirm dialog naming the missing skill.
+- **CA-22 Offline queue:** `SwipeQueue` persisted in `shared_preferences`. `connectivity_plus` triggers an in-order flush. Rejected items (cap, closed job) go into a "Couldn't apply" list.
 
-#### CA-20 · Geometric background · M
-**Title:** Add the animated geometric background
+**Done when:** Fewer wasted applications, and swipes made with no signal aren't lost.
+
+#### C13 · As a candidate, I want a subtle animated geometric background, so the app feels playful without hurting performance.
+**Covers:** CA-20 · **Size:** ≈ 1 day · **Needs:** C2 · **Stories:** —
 
 **Build:** `GeometricBackground`: one `CustomPainter(repaint: controller)` with 6–10 wireframe rhombuses and hexagons in `framework` at 25–40% alpha and a 60 s loop, wrapped in a `RepaintBoundary`. It pauses with `AppLifecycleListener` and shows a static frame when animations are disabled.
-**Enables:** The playful geometric brand feel without a performance cost.
-**Needs:** RC-01 · **Stories:** —
 
-#### CA-22 · Offline swipe queue · M
-**Title:** Queue swipes made offline and sync them later
+**Done when:** The brand feel is there with no measurable frame cost.
 
-**Build:** `SwipeQueue` persisted in `shared_preferences`. `connectivity_plus` triggers an in-order flush. Rejected items (cap, closed job) go into a "Couldn't apply" list.
-**Enables:** Swipes made with no signal aren't lost.
-**Needs:** CA-14 · **Stories:** US-22
-
-#### CA-23 · Delete account screen · S
-**Title:** Build the delete account screen
+#### C14 · As a candidate, I want to delete my account from inside the app, so I control my data.
+**Covers:** CA-23 · **Size:** ≈ ½ day · **Needs:** A10 · **Stories:** US-50
 
 **Build:** Profile → "Delete account" opens a type-to-confirm dialog, then calls `functions.invoke('delete-account')`, then signs out.
-**Enables:** Candidates remove their data from inside the app.
-**Needs:** PL-24 · **Stories:** US-50
+
+**Done when:** A candidate can remove their data without leaving the app.
 
 ---
 
 ## Person D: Frontend (recruiter app + auth & routing)
 
-Folders: `lib/app/`, `lib/features/{auth,company,jobs,board}/`, the web build. Skills: `resurhombus-ui`, `resurhombus-flutter`. Each scaffold page lists the task IDs that replace it.
+Folders: `lib/app/`, `lib/features/{auth,company,jobs,board}/`, the web build. Skills: `resurhombus-ui`, `resurhombus-flutter`. Each scaffold page lists the task IDs it will replace.
 
 ### Core
 
-#### PL-02 · Finish the Flutter skeleton · S
-**Title:** Connect the Flutter app to Supabase and Riverpod
+#### D1 · As a developer, I want the app connected to Supabase with fake repositories and agreed wireframes, so I can build auth and recruiter screens in parallel with the backend.
+**Covers:** PL-02, RC-03, RC-04 · **Size:** ≈ 2 days · **Needs:** A1, C1 · **Stories:** US-55
 
-**Build:**
-- The folders, routing, and placeholder pages already exist.
-- `flutter pub add supabase_flutter flutter_riverpod fl_chart google_fonts file_picker crypto url_launcher`.
-- In `main.dart`, call `Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.anonKey)` and wrap the app in `ProviderScope`.
-- Add `lib/app/env.dart` reading `String.fromEnvironment`.
-- Commit `env/example.json` and gitignore `env/dev.json`.
-- The run command becomes `flutter run --dart-define-from-file=env/dev.json`.
+**Build**
+- **PL-02 Skeleton:** The folders, routing, and placeholder pages already exist. Run `flutter pub add supabase_flutter flutter_riverpod fl_chart google_fonts file_picker crypto url_launcher`. In `main.dart`, call `Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.anonKey)` and wrap the app in `ProviderScope`. Add `lib/app/env.dart` reading `String.fromEnvironment`. Commit `env/example.json` and gitignore `env/dev.json`. Run with `flutter run --dart-define-from-file=env/dev.json`.
+- **RC-03 Fakes:** Abstract `AuthRepository`, `CompanyRepository`, `JobRepository`, and `BoardRepository` with `Fake…` implementations from the contract JSON. Providers are overridden in `main_fake.dart` (shared with C).
+- **RC-04 Wireframes:** Low-fidelity layouts for every scaffold page (paper photos or Figma), covering compact and wide layouts and the four states. Team review, stored in `docs/wireframes/`.
 
-**Enables:** The app can talk to Supabase, and everyone runs it with their own config.
-**Needs:** PL-01 · **Stories:** —
+**Done when:** The app talks to Supabase, everyone runs it with their own config, and every recruiter and auth screen can run on fake data.
 
-#### RC-03 · Recruiter & auth repositories + fakes · S
-**Title:** Create recruiter and auth repositories with fake data
+#### D2 · As a new user, I want to choose my role and sign up, sign in, or reset my password, so I can get into the right experience.
+**Covers:** PL-09, PL-10 · **Size:** ≈ 2 days · **Needs:** D1, A3, C2 · **Stories:** US-01, US-02, US-04, US-05
 
-**Build:**
-- Abstract `AuthRepository`, `CompanyRepository`, `JobRepository`, and `BoardRepository`.
-- `Fake…` implementations from the contract JSON, with providers overridden in `main_fake.dart` (shared with C).
+**Build**
+- **PL-09 Auth repository:** `SupabaseAuthRepository`. `signUpWithEmail(email, pw, role)` → `auth.signUp(data: {'role': role.name})`. `signInWithEmail`. `signInWithGoogle`: on Android, `google_sign_in` then `signInWithIdToken`; on web, `signInWithOAuth`. `signOut` (also invalidates user-scoped providers). `resetPassword(email)` → `resetPasswordForEmail(redirectTo:)`. `updatePassword`. Expose `authStateProvider` (a `StreamProvider` over `onAuthStateChange`) and `profileProvider`. Add the Android deep-link intent filter in `AndroidManifest.xml`.
+- **PL-10 Auth screens:** Replace the placeholders for Welcome (two `RoleChoiceCard`s, honoring `?role=recruiter`), Role choice (calls `rpc('set_initial_role')`), Sign up (email, password ≥ 8, Terms checkbox, Google button), Sign in, Forgot password, and Reset password. Add form validation and map loading and error states from `AsyncValue`.
 
-**Enables:** Every recruiter screen can be built and demoed before the backend exists.
-**Needs:** CA-01 · **Stories:** US-55
+**Done when:** Users create accounts as a candidate or recruiter, sign in and out, and recover a forgotten password.
 
-#### RC-04 · Wireframes · M
-**Title:** Create wireframes for every screen
+#### D3 · As a signed-in user, I want to stay signed in and land on a home the other role can't reach, with navigation that fits my phone or laptop, so the app routes me correctly.
+**Covers:** PL-11, RC-05 · **Size:** ≈ 2 days · **Needs:** D2 · **Stories:** US-03, US-06, US-45
 
-**Build:** Low-fidelity layouts for every scaffold page (paper photos or Figma), covering compact and wide layouts and the four states. Review them with the team and store them in `docs/wireframes/`.
-**Enables:** Agreed layouts before building, so less rework.
-**Needs:** — · **Stories:** —
+**Build**
+- **PL-11 Real routing:** Delete `lib/app/dev_session.dart`. `resolveRedirect` now reads `authStateProvider` and `profileProvider`. The candidate-onboarded flag becomes `candidates.active_version_id != null`, and the recruiter-has-company flag becomes "a `recruiters` row exists". Add a signed-in-without-role state that routes to `/welcome/role`. `refreshListenable` is a `ChangeNotifier` bridging the auth stream. Handle `AuthChangeEvent.passwordRecovery` by routing to the reset page. Keep the existing router tests passing with fake providers.
+- **RC-05 Recruiter shell:** In `RecruiterShell`, use a `LayoutBuilder`: at ≥ 900 px a `NavigationRail` (extended at ≥ 1200), below that the existing `NavigationBar`. Keep the selected index in sync with `navigationShell`.
 
-#### PL-09 · Real auth repository · M
-**Title:** Build real sign-up, sign-in, and password reset
+**Done when:** Users stay signed in, land on their own home, can never open the other role's pages, and the recruiter portal feels native on laptop web and on Android.
 
-**Build:** `SupabaseAuthRepository`:
-- `signUpWithEmail(email, pw, role)` → `auth.signUp(data: {'role': role.name})`
-- `signInWithEmail`
-- `signInWithGoogle`: on Android, `google_sign_in` then `signInWithIdToken`. On web, `signInWithOAuth`.
-- `signOut` (also invalidates user-scoped providers)
-- `resetPassword(email)` → `resetPasswordForEmail(redirectTo:)`
-- `updatePassword`
-- Expose `authStateProvider` (a `StreamProvider` over `onAuthStateChange`) and `profileProvider`.
-- Add the Android deep-link intent filter in `AndroidManifest.xml`.
+#### D4 · As a recruiter, I want to create or join a company and manage invite codes, so my team shares one workspace.
+**Covers:** RC-07, PL-15, RC-18 · **Size:** ≈ 2.5 days · **Needs:** D1, A4, A5 · **Stories:** US-30, US-31, US-32
 
-**Enables:** Real accounts: sign up, sign in, sign out, and recover a password.
-**Needs:** PL-02, PL-07 · **Stories:** US-02, US-04, US-05
+**Build**
+- **RC-07 Screens:** Replace the placeholders for Company setup, Create company (name, website URL validation, logo picker), and Join company (8-character code field that auto-uppercases and maps `invalid_invite` and `already_in_company`). On success, refresh `profileProvider` so the router moves to Jobs.
+- **PL-15 Repository:** `SupabaseCompanyRepository`: `create` → `rpc('create_company')` plus a logo upload to `company-logos/{id}/logo.png`, `join` → `rpc('join_company')`, `myCompany()`, `invites()`, `createInvite()`, `revokeInvite()`. Connect it to the screens.
+- **RC-18 Company settings:** Replace `CompanySettingsScreen`'s placeholder: company info and `CompanyBadge`. For the owner, an invite code list with Generate, Copy (`Clipboard`), and Revoke. Plus Sign out.
 
-#### PL-10 · Auth screens · M
-**Title:** Build the welcome, role choice, and sign-in screens
+**Done when:** Recruiters set up or join a company for real, owners bring teammates in, and old codes can be shut off.
 
-**Build:**
-- Replace the placeholders for Welcome (two `RoleChoiceCard`s, honoring `?role=recruiter`), Role choice (calls `rpc('set_initial_role')`), Sign up (email, password ≥ 8, Terms checkbox, Google button), Sign in, Forgot password, and Reset password.
-- Add form validation, and map loading and error states from `AsyncValue`.
+#### D5 · As a recruiter, I want a list of my company's jobs with applicant counts and the ability to publish, pause, or close them, so I control what is live.
+**Covers:** RC-06, RC-11 · **Size:** ≈ 2 days · **Needs:** D1, D3, A2 · **Stories:** US-37, US-38
 
-**Enables:** New users pick "I'm looking for a job" or "I'm hiring" and get into the right experience.
-**Needs:** RC-01, PL-09 · **Stories:** US-01, US-02, US-05
+**Build**
+- **RC-06 Jobs list:** Replace `JobsListScreen`'s placeholder: a `ListView` on compact layouts and a `DataTable` on expanded ones, from `company_jobs_overview`. Show `StatusChip`s, new and total badges, a "New job" button, pull-to-refresh, and an empty state ("Post your first job").
+- **RC-11 Job repository:** `SupabaseJobRepository`: `list()` (from `company_jobs_overview`), `get(id)`, `createDraft`, `update(fields)`, `saveRequirements`, and `setStatus(id, status)` → `rpc('set_job_status')`. Add publish, pause, and close actions (close asks for confirmation) to Job details and the jobs list.
 
-#### PL-11 · Real routing · M
-**Title:** Replace fake routing with real auth-based routing
+**Done when:** Recruiters see every job and where new applicants wait. Jobs go live, pause, and close for real, and closing a job updates its applicants.
 
-**Build:**
-- Delete `lib/app/dev_session.dart`. `resolveRedirect` now reads `authStateProvider` + `profileProvider`.
-- The candidate-onboarded flag becomes `candidates.active_version_id != null`, and the recruiter-has-company flag becomes "a `recruiters` row exists".
-- Add a signed-in-without-role state that routes to `/welcome/role`.
-- `refreshListenable` is a `ChangeNotifier` bridging the auth stream.
-- Handle `AuthChangeEvent.passwordRecovery` by routing to the reset page.
-- Keep the existing router tests passing with fake providers.
+#### D6 · As a recruiter, I want to paste a job description, review the extracted requirements, and set job details, so I can publish a job in minutes.
+**Covers:** RC-08, RC-09a, RC-09b, RC-10 · **Size:** ≈ 4 days · **Needs:** B7, D1 · **Stories:** US-34, US-35, US-36
 
-**Enables:** Users stay signed in, land on their own home, and can never open the other role's pages.
-**Needs:** PL-09 · **Stories:** US-03, US-06
+**Build**
+- **RC-08 New job:** Replace `NewJobScreen`'s placeholder: a multiline field with a 20k character counter. Submit runs `JobRepository.createDraft(raw)`: insert the job, invoke `parse-job`, and watch `jobs.parse_status` through Realtime. Show progress, then navigate to `Routes.jobRequirementsFor(id)`.
+- **RC-09a Requirement table:** Replace `RequirementEditorScreen`'s placeholder. A `RequirementsController` holds `List<RequirementDraft>`. Rows show the skill name, a Required/Preferred `SegmentedButton`, a min-years stepper, and weight pips (1–3). `DataTable` when expanded, cards when compact.
+- **RC-09b Limits & evidence:** Show "8/8 required" and "12/15 total" counters. The controller enforces the limits, and the UI disables toggles with a tooltip explaining why. "Add skill" opens a taxonomy search. Show unmapped skills from `parse-job` with a "map to…" action. Selecting a row highlights its evidence in the JD panel (side by side when expanded). Save calls `rpc('save_requirements')`.
+- **RC-10 Job details:** Replace `JobDetailsScreen`'s placeholder: location, remote chips, job type, a sponsorship switch, and salary min and max (validated min ≤ max), pre-filled from the `parse-job` output.
 
-#### RC-05 · Recruiter shell · M
-**Title:** Build the responsive recruiter navigation shell
+**Done when:** A pasted description becomes confirmed requirements and job details, and only candidates who can take the job will see it.
 
-**Build:** In `RecruiterShell`, use a `LayoutBuilder`: at ≥ 900 px a `NavigationRail` (extended at ≥ 1200) beside the content, below that the existing `NavigationBar`. Keep the selected index in sync with `navigationShell`.
-**Enables:** The portal feels native on laptop web and on Android.
-**Needs:** RC-01 · **Stories:** US-45
+#### D7 · As a recruiter, I want a ranked grid of skill-only tiles with one-click advance and reject, so I can triage fast on any device.
+**Covers:** RC-12, RC-13 · **Size:** ≈ 3 days · **Needs:** C2 · **Stories:** US-40, US-41, US-43, US-44, US-45
 
-#### RC-07 · Company onboarding screens · M
-**Title:** Build the company create and join screens
+**Build**
+- **RC-12 Mosaic grid & blind tiles:** `MosaicGrid` is a `SliverGrid` with `SliverGridDelegateWithMaxCrossAxisExtent(320)` and keyed animated removal. `CandidateTile` has a `RhombusMark` avatar, handle, `ScoreBadge`, years, 3 skills, and 2 gaps, with `e1` → `e2` elevation on hover or focus. It has **no identity fields**. Replace `BoardScreen`'s placeholder with the header (job title, count, "Sorted by Match").
+- **RC-13 Triangle actions:** `TriangleActions` are two `ClipPath` triangles inside 48×48 `InkWell` hit areas. On web, `MouseRegion` hover slides them in over 150 ms. On touch, a tap toggles them (`selectedTileProvider`, so one tile at a time) and a long-press opens the detail view. Reject shows a 10 s "Not a fit · Undo" SnackBar. Advance opens an optional note popover.
 
-**Build:**
-- Replace the placeholders for Company setup, Create company (name, website URL validation, logo picker), and Join company (8-character code field that auto-uppercases and maps the `invalid_invite` / `already_in_company` errors).
-- On success, refresh `profileProvider` so the router moves to Jobs.
+**Done when:** Recruiters see a ranked grid of nameless tiles, 1–5 columns by width, with one-click advance and reject on web and phone.
 
-**Enables:** Recruiters set up or join their company workspace.
-**Needs:** RC-03 · **Stories:** US-30, US-32
+#### D8 · As a recruiter, I want the board connected to live data, so new applicants appear in score order and my decisions reach candidates instantly.
+**Covers:** RC-14 · **Size:** ≈ 1 day · **Needs:** A8, D7 · **Stories:** US-40, US-43, US-44
 
-#### PL-15 · Real company repository · M
-**Title:** Connect company screens to the backend
+**Build:** `SupabaseBoardRepository`: `rpc('get_board')` with pagination (50), `advance`, `reject`, and `undoReject`. A Realtime subscription on `applications` filtered `job_id=eq.<id>` inserts new applicants in score order. Optimistic updates with rollback.
 
-**Build:** `SupabaseCompanyRepository`:
-- `create` → `rpc('create_company')`, plus a logo upload to `company-logos/{id}/logo.png`
-- `join` → `rpc('join_company')`
-- `myCompany()`
-- `invites()` / `createInvite()` / `revokeInvite()`
+**Done when:** Candidates who swiped right appear live, and a recruiter's decision reaches the candidate immediately.
 
-Connect it to the RC-07 screens.
-**Enables:** Company creation and joining work for real.
-**Needs:** PL-13, PL-14, RC-07 · **Stories:** US-30, US-32
+#### D9 · As a recruiter, I want a candidate detail view and an interview list with resume links, so I can verify a match and follow up.
+**Covers:** RC-15, RC-16 · **Size:** ≈ 2 days · **Needs:** C9, A8, A9 · **Stories:** US-42, US-47
 
-#### RC-18 · Company settings · S
-**Title:** Build company settings with invite code management
+**Build**
+- **RC-15 Candidate detail:** Replace `CandidateDetailScreen`'s placeholder. On open it calls `rpc('open_application')`, then `rpc('get_candidate_detail')`. Show C's `RadarDeepDive(legendLabel: 'Candidate')`, an evidence list per skill, and advance and reject buttons. On expanded layouts it can render as a side panel next to the grid.
+- **RC-16 Interview list:** Replace `InterviewListScreen`'s placeholder with `rpc('get_interview_list')`. Rows show the name, job, score, an "Email" link (`mailto:`), and a "Resume" button (`functions.invoke('resume-url')`, then `launchUrl`). Allow filtering by job.
 
-**Build:** Replace `CompanySettingsScreen`'s placeholder. It shows the company info and `CompanyBadge`. If the user is the owner, it also shows an invite code list with Generate, Copy (`Clipboard`), and Revoke. Plus Sign out.
-**Enables:** Owners bring teammates in and shut off old codes.
-**Needs:** PL-15 · **Stories:** US-31
+**Done when:** Recruiters verify a match in depth before deciding, and identity and resumes appear only after advancing.
 
-#### RC-06 · Jobs list · M
-**Title:** Build the recruiter jobs list
+#### D10 · As a recruiter on a phone or laptop, I want an accessible, responsive portal at a public URL, so I can use and demo it anywhere.
+**Covers:** RC-20, RC-21 · **Size:** ≈ 1.5 days · **Needs:** D1–D9 · **Stories:** US-45
 
-**Build:**
-- Replace `JobsListScreen`'s placeholder: a `ListView` on compact layouts and a `DataTable` on expanded ones, from `company_jobs_overview`.
-- Show `StatusChip`s, new/total badges, a "New job" button, pull-to-refresh, and an empty state ("Post your first job").
+**Build**
+- **RC-20 Pass:** Test every recruiter page at 360 px and 1280 px. Check the tab and focus order, visible focus rings (`matchStrong`), and contrast. Make sure all triangle buttons have tooltips and semantics labels. Test at 2.0× text scale.
+- **RC-21 Hosting:** `flutter build web --release --dart-define-from-file=env/prod.json`. Deploy `build/web` to a static host (Netlify, Vercel, or GitHub Pages) with an SPA fallback to `index.html`. Add the hosted URL to Supabase Auth's redirect URLs.
 
-**Enables:** Recruiters see every job and where new applicants are waiting.
-**Needs:** RC-03 · **Stories:** US-38
-
-#### RC-08 · New job screen · M
-**Title:** Build the paste-job-description screen
-
-**Build:**
-- Replace `NewJobScreen`'s placeholder: a multiline field with a 20k character counter.
-- Submit runs `JobRepository.createDraft(raw)`: insert the job, invoke `parse-job`, and watch `jobs.parse_status` through Realtime.
-- Show a progress state, then navigate to `Routes.jobRequirementsFor(id)`.
-
-**Enables:** Recruiters create a job by pasting a description.
-**Needs:** AI-12 (fake until then) · **Stories:** US-34
-
-#### RC-09a · Requirement editor: table · M
-**Title:** Build the requirement editor table
-
-**Build:**
-- Replace `RequirementEditorScreen`'s placeholder. A `RequirementsController` holds `List<RequirementDraft>`.
-- Rows show the skill name, a Required/Preferred `SegmentedButton`, a min-years stepper, and weight pips (1–3).
-- Use a `DataTable` when expanded and cards when compact.
-
-**Enables:** Recruiters decide which skills matter most, which directly shapes every score.
-**Needs:** RC-08 · **Stories:** US-35
-
-#### RC-09b · Requirement editor: limits & evidence · M
-**Title:** Add requirement limits, skill search, and evidence highlights
-
-**Build:**
-- Show "8/8 required" and "12/15 total" counters. The controller enforces the limits and the UI disables toggles with a tooltip explaining why.
-- "Add skill" opens a taxonomy search.
-- Show unmapped skills from `parse-job` with a "map to…" action.
-- Selecting a row highlights its evidence in the JD panel (side-by-side when expanded).
-- Save calls `rpc('save_requirements')`.
-
-**Enables:** Focused requirements, with a visible source for each one.
-**Needs:** RC-09a · **Stories:** US-35
-
-#### RC-10 · Job details form · M
-**Title:** Build the job details form
-
-**Build:** Replace `JobDetailsScreen`'s placeholder. It has fields for location, remote chips, job type, a sponsorship switch, and salary min/max (validated so min ≤ max), pre-filled from the `parse-job` output.
-**Enables:** Only candidates who can take the job see it.
-**Needs:** RC-03 · **Stories:** US-36
-
-#### RC-11 · Real job repository · M
-**Title:** Connect jobs to the backend with publish, pause, and close
-
-**Build:** `SupabaseJobRepository`:
-- `list()` (from `company_jobs_overview`)
-- `get(id)`
-- `createDraft`
-- `update(fields)`
-- `saveRequirements`
-- `setStatus(id, status)` → `rpc('set_job_status')`
-
-Add publish, pause, and close actions (close asks for confirmation) to Job details and the jobs list.
-**Enables:** Jobs go live, pause, and close for real. Closing a job updates its applicants.
-**Needs:** PL-06, PL-11 · **Stories:** US-37, US-38
-
-#### RC-12 · Mosaic grid & blind tiles · L
-**Title:** Build the Mosaic grid of blind candidate tiles
-
-**Build:**
-- `MosaicGrid`: `SliverGrid` with `SliverGridDelegateWithMaxCrossAxisExtent(320)`, and keyed animated removal.
-- `CandidateTile`: `RhombusMark` avatar, handle, `ScoreBadge`, years, 3 skills, 2 gaps, with `e1` → `e2` elevation on hover or focus. It has **no identity fields**.
-- Replace `BoardScreen`'s placeholder with the header (job title, count, "Sorted by Match").
-
-**Enables:** Recruiters see a ranked grid of skill-only tiles, 1–5 columns depending on width.
-**Needs:** RC-02 · **Stories:** US-40, US-41
-
-#### RC-13 · Triangle actions · M
-**Title:** Add advance and reject triangle actions to tiles
-
-**Build:**
-- `TriangleActions`: two `ClipPath` triangles inside 48×48 `InkWell` hit areas.
-- On web, `MouseRegion` hover slides them in over 150 ms. On touch, a tap toggles them (`selectedTileProvider`, so one tile at a time), and a long-press opens the detail view.
-- Reject shows a 10 s "Not a fit · Undo" SnackBar. Advance opens an optional note popover.
-
-**Enables:** One-click advance and reject on web and phone.
-**Needs:** RC-12 · **Stories:** US-43, US-44, US-45
-
-#### RC-14 · Connect the board · M
-**Title:** Connect the applicant board to the backend with live updates
-
-**Build:**
-- `SupabaseBoardRepository`: `rpc('get_board')` with pagination (50), `advance`, `reject`, and `undoReject`.
-- A Realtime subscription on `applications` filtered `job_id=eq.<id>` inserts new applicants in score order.
-- Optimistic updates with rollback.
-
-**Enables:** Candidates who swiped right appear live, and decisions reach candidates instantly.
-**Needs:** AI-16, PL-19 · **Stories:** US-40, US-43, US-44
-
-#### RC-15 · Candidate detail · M
-**Title:** Build the recruiter candidate detail view
-
-**Build:**
-- Replace `CandidateDetailScreen`'s placeholder. On open it calls `rpc('open_application')`, then `rpc('get_candidate_detail')`.
-- Show C's `RadarDeepDive(legendLabel: 'Candidate')` and an evidence list per skill, with advance and reject buttons.
-- On expanded layouts it can render as a side panel next to the grid.
-
-**Enables:** Recruiters verify a match before deciding, and candidates see "Under review".
-**Needs:** CA-16, AI-16 · **Stories:** US-42
-
-#### RC-16 · Interview list · M
-**Title:** Build the interview list with resume links
-
-**Build:** Replace `InterviewListScreen`'s placeholder with `rpc('get_interview_list')`. Rows show the name, job, score, an "Email" link (`mailto:`), and a "Resume" button: `functions.invoke('resume-url')`, then `launchUrl`. Allow filtering by job.
-**Enables:** Recruiters follow up with advanced candidates, and identity appears only here.
-**Needs:** AI-16, PL-23 · **Stories:** US-47
-
-#### RC-20 · Recruiter accessibility & responsive pass · M
-**Title:** Run the recruiter accessibility and responsive pass
-
-**Build:**
-- Test every recruiter page at 360 px and 1280 px.
-- Check the tab and focus order, visible focus rings (`matchStrong`), and contrast.
-- Make sure all triangle buttons have tooltips and semantics labels.
-- Test with 2.0× text scale.
-
-**Enables:** The portal works on small phones and laptops, and with assistive tech.
-**Needs:** all RC · **Stories:** US-45
-
-#### RC-21 · Host the web build · S
-**Title:** Build and host the recruiter web app
-
-**Build:**
-- `flutter build web --release --dart-define-from-file=env/prod.json`.
-- Deploy `build/web` to a static host (Netlify, Vercel, or GitHub Pages) with an SPA fallback to `index.html`.
-- Add the hosted URL to Supabase Auth's redirect URLs.
-
-**Enables:** A public URL for the recruiter portal, for the demo and grading.
-**Needs:** RC-20 · **Stories:** —
+**Done when:** The portal works on small phones and laptops, and has a public URL for the demo and grading.
 
 ### Later
 
-#### RC-17 · Board filters · M
-**Title:** Add applicant board filters
+#### D11 · As a recruiter, I want board filters and keyboard shortcuts, so I can triage large applicant pools quickly.
+**Covers:** RC-17, RC-19 · **Size:** ≈ 2 days · **Needs:** D8 · **Stories:** US-46, US-48
 
-**Build:** A filter chip row (skills from the job's requirements, minimum years, minimum score) that passes `p_filters` to `get_board`. The order is unchanged. Sync the state to query parameters so it survives a web refresh.
-**Enables:** Recruiters narrow a big pool without losing the ranking.
-**Needs:** RC-14 · **Stories:** US-46
+**Build**
+- **RC-17 Filters:** A filter chip row (skills from the job's requirements, minimum years, minimum score) that passes `p_filters` to `get_board`. The order is unchanged. Sync the state to query parameters so it survives a web refresh.
+- **RC-19 Shortcuts:** `Shortcuts` + `Actions` on the board: J/K move focus between tiles (one `FocusNode` each), A advances, R rejects, Enter opens, and ? shows the help dialog. Shortcuts are disabled while a text field has focus.
 
-#### RC-19 · Keyboard shortcuts · M
-**Title:** Add keyboard shortcuts for board triage
+**Done when:** Recruiters narrow a big pool without losing the ranking and triage from the keyboard.
 
-**Build:** `Shortcuts` + `Actions` on the board: J/K move focus between tiles (one `FocusNode` each), A advances, R rejects, Enter opens, and ? shows the help dialog. Shortcuts are disabled while a text field has focus.
-**Enables:** Fast laptop triage without the mouse.
-**Needs:** RC-14 · **Stories:** US-48
-
-#### RC-22 · Verified badge in recruiter header · S
-**Title:** Show the verified badge in the recruiter header
+#### D12 · As a recruiter, I want to see my company's verified status, so I know candidates can trust it.
+**Covers:** RC-22 · **Size:** ≈ ½ day · **Needs:** A10 · **Stories:** US-33
 
 **Build:** Show `CompanyBadge` in the recruiter shell header and on Company settings, reading `companies.verified`.
-**Enables:** Recruiters see their company's verification status.
-**Needs:** PL-26 · **Stories:** US-33
+
+**Done when:** Recruiters see whether their company is verified.
 
 ---
 
 ## Everyone
 
-| ID | Task | Title | Technical description |
-|---|---|---|---|
-| ALL-01 | **Contract review** | Review and freeze the API contract as a team | Walk through [schema.sql](schema.sql), `API_CONTRACT.md`, the Dart models, and the AI schemas together. Any disagreement is fixed in those files before building. After this, contract changes need a chat heads-up and frontend approval. |
-| ALL-02 | **Loop test** | Test the full candidate-to-recruiter loop together | With `supabase db reset` seed data and a real AI provider: candidate on the Android emulator, recruiter on Chrome. Swipe right, then see the tile appear, advance it, and see the candidate's status update live. File an issue for every break. |
-| ALL-03 | **Bug bash** | Run a cross-team bug bash | Each person spends 1 hour using the other silos' flows (including edge cases: bad files, an expired invite, the 26th swipe, undo timing) and files issues with steps to reproduce. |
-| ALL-04 | **Demo rehearsal** | Rehearse the demo | Write a 5-minute script using the seed accounts and do 2 dry runs with the candidate and recruiter side by side. Have a pre-parsed resume ready in case live parsing is slow. |
+#### T1 · As a team, we want to review and freeze the API contract together, so everyone builds on the same agreement.
+**Covers:** ALL-01 · **Needs:** A2, B2, C1
+
+**Build:** Walk through [schema.sql](schema.sql), `API_CONTRACT.md`, the Dart models, and the AI schemas together. Fix any disagreement in those files before building. After this, contract changes need a chat heads-up and frontend approval.
+
+#### T2 · As a team, we want to test the full candidate-to-recruiter loop together, so we know the silos actually connect.
+**Covers:** ALL-02 · **Needs:** A7, A8, B9, C8, D8
+
+**Build:** With `supabase db reset` seed data and a real AI provider, run the candidate on the Android emulator and the recruiter on Chrome. Swipe right, see the tile appear, advance it, and see the candidate's status update live. File an issue for every break.
+
+#### T3 · As a team, we want a cross-team bug bash and a demo rehearsal, so the demo goes smoothly.
+**Covers:** ALL-03, ALL-04 · **Needs:** all core blocks
+
+**Build**
+- **Bug bash:** Each person spends 1 hour using the other silos' flows, including edge cases (bad files, an expired invite, the 26th swipe, undo timing), and files issues with steps to reproduce.
+- **Rehearsal:** Write a 5-minute script using the seed accounts and do 2 dry runs with the candidate and recruiter side by side. Keep a pre-parsed resume ready in case live parsing is slow.
+
+---
+
+## ID lookup
+
+The original task IDs are still used in USER_STORIES.md, TEAM_PLAN.md, and the scaffold pages (`lib/features/*`). This table points each one to its block.
+
+| Original ID | Block |
+|---|---|
+| AI-01 | B1 |
+| AI-02 | B2 |
+| AI-03 | B2 |
+| AI-04 | B1 |
+| AI-05 | B4 |
+| AI-06 | B4 |
+| AI-07 | B6 |
+| AI-08 | B4 |
+| AI-09 | B3 |
+| AI-10 | B5 |
+| AI-11 | B5 |
+| AI-12 | B7 |
+| AI-13 | B3 |
+| AI-14 | B8 |
+| AI-15 | B9 |
+| AI-16 | A8 |
+| AI-17 | B8 |
+| AI-18 | B11 |
+| AI-19 | B6 |
+| AI-20 | B10 |
+| AI-21 | B12 |
+| ALL-01 | T1 |
+| ALL-02 | T2 |
+| ALL-03 | T3 |
+| ALL-04 | T3 |
+| CA-01 | C1 |
+| CA-02 | C1 |
+| CA-03 | C3 |
+| CA-04 | C3 |
+| CA-05a | C4 |
+| CA-05b | C4 |
+| CA-06 | C4 |
+| CA-07 | C5 |
+| CA-08 | C5 |
+| CA-09 | C5 |
+| CA-10 | C6 |
+| CA-11 | C6 |
+| CA-12 | C7 |
+| CA-13 | C7 |
+| CA-14 | C8 |
+| CA-15 | C7 |
+| CA-16 | C9 |
+| CA-17 | C10 |
+| CA-18 | C10 |
+| CA-19 | C12 |
+| CA-20 | C13 |
+| CA-21 | C11 |
+| CA-22 | C12 |
+| CA-23 | C14 |
+| PL-01 | A1 |
+| PL-02 | D1 |
+| PL-03 | A1 |
+| PL-04 | A2 |
+| PL-05 | A2 |
+| PL-06 | A2 |
+| PL-07 | A3 |
+| PL-08 | A3 |
+| PL-09 | D2 |
+| PL-10 | D2 |
+| PL-11 | D3 |
+| PL-12 | A3 |
+| PL-13 | A4 |
+| PL-14 | A5 |
+| PL-15 | D4 |
+| PL-16 | A6 |
+| PL-17 | A5 |
+| PL-18 | A7 |
+| PL-19 | A8 |
+| PL-20 | A9 |
+| PL-21 | A9 |
+| PL-22 | A11 |
+| PL-23 | A9 |
+| PL-24 | A10 |
+| PL-25 | A6 |
+| PL-26 | A10 |
+| PL-27 | A2, B2 |
+| RC-01 | C2 |
+| RC-02 | C2 |
+| RC-03 | D1 |
+| RC-04 | D1 |
+| RC-05 | D3 |
+| RC-06 | D5 |
+| RC-07 | D4 |
+| RC-08 | D6 |
+| RC-09a | D6 |
+| RC-09b | D6 |
+| RC-10 | D6 |
+| RC-11 | D5 |
+| RC-12 | D7 |
+| RC-13 | D7 |
+| RC-14 | D8 |
+| RC-15 | D9 |
+| RC-16 | D9 |
+| RC-17 | D11 |
+| RC-18 | D4 |
+| RC-19 | D11 |
+| RC-20 | D10 |
+| RC-21 | D10 |
+| RC-22 | D12 |
+
