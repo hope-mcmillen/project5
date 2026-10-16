@@ -1,0 +1,23 @@
+Backend Engineer, Python — Bayou Ledger
+Remote (US) · Full-time · $120,000 – $150,000
+
+Bayou Ledger is a fintech startup that helps small credit unions reconcile payments in real time.
+
+The role
+You'll design and build the APIs behind our reconciliation engine. Our stack is Python 3.12, FastAPI, PostgreSQL, Redis, and Celery, deployed as Docker containers on AWS (ECS, RDS, S3).
+
+Requirements
+- 3+ years of professional Python backend development.
+- Strong experience with FastAPI or Django.
+- 2+ years with PostgreSQL, including schema design and query tuning.
+- Experience designing REST APIs.
+- Docker.
+- Unit testing with pytest.
+
+Preferred
+- Redis and Celery for background jobs.
+- AWS (ECS, Lambda, S3).
+- Experience in payments or fintech; PCI DSS familiarity.
+- Event-driven architecture or Kafka.
+
+We sponsor visas for this position.

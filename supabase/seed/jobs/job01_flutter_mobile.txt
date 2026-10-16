@@ -1,0 +1,25 @@
+Mobile Engineer (Flutter) — Pelican Path Health
+Baton Rouge, LA · Hybrid (2 days in office) · Full-time · $95,000 – $120,000
+
+About us
+Pelican Path Health builds a patient-scheduling app used by 40 rural clinics across Louisiana. Our small team ships to iOS and Android from one Flutter codebase.
+
+What you'll do
+- Build and maintain features in our Flutter app, from design hand-off in Figma to App Store and Google Play release.
+- Own state management with Riverpod and keep our offline-first appointment cache reliable.
+- Integrate with our Firebase backend (Auth, Firestore, Cloud Messaging for push notifications).
+- Write widget and unit tests and keep our Codemagic CI pipeline green.
+
+Required
+- 2+ years building production apps with Flutter and Dart.
+- Experience with a state management approach (Riverpod or Bloc).
+- Experience consuming REST APIs.
+- Comfortable with Git and code review.
+
+Nice to have
+- Firebase (Auth, Firestore, push notifications).
+- Native iOS (Swift) or Android (Kotlin) experience.
+- Accessibility (WCAG) experience.
+- Healthcare or HIPAA-regulated work.
+
+Visa sponsorship is not available for this role.

@@ -1,0 +1,27 @@
+Frontend Engineer (React) — Cypress Lane Commerce
+Austin, TX · Hybrid · Full-time · $105,000 – $130,000
+
+Cypress Lane Commerce powers storefronts for 3,000 independent retailers.
+
+You will
+- Build customer-facing storefront features in React and TypeScript on Next.js.
+- Grow our component library in Storybook with Tailwind CSS.
+- Improve Core Web Vitals and accessibility across the checkout flow.
+- Write tests with Jest and Playwright.
+
+Required
+- 2+ years of React.
+- 2+ years of TypeScript.
+- Strong HTML and CSS, including responsive design.
+- Experience with REST or GraphQL APIs.
+- Unit testing (Jest or Vitest).
+
+Nice to have
+- Next.js.
+- Tailwind CSS.
+- Accessibility (WCAG 2.1 AA).
+- End-to-end testing with Playwright or Cypress.
+- E-commerce experience.
+- Figma.
+
+Visa sponsorship is not available.

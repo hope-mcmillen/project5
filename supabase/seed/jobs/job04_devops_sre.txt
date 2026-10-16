@@ -1,0 +1,27 @@
+DevOps / Site Reliability Engineer — Magnolia Grid Systems
+Remote (US, Central time preferred) · Full-time · $130,000 – $160,000
+
+Magnolia Grid Systems runs the software that balances load across regional power co-ops. Uptime is our product.
+
+What you'll own
+- Our Kubernetes platform (EKS) and the Helm charts every service ships with.
+- Infrastructure as code in Terraform across AWS accounts.
+- CI/CD in GitHub Actions and progressive delivery with Argo CD.
+- Observability with Prometheus, Grafana, and OpenTelemetry; you'll join the on-call rotation.
+
+Required
+- 4+ years in DevOps or SRE roles.
+- 3+ years running Kubernetes in production.
+- 2+ years of Terraform.
+- AWS.
+- Docker.
+- Linux administration and Bash scripting.
+- CI/CD pipeline design.
+
+Preferred
+- Helm and Argo CD.
+- Prometheus and Grafana.
+- Go or Python for tooling.
+- Security hardening experience.
+
+Visa sponsorship available.

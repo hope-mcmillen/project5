@@ -1,0 +1,25 @@
+Data Engineer — Crescent Freight Analytics
+New Orleans, LA · On-site · Full-time · $110,000 – $135,000
+
+Crescent Freight moves 2 million containers a year through Gulf ports. Our data team turns port telemetry into delivery forecasts.
+
+Responsibilities
+- Build and operate batch and streaming pipelines with Apache Airflow, Apache Spark, and Apache Kafka.
+- Model our warehouse in Snowflake using dbt.
+- Partner with analysts on Tableau dashboards.
+
+Must have
+- 3+ years of SQL.
+- 2+ years of Python for data engineering.
+- Hands-on Apache Spark (PySpark).
+- Apache Airflow orchestration.
+- Data modeling and data warehousing concepts.
+
+Bonus
+- Kafka or another streaming platform.
+- dbt.
+- Snowflake or BigQuery.
+- Tableau or Power BI.
+- Experience with AWS.
+
+No visa sponsorship available.

@@ -1,0 +1,26 @@
+Machine Learning Engineer — Gulfstream Diagnostics
+Houston, TX · Remote or hybrid · Full-time · $140,000 – $175,000
+
+Gulfstream Diagnostics builds models that flag anomalies in hospital lab results for clinician review.
+
+Responsibilities
+- Train, evaluate, and ship classification models with PyTorch and scikit-learn.
+- Build retrieval-augmented generation (RAG) tools over clinical guidelines using LLM APIs and a vector database.
+- Productionize models with MLflow, Docker, and FastAPI on Google Cloud.
+
+Required
+- 3+ years of Python.
+- 2+ years of machine learning in production.
+- PyTorch or TensorFlow.
+- scikit-learn and Pandas.
+- SQL.
+- Statistics fundamentals.
+
+Preferred
+- Large language models and prompt engineering.
+- Vector databases (pgvector, Pinecone).
+- MLOps tooling (MLflow, Kubeflow).
+- Google Cloud.
+- HIPAA or healthcare data experience.
+
+We sponsor visas.
