@@ -260,12 +260,12 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 **Covers:** AI-09, AI-13 · **Size:** ≈ 1.5 days · **Needs:** B2, A2 · **Stories:** US-53
 
 **Build**
-- **AI-09 Gemini provider (PRD v0.5):** `GeminiProvider` in `_shared/llm.ts` uses `new GoogleGenAI({apiKey: GEMINI_API_KEY})` from `npm:@google/genai`.
+- **AI-09 Gemini provider (PRD v0.5):** `GeminiProvider` in `_shared/gemini.ts` (shared types in `llm_base.ts`, selected by `getProvider()` in `llm.ts`) uses `new GoogleGenAI({apiKey: GEMINI_API_KEY})` from `npm:@google/genai`.
   - `extract`: `models.generateContent` with `config: {responseMimeType: 'application/json', responseJsonSchema: schema, temperature: 0, systemInstruction: system}`. Check that Gemini accepts the `["string","null"]` style from `schemas.ts`. If not, convert it inside the adapter rather than changing `schemas.ts`.
   - `embed`: `models.embedContent` with `model: LLM_EMBED_MODEL`, `outputDimensionality: 1536`, `taskType: 'SEMANTIC_SIMILARITY'`, then L2-normalize each vector. Assert at startup that the model is `gemini-embedding-001`.
   - `transcribe(pdf)`: `generateContent` with the PDF as `inlineData` (`application/pdf`) and "Transcribe the visible text exactly. Output plain text only." Used only for image-only PDFs.
   - Map HTTP 429 (rate limit) to a retry with backoff, then `internal`. Add an opt-in contract test (`LLM_PROVIDER=gemini`) that runs one JD and one resume and validates the output.
-- **AI-13 Usage & budget:** Wrap every provider call to insert into `llm_usage`. Before each call, sum today's tokens and throw `BudgetExceeded` at or above `LLM_DAILY_TOKEN_BUDGET`. `parse-*` turns that into `FAILED` with `budget_exceeded`.
+- **AI-13 Usage & budget:** `_shared/usage.ts`. `getMeteredProvider({functionName, userId, store})` wraps every provider call to insert into `llm_usage`. Before each call, sum today's tokens and throw `BudgetExceeded` at or above `LLM_DAILY_TOKEN_BUDGET`. `parse-*` turns that into `FAILED` with `budget_exceeded`.
 
 **Done when:** Real AI works with `LLM_PROVIDER=gemini`, `mock` still runs everything offline, and parsing stops cleanly before the budget runs out.
 

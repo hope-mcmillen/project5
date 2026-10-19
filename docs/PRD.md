@@ -505,7 +505,7 @@ Two implementations exist: `GeminiProvider` (official `@google/genai` SDK) and `
 |---|---|---|
 | `LLM_PROVIDER` | `gemini` \| `mock` | Picks the implementation. No default: unset fails loudly. |
 | `GEMINI_API_KEY` | | Google AI Studio key. Local `.env` (gitignored) or `supabase secrets set`. |
-| `LLM_EXTRACT_MODEL` | `gemini-2.5-flash` | Any current Flash-class model. Verify available model names before launch. |
+| `LLM_EXTRACT_MODEL` | `gemini-3.8-flash` | Any current Flash-class model. Verify available model names before launch. |
 | `LLM_EMBED_MODEL` | `gemini-embedding-001` | **Pinned** (see below) |
 | `LLM_DAILY_TOKEN_BUDGET` | `200000` | Budget guard |
 
