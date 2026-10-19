@@ -1,0 +1,16 @@
+Casey Broussard
+Java Developer
+casey.b@example.com · (225) 555-0166 · Baton Rouge, LA
+
+SUMMARY
+Java developer with Spring Boot experience.
+
+SKILLS
+Java, Spring Boot, MySQL
+
+EXPERIENCE
+Java Developer, Capitol Systems  2019 - 2023
+  - Built Spring Boot services on MySQL.
+
+EDUCATION
+B.S. Computer Science, Southern University
