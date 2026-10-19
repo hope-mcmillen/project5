@@ -1,10 +1,16 @@
 # ResuRhombus: Product Requirements & Architecture
 
-**Version:** 0.4 · **Updated:** 2026-10-06 · **Owner:** Kameron Arceneaux
+**Version:** 0.5 · **Updated:** 2026-10-18 · **Owner:** Kameron Arceneaux
 
 ---
 
 ## 0. Changelog
+
+### v0.5 decisions
+- **Google Gemini (AI Studio API key) is the only LLM provider.** It replaces the OpenAI API and Azure OpenAI from v0.4, because that's the key the team has. The adapter interface stays, so another provider could still be added later. `mock` remains for tests, CI, and seeding. See §9.3.
+- **Azure Document Intelligence is removed.** Text comes out of resumes in code: the PDF text layer through `unpdf` (pdf.js) and DOCX through its XML. Only image-only (scanned) PDFs go to Gemini for transcription. This makes the hidden-text defense deterministic and needs no Azure account. See §8.1 and §8.5.
+- **The embedding model is now `gemini-embedding-001` at 1536 dimensions.** The `vector(1536)` columns stay the same size. Because the model changed, no `text-embedding-3-small` vectors may be mixed in. See §9.3.
+- **Scanned resumes are supported** through Gemini transcription instead of failing outright. `unreadable_scan` now means the transcription itself came back empty.
 
 ### v0.4 decisions
 - **The LLM provider is configurable.** The default is the **OpenAI API** (using existing credits), and **Azure OpenAI** can be swapped in through config with no code change. Azure Document Intelligence still does document parsing. See §9.3.
@@ -314,20 +320,19 @@ sequenceDiagram
     participant ST as Supabase Storage
     participant DB as Supabase Postgres (+pgvector)
     participant EF as Edge Function: parse-resume
-    participant DI as Azure Doc Intelligence
-    participant LLM as LLM provider (OpenAI or Azure OpenAI)
+    participant LLM as Gemini API (or mock)
 
     App->>ST: upload resumes/{user_id}/{uuid}.pdf (RLS: own folder only)
     App->>DB: insert resume row (status=UPLOADED)
     App->>EF: invoke parse-resume {resume_id} with user JWT
     EF->>DB: status=PARSING
     EF->>ST: download file (service role)
-    EF->>DI: analyze prebuilt-layout (async)
-    loop poll until succeeded
-        EF->>DI: GET operation result
+    EF->>EF: extract text in code (PDF text layer via unpdf, DOCX XML)
+    opt image-only PDF (no text layer)
+        EF->>LLM: transcribe visible text
+        LLM-->>EF: plain text
     end
-    DI-->>EF: text + layout
-    EF->>EF: sanitize (strip hidden/tiny text, cap length)
+    EF->>EF: sanitize (strip hidden/tiny/white text, cap length)
     EF->>LLM: extract → strict JSON schema
     LLM-->>EF: roles[], skills[] with evidence spans
     EF->>EF: validate evidence, compute years from role dates
@@ -337,7 +342,17 @@ sequenceDiagram
     DB-->>App: Realtime: resume.status = READY
 ```
 
-The app subscribes to its `resumes` row through **Supabase Realtime**, so the "prism" progress animation reacts to status changes without polling. Job descriptions go through the same steps with a `parse-job` Edge Function, without the Doc Intelligence step because the input is already plain text.
+The app subscribes to its `resumes` row through **Supabase Realtime**, so the "prism" progress animation reacts to status changes without polling. Job descriptions go through the same steps with a `parse-job` Edge Function, without the text-extraction step because the input is already plain text.
+
+**Text extraction (v0.5).** No layout service is used. Code pulls the text and keeps the formatting facts needed to spot hidden text:
+
+| Input | How the text is read | What hidden-text signals are available |
+|---|---|---|
+| PDF with a text layer | `unpdf` (serverless pdf.js) `getTextContent()`, grouped into lines | Font size from each item's transform matrix. Fill color from the page's operator list (white or near-white fill). |
+| Image-only PDF (scan or photo) | Gemini transcribes the visible text (one call, PDF sent inline) | None needed. A scan has no hidden text layer, so the model sees only what a person sees. |
+| DOCX | Unzip and read `word/document.xml` (paragraphs `w:p`, runs `w:r`) | `w:vanish` (hidden), `w:color` white, `w:sz` tiny. Word stores these explicitly. |
+
+A PDF counts as image-only when its text layer has fewer than about 50 non-space characters per page.
 
 ### 8.2 Extraction schema (resume)
 
@@ -395,7 +410,7 @@ Match Score  = round(100 × clamp(raw − penalty, 0, 1))
 
 ### 8.5 LLM safety & robustness
 - **Prompt injection:** Resume and job description text is wrapped as untrusted data, and the system prompt says to extract facts only. The output must match a strict JSON schema (structured outputs). The LLM has **no influence on the score** beyond the facts it extracts. Any skill whose evidence string doesn't appear in the source text is dropped.
-- **Hidden text:** Discard text that Doc Intelligence reports as very small or with zero-area bounding boxes. Optionally flag documents with a lot of white-on-white text for review.
+- **Hidden text:** Before the LLM sees anything, code drops text with a tiny font (under about 4 pt), white or near-white fill, or DOCX `w:vanish`, using the signals in §8.1. This is deterministic, so it can't be talked out of. Optionally flag documents with a lot of dropped text for review.
 - **Cost and latency:** Cache results by file hash so re-uploading the same file is free. Cap input at about 15k tokens.
 - **Fallback:** If extraction fails, the candidate sees a manual skill picker so onboarding never dead-ends.
 
@@ -429,11 +444,7 @@ flowchart LR
         RT[Realtime]
         EF[Edge Functions<br/>parse-resume · parse-job · notify]
     end
-    subgraph AZ["Azure"]
-        DI[AI Document Intelligence]
-        AO[Azure OpenAI<br/>optional]
-    end
-    OA[OpenAI API<br/>default LLM]
+    GM[Google Gemini API<br/>extraction · embeddings · scan OCR]
     FCM[FCM<br/>Android push, optional]
 
     M & WB --> AU
@@ -442,8 +453,7 @@ flowchart LR
     M & WB -->|invoke| EF
     PG -->|changes| RT --> M & WB
     EF --> ST
-    EF --> DI
-    EF -->|LLM_PROVIDER| OA & AO
+    EF -->|LLM_PROVIDER| GM
     EF --> PG
     PG -->|db webhook on status_event| EF -->|notify| FCM --> M
 ```
@@ -454,7 +464,7 @@ flowchart LR
 |---|---|---|
 | Simple reads and writes (profile edits, swipes, job edits) | Direct table access from `supabase_flutter`, protected by **RLS** | No custom API to build or host |
 | Match Score, feed, board | **Postgres functions** called with `rpc()`: `compute_match()`, `get_feed()`, `get_board()` | Deterministic, runs next to the data, and triggers can re-score automatically when requirements change |
-| Anything that calls Azure or needs secrets | **Edge Functions** (Deno/TypeScript) | Azure keys stay in Edge Function secrets and **never ship in the Flutter app** |
+| Anything that calls the LLM or needs secrets | **Edge Functions** (Deno/TypeScript) | The Gemini key stays in Edge Function secrets and **never ships in the Flutter app** |
 | Status changes to UI | **Realtime** subscriptions | Live pipeline and board updates, and the parse progress screen |
 
 ### 9.2 Stack decisions
@@ -469,41 +479,42 @@ flowchart LR
 | Charts | **fl_chart** (`RadarChart`) | Native Flutter with no web views |
 | Database | **Supabase Postgres + `vector` extension** | Relational data and embeddings in one place |
 | Server logic | **Supabase Edge Functions** (TypeScript) + SQL functions | No separate server to deploy |
-| Document parsing | **Azure AI Document Intelligence** (`prebuilt-layout`) | Handles both PDF and DOCX, including layout |
-| LLM | **OpenAI API** by default, or **Azure OpenAI** via config (structured outputs, `text-embedding-3-small`, 1536 dims) | Uses existing OpenAI credits. Both providers serve the same model families, so swapping is a config change. See §9.3. |
+| Document parsing | **In code:** `unpdf` for PDF text layers, DOCX XML via `fflate`. Gemini transcribes image-only PDFs. | No extra cloud account. Gives the font-size and color signals the hidden-text filter needs. See §8.1. |
+| LLM | **Google Gemini API** with an AI Studio key (structured output with a JSON schema, `gemini-embedding-001` at 1536 dims) | The team's available key. One provider for extraction, embeddings, and scan OCR. See §9.3. |
 | Push | FCM, sent from the `notify` Edge Function | Optional for MVP. Realtime covers in-app updates. |
 
-**Edge Function limits to design around:** Edge Functions have a wall-clock limit (minutes, which depends on plan), and Doc Intelligence analysis is asynchronous. A typical resume finishes in well under the limit, so parsing runs **inline in one function call** for MVP. If timeouts show up, split it into two steps: `parse-resume` starts the analysis and stores the operation id, and a `pg_cron` job finishes it.
+**Edge Function limits to design around:** Edge Functions have a wall-clock limit (minutes, which depends on plan) and a memory limit. Text extraction runs in-process and a typical resume needs one or two Gemini calls, so parsing runs **inline in one function call** for MVP. If timeouts show up on scans, split it into two steps: `parse-resume` stores the extracted text, and a `pg_cron` job runs the LLM step.
 
 ### 9.3 LLM provider configuration
 
-All LLM calls go through **one small adapter module** in the Edge Functions (`supabase/functions/_shared/llm.ts`). It exposes two methods:
+All LLM calls go through **one small adapter module** in the Edge Functions (`supabase/functions/_shared/llm.ts`). It exposes:
 
 ```ts
 interface LlmProvider {
-  extract<T>(schema: JsonSchema, system: string, untrustedText: string): Promise<T>; // structured output
-  embed(texts: string[]): Promise<number[][]>;                                          // 1536-dim vectors
+  extract<T>(opts: { schemaName, schema, system, untrustedText }): Promise<{ data: T; usage; model }>; // structured output
+  embed(texts: string[]): Promise<{ vectors: number[][]; usage; model }>;                              // 1536-dim unit vectors
+  transcribe(pdf: Uint8Array): Promise<{ text: string; usage; model }>;                               // image-only PDFs
 }
 ```
 
-The two implementations, `OpenAIProvider` and `AzureOpenAIProvider`, differ only in base URL, auth header, and how the model or deployment name is passed. Both use the official `openai` npm package, which supports both endpoints.
+Two implementations exist: `GeminiProvider` (official `@google/genai` SDK) and `MockProvider` (fixtures, no network). The interface stays provider-neutral so another provider can be added later without touching callers.
 
 **Config (Supabase Edge Function secrets, never in the app):**
 
 | Key | Example | Notes |
 |---|---|---|
-| `LLM_PROVIDER` | `openai` \| `azure` | Picks the implementation |
-| `LLM_EXTRACT_MODEL` | `gpt-4o-mini` | For Azure, this is the **deployment name** |
-| `LLM_EMBED_MODEL` | `text-embedding-3-small` | Must stay the same across providers (see below) |
-| `OPENAI_API_KEY` | | Used when `openai` |
-| `AZURE_OPENAI_ENDPOINT`, `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_API_VERSION` | | Used when `azure` |
-| `AZURE_DI_ENDPOINT`, `AZURE_DI_KEY` | | Document Intelligence. Always Azure. |
+| `LLM_PROVIDER` | `gemini` \| `mock` | Picks the implementation. No default: unset fails loudly. |
+| `GEMINI_API_KEY` | | Google AI Studio key. Local `.env` (gitignored) or `supabase secrets set`. |
+| `LLM_EXTRACT_MODEL` | `gemini-2.5-flash` | Any current Flash-class model. Verify available model names before launch. |
+| `LLM_EMBED_MODEL` | `gemini-embedding-001` | **Pinned** (see below) |
+| `LLM_DAILY_TOKEN_BUDGET` | `200000` | Budget guard |
 
 **Rules**
-- **The embedding model is pinned.** Vectors from different embedding models can't be compared. Switching providers is safe as long as both use `text-embedding-3-small`. **Changing the embedding model** requires re-embedding every `skills`, `profile_versions`, and `jobs` row. A `scripts/reembed` job and an `embedding_model` column on each table make this detectable.
+- **The embedding model is pinned:** `gemini-embedding-001`, `outputDimensionality: 1536`, task type `SEMANTIC_SIMILARITY` for every call, and vectors L2-normalized in the adapter (Gemini only pre-normalizes its full 3072-dim output). Vectors from different models, sizes, or task types can't be compared. **Changing any of these** requires re-embedding every `skills`, `profile_versions`, and `jobs` row. A `scripts/reembed` job and an `embedding_model` column on each table make this detectable. Mock vectors are tagged `mock-embed` and must never be stored next to real ones.
 - The extraction model can change freely. Each extraction stores `llm_provider` and `llm_model` for auditing (X-5).
-- The pipeline uses **structured outputs** (JSON schema, `strict: true`), which both providers support. Never rely on free-form JSON parsing.
-- **Budget guard:** The adapter logs tokens per call to an `llm_usage` table. Edge Functions refuse new parses once a configurable `LLM_DAILY_TOKEN_BUDGET` is hit, which protects the credits. Cached results by file hash (§8.5) also reduce spend.
+- The pipeline uses **structured output** (`responseMimeType: application/json` with a JSON schema) at temperature 0, then validates again with Zod. Never rely on free-form JSON parsing.
+- **Budget guard:** The adapter logs tokens per call to an `llm_usage` table. Edge Functions refuse new parses once a configurable `LLM_DAILY_TOKEN_BUDGET` is hit. AI Studio also has its own per-minute and per-day rate limits, so treat HTTP 429 as a retryable `internal` failure. Cached results by file hash (§8.5) also reduce spend.
+- **Data use (verify before launch):** On the AI Studio free tier, Google may use prompts and files to improve its products. That's acceptable for synthetic demo resumes. Use a billing-enabled key before real candidates upload real resumes, and check the current terms.
 - **Offline/dev mode:** `LLM_PROVIDER=mock` returns canned extractions from fixtures. Tests and the seed script make no paid calls.
 
 ### 9.4 Core data model
@@ -563,7 +574,7 @@ erDiagram
 
 | Name | Type | Caller | Purpose |
 |---|---|---|---|
-| `parse-resume` | Edge Fn | Candidate | Doc Intelligence → LLM → normalize → `profile_versions` |
+| `parse-resume` | Edge Fn | Candidate | Text extraction (Gemini OCR for scans) → sanitize → LLM → normalize → `profile_versions` |
 | `parse-job` | Edge Fn | Recruiter | Raw JD → LLM → draft `job_requirements` |
 | `notify` | Edge Fn | DB webhook | Status event → FCM push |
 | `confirm_profile(version_id)` | RPC | Candidate | Lock the reviewed profile and compute its embedding-backed feed |
@@ -582,7 +593,7 @@ erDiagram
 | Feed latency | p95 under 300 ms (pre-scored, cursor-paginated) |
 | Resume parse | p95 under 20 s. Hard timeout 60 s, after which the manual skill picker appears. |
 | Re-score on job edit | Under 1 minute for 5k applications |
-| Security | RLS enabled on **every** table (Supabase denies by default once it's on). Private storage bucket with short-lived signed URLs. Azure keys and the service-role key exist only in Edge Function secrets. The Flutter app ships with the **anon key only**. |
+| Security | RLS enabled on **every** table (Supabase denies by default once it's on). Private storage bucket with short-lived signed URLs. The Gemini key and the service-role key exist only in Edge Function secrets. The Flutter app ships with the **anon key only**. |
 | Privacy | Minimal PII sent to the LLM (contact block stripped before extraction where detectable) |
 | Observability | Log every LLM call with tokens, latency, and model version. Keep a dashboard of parse failures and unmapped-skill rate. |
 
@@ -638,9 +649,9 @@ The demo must work right away, with a populated recruiter board, before anyone u
 
 | # | Question | Recommendation |
 |---|---|---|
-| ~~Q1~~ | ~~Backend choice~~ | **Decided (v0.3):** Supabase for DB, auth, storage, and functions. Azure for Document Intelligence and LLM. |
+| ~~Q1~~ | ~~Backend choice~~ | **Decided (v0.3):** Supabase for DB, auth, storage, and functions. Azure for Document Intelligence and LLM. **Superseded (v0.5):** Gemini for the LLM, and text extraction in code (§8.1). |
 | ~~Q2~~ | ~~Recruiter portal in scope?~~ | **Decided (v0.3):** Yes, it's the deliverable. A role choice at sign-up enables recruiter accounts. |
-| ~~Q8~~ | ~~LLM provider~~ | **Decided (v0.4):** Configurable. OpenAI API is the default and Azure OpenAI is an option, with the embedding model pinned (§9.3). |
+| ~~Q8~~ | ~~LLM provider~~ | **Decided (v0.4):** Configurable. OpenAI API is the default and Azure OpenAI is an option, with the embedding model pinned (§9.3). **Superseded (v0.5):** Gemini only, and Document Intelligence removed (§8.1, §9.3). |
 | ~~Q9~~ | ~~Recruiter approval~~ | **Decided (v0.4):** Soft verification (badge only). Revisit an approval queue before any public launch. |
 | ~~Q10~~ | ~~Seed data~~ | **Decided (v0.4):** Yes, synthetic. Spec in §9.8. |
 | Q3 | Should salary be a required field on job posts? | Yes. It improves candidate trust and acts as a hard filter. |
@@ -648,3 +659,5 @@ The demo must work right away, with a populated recruiter board, before anyone u
 | Q5 | Which taxonomy seed: O*NET, ESCO, or a hand-curated list of about 300 skills? | Hand-curated for MVP, which keeps scope small and quality high |
 | Q6 | Should candidates see their *exact* score or only the band? | Show both on the card. Recruiters see both too. |
 | Q7 | Does withdrawing an application free a slot in the daily cap? | No. This prevents gaming. |
+| Q11 | Do we need a billing-enabled Gemini key, given free-tier data use and rate limits (§9.3)? | Free tier for development and the class demo with synthetic data. Switch to a billing-enabled key before any real user uploads a resume. |
+| Q12 | Is the in-code white-text check (PDF operator list) worth the effort, or is the font-size check enough? | Build both. The `r09` fixture uses both tricks, and the injection test (AI-19) must pass on it. |

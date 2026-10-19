@@ -41,7 +41,7 @@ test/                           # mirrors lib/
 
 ## Conventions
 
-- **Config:** `--dart-define-from-file=env/dev.json` (gitignored, with a committed `env/example.json`). It holds only the Supabase URL and **anon key**. No LLM, Azure, or service-role keys ever go in the app, because they're server-side secrets (PRD §9.7).
+- **Config:** `--dart-define-from-file=env/dev.json` (gitignored, with a committed `env/example.json`). It holds only the Supabase URL and **anon key**. No LLM (Gemini) or service-role keys ever go in the app, because they're server-side secrets (PRD §9.7).
 - **State:** Riverpod. Use `@riverpod` code generation if `riverpod_generator` is set up, otherwise plain `Provider` / `NotifierProvider` / `AsyncNotifierProvider`. Pick one style per project and stick to it. Use `AsyncValue` for every remote load, so loading, error, and data map directly onto the four UI states.
 - **Realtime:** Expose subscriptions as `StreamProvider`s in the repository layer (`watchResume(id)`, `watchApplications()`). Dispose with `ref.onDispose`.
 - **Routing:**

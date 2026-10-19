@@ -9,7 +9,7 @@
 - **Technical implementation**:
   - **Flutter**: screens, widgets, providers, and repositories
   - **Backend**: Supabase tables, RLS, RPCs, Edge Functions, Storage, and Realtime
-  - **AI**: anything touching the LLM or Document Intelligence
+  - **AI**: anything touching the LLM or resume text extraction
   - **Tests**: what proves it works
 - **Refs**: PRD requirement IDs and sections, [TEAM_PLAN](TEAM_PLAN.md) task IDs, and the **backend** and **frontend** owners (A Backend: DB & API · B Backend: AI · C Frontend: candidate + design system · D Frontend: recruiter + auth). "—" means that layer has no work for the story.
 
@@ -263,13 +263,13 @@
   - Because the state is stored in the database, re-opening the app resumes from the current status.
 - **Backend:**
   - `parse-resume` Edge Function updates `resumes.status` at each stage. It uses the service-role client only for those writes, after verifying the caller owns the row through the user JWT.
-  - **Doc Intelligence:** a POST to `…/documentModels/prebuilt-layout:analyze`, then the function polls the `Operation-Location` URL until it succeeds.
+  - **Text extraction (PRD v0.5):** done in code with `unpdf` (PDF text layer) or the DOCX XML. Image-only PDFs are transcribed by Gemini. `PARSING_LAYOUT` covers this step.
   - Add `resumes` to the `supabase_realtime` publication.
   - A hard timeout at 60 s sets `FAILED` with `failure_reason = 'timeout'`.
-- **AI:** Document Intelligence, then the LLM extraction described in US-51.
+- **AI:** Text extraction, then the LLM extraction described in US-51.
 - **Tests:**
   - Widget test with a fake stream emitting every status.
-  - Deno test of the function with mocked DI and LLM.
+  - Deno test of the function with the mock LLM.
 
 **Refs:** PRD C-ON-2, §8.1 · Tasks CA-04, CA-07, AI-05, AI-07, PL-21 · **Backend:** B · **Frontend:** C
 
@@ -801,7 +801,7 @@
   4. Normalizes skills (alias, then vector).
   5. Inserts draft `job_requirements` with default weights (required = 2, preferred = 1).
   6. Sets `parse_status 'READY'`.
-  - There's no Document Intelligence step, because the input is plain text.
+  - There's no text-extraction step, because the input is plain text.
 - **Tests:** Deno test using the mock provider with fixture job descriptions.
 
 **Refs:** PRD §6.1 · Tasks AI-12, RC-08 · **Backend:** B · **Frontend:** D
@@ -1119,20 +1119,20 @@
 **Refs:** PRD §9.3 · Tasks AI-03 · **Backend:** B · **Frontend:** —
 
 ### US-53 · Switchable LLM provider · Must
-> As the **team**, we want to switch between the OpenAI API and Azure OpenAI with a setting, so we can use whichever credits we have.
+> As the **team**, we want to switch between real Gemini and the free mock with one setting, so we can use our Google AI Studio key without code changes. *(PRD v0.5: Gemini replaced OpenAI/Azure.)*
 
 **Done when:**
-- Changing `LLM_PROVIDER` works with no code changes.
+- Changing `LLM_PROVIDER` (`gemini` or `mock`) works with no code changes.
 - The embedding model stays pinned.
 
 **Technical implementation**
 - **AI:**
   - `getProvider()` reads `LLM_PROVIDER`.
-  - `OpenAIProvider` uses `new OpenAI({apiKey})`. `AzureOpenAIProvider` uses `new AzureOpenAI({endpoint, apiKey, apiVersion, deployment})`. Both come from `npm:openai`.
-  - Both use `chat.completions.create` with `response_format: {type: 'json_schema', json_schema: {name, schema, strict: true}}` and `embeddings.create({model: LLM_EMBED_MODEL})`.
-  - On startup, assert `LLM_EMBED_MODEL === 'text-embedding-3-small'` unless `ALLOW_EMBED_MODEL_CHANGE=true`.
+  - `GeminiProvider` uses `new GoogleGenAI({apiKey: GEMINI_API_KEY})` from `npm:@google/genai`.
+  - It uses `models.generateContent` with `responseMimeType: 'application/json'`, `responseJsonSchema`, and temperature 0, plus `models.embedContent` with `outputDimensionality: 1536` and `taskType: 'SEMANTIC_SIMILARITY'` (then L2-normalized).
+  - On startup, assert `LLM_EMBED_MODEL === 'gemini-embedding-001'` unless `ALLOW_EMBED_MODEL_CHANGE=true`.
   - Every call is logged to `llm_usage` and checked against `LLM_DAILY_TOKEN_BUDGET`.
-- **Tests:** A contract test runs the same fixture through both providers (opt-in, costs credits) and checks the outputs validate against the schema.
+- **Tests:** An opt-in contract test (`LLM_PROVIDER=gemini`, uses quota) runs the same fixtures through Gemini and checks the outputs validate against the schema.
 
 **Refs:** PRD §9.3 · Tasks AI-09, AI-13 · **Backend:** B · **Frontend:** —
 

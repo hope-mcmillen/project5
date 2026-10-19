@@ -112,7 +112,7 @@ create table public.skills (
   name             text not null unique,
   category         text not null,                 -- Languages | Frameworks | Data | Cloud/DevOps | Tools | Domain
   aliases          text[] not null default '{}',  -- lowercase alternate spellings
-  embedding        extensions.vector(1536),       -- text-embedding-3-small
+  embedding        extensions.vector(1536),       -- gemini-embedding-001 @ 1536 dims
   embedding_model  text,
   is_seed          boolean not null default true
 );
@@ -300,7 +300,7 @@ create index status_events_application_idx on public.status_events (application_
 create table public.llm_usage (
   id             bigint generated always as identity primary key,
   function_name  text not null,          -- parse-resume | parse-job | embed
-  provider       text not null,          -- openai | azure | mock
+  provider       text not null,          -- gemini | mock
   model          text not null,
   input_tokens   int not null default 0,
   output_tokens  int not null default 0,

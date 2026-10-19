@@ -5,9 +5,11 @@
 // - The LLM returns facts with evidence. Never scores, never date math.
 // - The resume schema has NO fields for name, contact info, photo, age,
 //   graduation year, gender, nationality, or address. Don't add them.
-// - JSON Schemas follow the OpenAI strict rules: every property is listed in
-//   `required`, every object has `additionalProperties: false`, and optional
-//   values use ["<type>", "null"].
+// - JSON Schemas use the strict structured-output style: every property is
+//   listed in `required`, every object has `additionalProperties: false`, and
+//   optional values use ["<type>", "null"]. Gemini receives them as
+//   `responseJsonSchema` (B3); if it rejects a construct, convert it in the
+//   adapter rather than loosening these.
 //
 // Bump EXTRACTION_SCHEMA_VERSION whenever either schema changes; cached
 // extractions are keyed by (file_hash, schema version).

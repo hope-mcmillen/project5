@@ -5,7 +5,7 @@ description: Backend specialist for ResuRhombus on Supabase. Covers Postgres sch
 
 # ResuRhombus Supabase Backend
 
-The backend is **Supabase** (Postgres + pgvector, Auth, Storage, Realtime, Edge Functions). Azure Document Intelligence and a configurable LLM are called **only** from Edge Functions. The architecture is in `docs/PRD.md` §9: §9.4 is the data model, §9.5 RLS, §9.6 RPCs and functions, and §9.8 seed data. Read the relevant section first and keep the PRD in sync when you change the contract.
+The backend is **Supabase** (Postgres + pgvector, Auth, Storage, Realtime, Edge Functions). The Gemini LLM (PRD v0.5) is called **only** from Edge Functions. The architecture is in `docs/PRD.md` §9: §9.4 is the data model, §9.5 RLS, §9.6 RPCs and functions, and §9.8 seed data. Read the relevant section first and keep the PRD in sync when you change the contract.
 
 ## Layout
 
@@ -16,7 +16,7 @@ supabase/
   seed.sql               # synthetic demo data, runs on `supabase db reset`
   seed/resumes/*.pdf     # fake resumes for the live parse demo
   functions/
-    _shared/             # llm.ts, azure_di.ts, cors.ts, supabase_admin.ts, schemas.ts
+    _shared/             # llm.ts, extract_text.ts, cors.ts, supabase_admin.ts, schemas.ts
     parse-resume/index.ts
     parse-job/index.ts
     notify/index.ts
@@ -26,7 +26,7 @@ supabase/
 ## Non-negotiables (and why)
 
 1. **RLS on every table, in the same migration that creates it.** Supabase exposes tables over the public API. A table without RLS is readable by anyone who has the anon key, and that key ships in the app. Write `alter table … enable row level security;` and the policies together.
-2. **Secrets live only in Edge Function secrets.** The Flutter app gets the **anon key** and nothing else. The service-role key, Azure keys, and OpenAI keys go in `supabase secrets set` and in `supabase/functions/.env` locally, which is gitignored.
+2. **Secrets live only in Edge Function secrets.** The Flutter app gets the **anon key** and nothing else. The service-role key and `GEMINI_API_KEY` go in `supabase secrets set` and in `supabase/functions/.env` locally, which is gitignored.
 3. **The role comes from the database, not the client.** `profiles.role` is set by the `on auth.users insert` trigger from sign-up metadata. The trigger only accepts `candidate` or `recruiter`. Policies read the role through a `security definer` helper (`public.current_app_role()`. Not `current_role`, which is a reserved SQL keyword.), or from the JWT claim added by a custom access-token hook. Never trust a role the client sends in a request body.
 4. **Recruiters never touch candidate tables directly.** They read candidates only through `get_board()` and `get_candidate_detail()`. These are `security definer` functions that return **blind** fields until the application reaches `INTERVIEW_REQUESTED`. This enforces PRD R-TRI-1 at the data layer, so a UI bug can't leak identities.
 5. **Status changes go through RPCs** (`advance`, `reject`, `withdraw`). Each one validates the transition against the state machine in PRD §5.4 and writes a `status_events` row in the same transaction.
@@ -55,7 +55,7 @@ create policy "recruiters manage own company jobs" on public.jobs
 
 **Daily cap:** Enforced inside `swipe()` by counting the caller's right swipes since `date_trunc('day', now() at time zone 'utc')`. Raise a clear error code (`P0001` with message `daily_cap_reached`) so the app can show a friendly message.
 
-**pgvector:** `create extension if not exists vector with schema extensions;`. Columns are `vector(1536)`, which matches `text-embedding-3-small`. Use an HNSW index with `vector_cosine_ops`. Store an `embedding_model` text column next to each vector (PRD §9.3).
+**pgvector:** `create extension if not exists vector with schema extensions;`. Columns are `vector(1536)`, which matches `gemini-embedding-001` at 1536 dims. Use an HNSW index with `vector_cosine_ops`. Store an `embedding_model` text column next to each vector (PRD §9.3).
 
 **Realtime:** Add only the tables the UI listens to (`resumes`, `applications`) to the `supabase_realtime` publication. RLS also applies to Realtime.
 

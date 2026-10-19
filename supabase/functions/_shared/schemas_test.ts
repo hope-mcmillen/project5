@@ -31,7 +31,7 @@ async function readFixtures(): Promise<Array<{ file: string; data: unknown }>> {
   return out;
 }
 
-Deno.test("JSON schemas follow the OpenAI strict rules", () => {
+Deno.test("JSON schemas follow the strict structured-output rules", () => {
   for (const [name, { jsonSchema }] of Object.entries(EXTRACTION_SCHEMAS)) {
     eachObjectSchema(jsonSchema as unknown as Json, name, (node, path) => {
       assertEquals(node.additionalProperties, false, `${path}: additionalProperties must be false`);

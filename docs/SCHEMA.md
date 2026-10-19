@@ -13,7 +13,7 @@ This is the agreed target schema for Supabase Postgres.
 **Conventions**
 - Primary keys are `uuid default gen_random_uuid()`. The exceptions are `profiles.id`, which equals `auth.users.id`, and the append-only logs, which use `bigint identity`.
 - Every table has **RLS enabled**. Clients use the anon key, so a table without RLS would be public.
-- Embeddings are `vector(1536)` from `text-embedding-3-small` and are always stored with an `embedding_model` column (PRD §9.3).
+- Embeddings are `vector(1536)` from `gemini-embedding-001` (1536-dim output, PRD v0.5) and are always stored with an `embedding_model` column (PRD §9.3).
 - Demo data rows have `is_seed = true`, so they can be removed in bulk.
 - `created_at` and `updated_at` are `timestamptz`. `updated_at` is maintained by the `touch_updated_at()` trigger.
 
@@ -212,7 +212,7 @@ All are `security definer` with `set search_path = public`, and each checks the 
 
 | Function | Caller | Owner | Purpose |
 |---|---|---|---|
-| `parse-resume` `{resume_id}` | candidate | B | Doc Intelligence → sanitize → LLM extract → normalize → `profile_versions` |
+| `parse-resume` `{resume_id}` | candidate | B | Text extraction (Gemini OCR for scans) → sanitize → LLM extract → normalize → `profile_versions` |
 | `parse-job` `{job_id}` | recruiter | B | JD → draft `job_requirements` |
 | `resume-url` `{application_id}` → `{url}` | recruiter | A | 10-minute signed URL, only after advance |
 | `notify` (DB webhook) | system | A | *(Later)* FCM push on status events |

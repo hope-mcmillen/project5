@@ -11,14 +11,19 @@ Usage (needs reportlab, python-docx, pillow):
   .venv/bin/python scripts/make_fake_resumes.py
 """
 import csv
+import hashlib
 import io
 import json
+from datetime import datetime
 import random
+import time
+import zipfile
 from pathlib import Path
 
 from docx import Document
 from docx.shared import Pt
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from reportlab import rl_config
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import LETTER
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -26,10 +31,13 @@ from reportlab.lib.units import inch
 from reportlab.platypus import (BaseDocTemplate, Frame, FrameBreak, PageTemplate, Paragraph,
                                 SimpleDocTemplate, Spacer, Table, TableStyle)
 
+rl_config.invariant = 1  # no timestamps/random IDs, so re-running gives identical PDFs
+
 ROOT = Path(__file__).resolve().parent.parent
 SEED = ROOT / "supabase" / "seed"
 OUT = SEED / "resumes"
 LABELS = SEED / "fixtures" / "labels.json"
+TRANSCRIBE = ROOT / "supabase" / "functions" / "_shared" / "fixtures" / "transcribe"
 
 # --------------------------------------------------------------------------
 # Resume content. `labels` are the canonical skills.csv names a correct
@@ -187,7 +195,7 @@ RESUMES = [
         "labels": ["JavaScript", "Node.js", "Express", "React", "MongoDB", "Mongoose", "Docker", "Heroku", "Jest"],
     },
     {
-        "id": "r08_scanned_image", "layout": "scanned-image", "expect": "failed",
+        "id": "r08_scanned_image", "layout": "scanned-image", "expect": "ready",
         "name": "Casey Broussard", "email": "casey.b@example.com", "phone": "(225) 555-0166",
         "location": "Baton Rouge, LA", "headline": "Java Developer",
         "summary": "Java developer with Spring Boot experience.",
@@ -197,7 +205,8 @@ RESUMES = [
              "bullets": ["Built Spring Boot services on MySQL."]},
         ],
         "education": "B.S. Computer Science, Southern University",
-        # Image-only PDF: no text layer. Expected to fail or need OCR; labels are what a human sees.
+        # Image-only PDF: no text layer. Takes the Gemini transcription path (PRD v0.5 §8.1), so it
+        # should end READY. Labels are what a human sees on the page.
         "labels": ["Java", "Spring Boot", "MySQL"],
     },
     {
@@ -399,7 +408,25 @@ def render_docx(r, path):
     d.add_heading("Education", level=1)
     d.add_paragraph(r["education"])
     d.core_properties.author = "ResuRhombus fixtures"
-    d.save(str(path))
+    d.core_properties.created = d.core_properties.modified = datetime(2026, 1, 1)
+    buf = io.BytesIO()
+    d.save(buf)
+    # Rewrite the zip with fixed entry timestamps so the file is byte-identical across runs.
+    src = zipfile.ZipFile(buf)
+    with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as out:
+        for info in src.infolist():
+            fixed = zipfile.ZipInfo(info.filename, date_time=(2026, 1, 1, 0, 0, 0))
+            fixed.compress_type = zipfile.ZIP_DEFLATED
+            out.writestr(fixed, src.read(info.filename))
+
+
+def scanned_lines(r):
+    lines = [r["headline"], contact_line(r), "", "SUMMARY", r["summary"], "", "SKILLS", ", ".join(r["skills"]),
+             "", "EXPERIENCE"]
+    for role in r["roles"]:
+        lines.append(f"{role['title']}, {role['company']}  {role['start']} - {role['end']}")
+        lines += [f"  - {b}" for b in role["bullets"]]
+    return lines + ["", "EDUCATION", r["education"]]
 
 
 def render_scanned(r, path):
@@ -416,20 +443,15 @@ def render_scanned(r, path):
     y = 90
     draw.text((100, y), r["name"], fill=30, font=big)
     y += 70
-    lines = [r["headline"], contact_line(r), "", "SUMMARY", r["summary"], "", "SKILLS", ", ".join(r["skills"]),
-             "", "EXPERIENCE"]
-    for role in r["roles"]:
-        lines.append(f"{role['title']}, {role['company']}  {role['start']} - {role['end']}")
-        lines += [f"  - {b}" for b in role["bullets"]]
-    lines += ["", "EDUCATION", r["education"]]
-    for line in lines:
+    for line in scanned_lines(r):
         draw.text((100, y), line, fill=40, font=font)
         y += 38
     for _ in range(9000):  # speckle noise like a photocopy
         draw.point((rng.randrange(W), rng.randrange(H)), fill=rng.randrange(80, 200))
     img = img.rotate(1.2, fillcolor=235).filter(ImageFilter.GaussianBlur(0.8))
     buf = io.BytesIO()
-    img.convert("RGB").save(buf, format="PDF", resolution=150)
+    fixed = time.gmtime(1767225600)  # 2026-01-01T00:00:00Z
+    img.convert("RGB").save(buf, format="PDF", resolution=150, creationDate=fixed, modDate=fixed)
     path.write_bytes(buf.getvalue())
 
 
@@ -461,6 +483,14 @@ def main():
         ext = ".docx" if r["layout"] == "docx" else ".pdf"
         path = OUT / f"{r['id']}{ext}"
         RENDERERS[r["layout"]](r, path)
+        if r["layout"] == "scanned-image":
+            # What a perfect OCR would return, for MockProvider.transcribe().
+            TRANSCRIBE.mkdir(parents=True, exist_ok=True)
+            for stale in TRANSCRIBE.glob("*.txt"):
+                if stale.name != "default.txt":
+                    stale.unlink()
+            key = hashlib.sha256(path.read_bytes()).hexdigest()
+            (TRANSCRIBE / f"{key}.txt").write_text("\n".join([r["name"], *scanned_lines(r)]) + "\n")
         labels["resumes"][path.name] = {
             "layout": r["layout"],
             "expect_status": "FAILED" if r["expect"] == "failed" else "READY",

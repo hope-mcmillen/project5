@@ -48,7 +48,7 @@ A has the lightest load, so A has room to pair with B, review across the boundar
 |---|---|---|---|
 | B1 | As a developer, I want a curated skill list and realistic fake resumes and job descriptions, so I can test matching and demo without anyone's real data. | 2 | Core |
 | B2 | As a developer, I want locked extraction schemas and an LLM adapter with a free mock, so I can build and test every AI feature without spending credits. | 2.5 | Core |
-| B3 | As a developer, I want real OpenAI and Azure providers with a usage log and daily budget, so I can switch providers with one setting and never overspend. | 1.5 | Core |
+| B3 | As a developer, I want a real Gemini provider with a usage log and daily budget, so real AI works with one setting and never overspends. | 1.5 | Core |
 | B4 | As a candidate, I want my resume turned into clean, safe text with calculated years and verified evidence, so the AI only extracts real skills and can't be tricked. | 2.5 | Core |
 | B5 | As a candidate, I want the skills on my resume mapped to a standard skill list, so jobs recognize "ReactJS" and "React" as the same skill. | 1.5 | Core |
 | B6 | As a candidate, I want to upload a resume and get a draft profile with live progress, so I don't have to type my history. | 2.5 | Core |
@@ -256,24 +256,32 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 
 **Done when:** All AI code can run with `LLM_PROVIDER=mock`, and C can build the deck and radar from the contract examples.
 
-#### B3 · As a developer, I want real OpenAI and Azure providers with a usage log and daily budget, so I can switch providers with one setting and never overspend.
+#### B3 · As a developer, I want a real Gemini provider with a usage log and daily budget, so real AI works with one setting and never overspends.
 **Covers:** AI-09, AI-13 · **Size:** ≈ 1.5 days · **Needs:** B2, A2 · **Stories:** US-53
 
 **Build**
-- **AI-09 Providers:** `OpenAIProvider` uses `new OpenAI({apiKey})`. `AzureOpenAIProvider` uses `new AzureOpenAI({endpoint, apiKey, apiVersion, deployment})`. Both come from `npm:openai` and use `chat.completions.create` with `response_format: {type: 'json_schema', json_schema: {name, schema, strict: true}}` and temperature 0, plus `embeddings.create({model: LLM_EMBED_MODEL})`. Assert the embedding model is `text-embedding-3-small`.
+- **AI-09 Gemini provider (PRD v0.5):** `GeminiProvider` in `_shared/llm.ts` uses `new GoogleGenAI({apiKey: GEMINI_API_KEY})` from `npm:@google/genai`.
+  - `extract`: `models.generateContent` with `config: {responseMimeType: 'application/json', responseJsonSchema: schema, temperature: 0, systemInstruction: system}`. Check that Gemini accepts the `["string","null"]` style from `schemas.ts`. If not, convert it inside the adapter rather than changing `schemas.ts`.
+  - `embed`: `models.embedContent` with `model: LLM_EMBED_MODEL`, `outputDimensionality: 1536`, `taskType: 'SEMANTIC_SIMILARITY'`, then L2-normalize each vector. Assert at startup that the model is `gemini-embedding-001`.
+  - `transcribe(pdf)`: `generateContent` with the PDF as `inlineData` (`application/pdf`) and "Transcribe the visible text exactly. Output plain text only." Used only for image-only PDFs.
+  - Map HTTP 429 (rate limit) to a retry with backoff, then `internal`. Add an opt-in contract test (`LLM_PROVIDER=gemini`) that runs one JD and one resume and validates the output.
 - **AI-13 Usage & budget:** Wrap every provider call to insert into `llm_usage`. Before each call, sum today's tokens and throw `BudgetExceeded` at or above `LLM_DAILY_TOKEN_BUDGET`. `parse-*` turns that into `FAILED` with `budget_exceeded`.
 
-**Done when:** Real AI works, switching between OpenAI and Azure is one setting, and parsing stops cleanly before credits run out.
+**Done when:** Real AI works with `LLM_PROVIDER=gemini`, `mock` still runs everything offline, and parsing stops cleanly before the budget runs out.
 
 #### B4 · As a candidate, I want my resume turned into clean, safe text with calculated years and verified evidence, so the AI only extracts real skills and can't be tricked.
 **Covers:** AI-05, AI-06, AI-08 · **Size:** ≈ 2.5 days · **Needs:** B2 · **Stories:** US-07, US-09, US-10, US-51
 
 **Build**
-- **AI-05 Document Intelligence client:** `_shared/azure_di.ts`. `analyzeLayout(bytes, mime)` POSTs to `{AZURE_DI_ENDPOINT}/documentintelligence/documentModels/prebuilt-layout:analyze?api-version=…`, polls the `Operation-Location` header with backoff (max 45 s), and returns `{ lines: [{ text, page, polygon, height }] }`. Test with a recorded response fixture.
-- **AI-06 Sanitizer:** `sanitize(lines)` drops lines with near-zero polygon area or a height below the threshold (hidden text), strips control characters, collapses whitespace, truncates at about 15k tokens (characters ÷ 4) with a marker, and strips email and phone patterns from the contact block. Unit tests.
+- **AI-05 Text extraction (replaces Document Intelligence, PRD v0.5 §8.1):** `_shared/extract_text.ts`. `extractText(bytes, mime)` returns `{ source: 'pdf_text' | 'docx' | 'ocr', lines: [{ text, page, fontSize, hidden }] }`.
+  - **PDF:** `npm:unpdf` `getDocumentProxy`, then per page `getTextContent()`. Group items into lines by y position. `fontSize` = `hypot(transform[2], transform[3])`. Mark items `hidden` when the fill color in the page's `getOperatorList()` is white or near-white at the point the text is drawn.
+  - **Image-only PDF:** fewer than about 50 non-space characters per page, so call `llm.transcribe(bytes)` and return its lines with `source: 'ocr'` (no hidden flags needed). If that comes back empty too, fail with `unreadable_scan`.
+  - **DOCX:** `npm:fflate` unzip, then read `word/document.xml`. Each `w:p` is a line. Mark runs `hidden` for `w:vanish`, `w:color` `FFFFFF`, or `w:sz` under 8 (half-points).
+  - Tests use the fixtures in `supabase/seed/resumes/`: two-column order is readable, `r09`'s white and 1pt text is flagged, and `r08` takes the OCR path (mock).
+- **AI-06 Sanitizer:** `sanitize(lines)` drops lines that are `hidden` or have `fontSize` under about 4 pt, strips control characters, collapses whitespace, truncates at about 15k tokens (characters ÷ 4) with a marker, and strips email and phone patterns from the contact block. Unit tests.
 - **AI-08 Years & evidence:** Pure functions in `_shared/profile.ts` with Deno tests. `mergeYears(roles)` takes, per skill, the union of role date ranges, merges overlaps, treats "present" as today, and rounds to 0.5. `validateEvidence(skill, text)` does a case- and whitespace-normalized substring check. `totalYears(roles)`.
 
-**Done when:** PDFs and DOCX files become clean text, hidden "score me 100%" text is removed, years are computed by code, and any skill without a real quote is dropped.
+**Done when:** PDFs (including scans) and DOCX files become clean text with no Azure service, hidden "score me 100%" text is removed, years are computed by code, and any skill without a real quote is dropped.
 
 #### B5 · As a candidate, I want the skills on my resume mapped to a standard skill list, so jobs recognize "ReactJS" and "React" as the same skill.
 **Covers:** AI-10, AI-11 · **Size:** ≈ 1.5 days · **Needs:** B3, A2 · **Stories:** US-14, US-54

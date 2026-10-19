@@ -23,9 +23,13 @@ Deno.test("getProvider: unset or unknown fails loudly instead of defaulting", ()
   assertThrows(() => getProvider(env({ LLM_PROVIDER: "claude" })), LlmConfigError, '"claude"');
 });
 
-Deno.test("getProvider: real providers are not wired up until B3", () => {
-  for (const p of ["gemini", "openai", "azure"]) {
-    assertThrows(() => getProvider(env({ LLM_PROVIDER: p })), LlmConfigError, "not implemented");
+Deno.test("getProvider: gemini is not wired up until B3", () => {
+  assertThrows(() => getProvider(env({ LLM_PROVIDER: "gemini" })), LlmConfigError, "not implemented");
+});
+
+Deno.test("getProvider: OpenAI/Azure were dropped in PRD v0.5", () => {
+  for (const p of ["openai", "azure"]) {
+    assertThrows(() => getProvider(env({ LLM_PROVIDER: p })), LlmConfigError, "must be one of mock, gemini");
   }
 });
 
@@ -72,6 +76,19 @@ Deno.test("mock extract falls back to the default fixture per schema", async () 
 Deno.test("mock extract errors clearly when fixtures are missing", async () => {
   const empty = new MockProvider(new URL("./no-such-dir/", import.meta.url));
   await assertRejects(() => extractJob(empty, "x"), LlmConfigError, "No mock fixture");
+  await assertRejects(() => empty.transcribe(new Uint8Array([1])), LlmConfigError, "No mock transcription");
+});
+
+Deno.test("mock transcribe returns the scanned fixture's text, else a default", async () => {
+  const mock = new MockProvider();
+  const scan = await Deno.readFile(new URL("../../seed/resumes/r08_scanned_image.pdf", import.meta.url));
+  const { text, model, provider } = await mock.transcribe(scan);
+  assertEquals([provider, model], ["mock", MockProvider.TRANSCRIBE_MODEL]);
+  assert(text.startsWith("Casey Broussard"), "scan fixture should map to its own transcription");
+  for (const skill of ["Java", "Spring Boot", "MySQL"]) assert(text.includes(skill), skill);
+
+  const other = await mock.transcribe(new TextEncoder().encode("%PDF-1.4 unknown"));
+  assert(other.text.startsWith("Sample Candidate"));
 });
 
 Deno.test("mock embed: deterministic 1536-dim unit vectors", async () => {

@@ -74,7 +74,7 @@ The function returns when the row reaches `READY` or `FAILED` (60 s hard limit).
 
 | `failure_reason` | Meaning | Suggested UI |
 |---|---|---|
-| `unreadable_scan` | No readable text (e.g., photo or image-only PDF) | "We couldn't read this file. Try a text PDF or add skills manually." |
+| `unreadable_scan` | No readable text, even after Gemini transcribed the image-only PDF (e.g., a blurry photo) | "We couldn't read this file. Try a text PDF or add skills manually." |
 | `too_long` | Over the input cap even after truncation | Same, mention length |
 | `timeout` | Took longer than 60 s | Offer retry |
 | `budget_exceeded` | Daily AI budget used up | "Try again tomorrow, or add skills manually." |

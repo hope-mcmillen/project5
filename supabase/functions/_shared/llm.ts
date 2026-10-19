@@ -2,15 +2,15 @@
 // Functions goes through getProvider(), so switching providers is one setting
 // (LLM_PROVIDER) and tests/CI/seeding run on the free mock.
 //
-// Real providers (gemini, openai, azure) arrive in B3 (AI-09), together with
-// the llm_usage log and the daily token budget (AI-13).
+// The real provider is Google Gemini (PRD v0.5). It arrives in B3 (AI-09),
+// together with the llm_usage log and the daily token budget (AI-13).
 import { EXTRACTION_SCHEMAS, type SchemaName } from "./schemas.ts";
 
 /** Vector width of skills/profile_versions/jobs.embedding (vector(1536)). */
 export const EMBED_DIMS = 1536;
 
-export type ProviderName = "mock" | "gemini" | "openai" | "azure";
-export const PROVIDER_NAMES: readonly ProviderName[] = ["mock", "gemini", "openai", "azure"];
+export type ProviderName = "mock" | "gemini";
+export const PROVIDER_NAMES: readonly ProviderName[] = ["mock", "gemini"];
 
 export interface Usage {
   inputTokens: number;
@@ -42,10 +42,19 @@ export interface EmbedResult {
   model: string;
 }
 
+export interface TranscribeResult {
+  text: string;
+  usage: Usage;
+  provider: ProviderName;
+  model: string;
+}
+
 export interface LlmProvider {
   readonly name: ProviderName;
   extract<T = unknown>(opts: ExtractOptions): Promise<ExtractResult<T>>;
   embed(texts: string[]): Promise<EmbedResult>;
+  /** OCR for image-only PDFs (PRD §8.1). Text-layer PDFs and DOCX never come here. */
+  transcribe(pdf: Uint8Array<ArrayBuffer>): Promise<TranscribeResult>;
 }
 
 export class LlmConfigError extends Error {
@@ -68,8 +77,6 @@ export function getProvider(env: Env = (k) => Deno.env.get(k)): LlmProvider {
     case "mock":
       return new MockProvider();
     case "gemini":
-    case "openai":
-    case "azure":
       throw new LlmConfigError(`LLM_PROVIDER=${name} is not implemented yet (B3 / AI-09). Use LLM_PROVIDER=mock.`);
     default:
       throw new LlmConfigError(
@@ -109,14 +116,15 @@ export function estimateTokens(text: string): number {
 // Mock provider (US-52): free, deterministic, offline.
 // ---------------------------------------------------------------------------
 
-const FIXTURE_DIR = new URL("./fixtures/extract/", import.meta.url);
+const FIXTURE_ROOT = new URL("./fixtures/", import.meta.url);
 
 export class MockProvider implements LlmProvider {
   readonly name = "mock" as const;
   static readonly EXTRACT_MODEL = "mock-extract";
   static readonly EMBED_MODEL = "mock-embed";
+  static readonly TRANSCRIBE_MODEL = "mock-transcribe";
 
-  constructor(private fixtureDir: URL = FIXTURE_DIR) {}
+  constructor(private fixtureRoot: URL = FIXTURE_ROOT) {}
 
   /**
    * Returns fixtures/extract/<sha256(normalized text)>.json if present,
@@ -127,7 +135,8 @@ export class MockProvider implements LlmProvider {
       throw new LlmConfigError(`Unknown schemaName "${opts.schemaName}"`);
     }
     const key = await fixtureKey(opts.untrustedText);
-    const raw = (await this.read(`${key}.json`)) ?? (await this.read(`default.${opts.schemaName}.json`));
+    const raw = (await this.read(`extract/${key}.json`)) ??
+      (await this.read(`extract/default.${opts.schemaName}.json`));
     if (raw === null) throw new LlmConfigError(`No mock fixture for ${opts.schemaName} (key ${key})`);
     return {
       data: JSON.parse(raw) as T,
@@ -153,9 +162,26 @@ export class MockProvider implements LlmProvider {
     };
   }
 
-  private async read(name: string): Promise<string | null> {
+  /**
+   * Returns fixtures/transcribe/<sha256(file bytes)>.txt if present (written
+   * by scripts/make_fake_resumes.py for the scanned fixture), otherwise
+   * fixtures/transcribe/default.txt.
+   */
+  async transcribe(pdf: Uint8Array<ArrayBuffer>): Promise<TranscribeResult> {
+    const key = await sha256Hex(pdf);
+    const text = (await this.read(`transcribe/${key}.txt`)) ?? (await this.read("transcribe/default.txt"));
+    if (text === null) throw new LlmConfigError(`No mock transcription (key ${key})`);
+    return {
+      text,
+      usage: { inputTokens: 258, outputTokens: estimateTokens(text) }, // Gemini bills ~258 tokens per PDF page
+      provider: this.name,
+      model: MockProvider.TRANSCRIBE_MODEL,
+    };
+  }
+
+  private async read(path: string): Promise<string | null> {
     try {
-      return await Deno.readTextFile(new URL(name, this.fixtureDir));
+      return await Deno.readTextFile(new URL(path, this.fixtureRoot));
     } catch (e) {
       if (e instanceof Deno.errors.NotFound) return null;
       throw e;

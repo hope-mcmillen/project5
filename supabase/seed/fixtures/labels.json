@@ -157,7 +157,7 @@
     },
     "r08_scanned_image.pdf": {
       "layout": "scanned-image",
-      "expect_status": "FAILED",
+      "expect_status": "READY",
       "skills": [
         "Java",
         "MySQL",
