@@ -65,7 +65,7 @@ The function returns when the row reaches `READY` or `FAILED` (60 s hard limit).
   "unmapped_count": 2
 }
 ```
-`cached` is `true` when the same file (by SHA-256) with the same `EXTRACTION_SCHEMA_VERSION` was parsed before, so no AI call was made.
+`cached` is `true` when the same file (SHA-256 computed by the server from the stored bytes, never the client's `file_hash`) with the same `EXTRACTION_SCHEMA_VERSION` was parsed before, so no AI call was made. Calling `parse-resume` again on a `READY` resume returns its latest draft with `cached: true` and doesn't re-parse.
 
 **Response `200` (failed)**: parsing failures are a normal outcome, not an HTTP error. The app shows the manual fallback (`create_manual_profile`).
 ```json
@@ -84,10 +84,12 @@ The function returns when the row reaches `READY` or `FAILED` (60 s hard limit).
 
 | HTTP | `code` | When |
 |---|---|---|
+| 400 | `invalid_request` | Body isn't JSON or `resume_id` isn't a UUID |
 | 401 | `unauthorized` | Missing or invalid JWT |
-| 403 | `not_owner` | Resume belongs to someone else |
+| 403 | `not_owner` | Resume (or its storage folder) belongs to someone else |
 | 404 | `resume_not_found` | No such `resume_id` |
-| 409 | `already_parsing` | Row is already in a parsing state |
+| 409 | `already_parsing` | Row is already in a parsing state (a run stuck for over 2 minutes can be retried) |
+| 500 | `config_error` / `internal` | Server misconfiguration or an unexpected error. The row is still left `FAILED`, never mid-parse. |
 
 **Reading the draft:** after `READY`, read the draft skills with a normal select on `candidate_skills` for `profile_version_id` (RLS: own rows only). Each row:
 ```json

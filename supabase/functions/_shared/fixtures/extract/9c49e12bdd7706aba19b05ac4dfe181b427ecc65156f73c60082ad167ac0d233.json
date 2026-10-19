@@ -1,0 +1,111 @@
+{
+  "roles": [
+    {
+      "title": "Senior Site Reliability Engineer",
+      "start": "2021-02",
+      "end": "present",
+      "skills_used": [
+        "Amazon EKS",
+        "Helm",
+        "Terraform",
+        "AWS",
+        "GitHub Actions",
+        "Argo CD",
+        "Prometheus",
+        "Grafana"
+      ],
+      "evidence": "Senior Site Reliability Engineer, Red River Cloudworks — Feb 2021 – Present"
+    },
+    {
+      "title": "DevOps Engineer",
+      "start": "2018-01",
+      "end": "2021-01",
+      "skills_used": [
+        "Docker",
+        "Linux",
+        "Jenkins",
+        "Bash",
+        "Go"
+      ],
+      "evidence": "DevOps Engineer, Caddo Data Systems — Jan 2018 – Jan 2021"
+    }
+  ],
+  "skills": [
+    {
+      "raw": "Kubernetes",
+      "evidence": "Kubernetes, Terraform, AWS, Docker, Helm, Argo CD, GitHub Actions, Prometheus, Grafana, Linux, Bash, Go",
+      "context": "skills"
+    },
+    {
+      "raw": "Terraform",
+      "evidence": "Wrote Terraform modules for every AWS account and enforced them in GitHub Actions.",
+      "context": "role:0"
+    },
+    {
+      "raw": "AWS",
+      "evidence": "Wrote Terraform modules for every AWS account and enforced them in GitHub Actions.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Docker",
+      "evidence": "Moved legacy apps into Docker containers on Linux hosts.",
+      "context": "role:1"
+    },
+    {
+      "raw": "Helm",
+      "evidence": "Operated 14 Amazon EKS clusters running 300 services packaged with Helm.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Argo CD",
+      "evidence": "Introduced Argo CD for GitOps deployments.",
+      "context": "role:0"
+    },
+    {
+      "raw": "GitHub Actions",
+      "evidence": "Wrote Terraform modules for every AWS account and enforced them in GitHub Actions.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Prometheus",
+      "evidence": "Built Prometheus alerts and Grafana dashboards; led on-call for the platform team.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Grafana",
+      "evidence": "Built Prometheus alerts and Grafana dashboards; led on-call for the platform team.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Linux",
+      "evidence": "Moved legacy apps into Docker containers on Linux hosts.",
+      "context": "role:1"
+    },
+    {
+      "raw": "Bash",
+      "evidence": "Built Jenkins CI/CD pipelines and Bash tooling; wrote a small Go CLI for deploys.",
+      "context": "role:1"
+    },
+    {
+      "raw": "Go",
+      "evidence": "Built Jenkins CI/CD pipelines and Bash tooling; wrote a small Go CLI for deploys.",
+      "context": "role:1"
+    },
+    {
+      "raw": "Amazon EKS",
+      "evidence": "Operated 14 Amazon EKS clusters running 300 services packaged with Helm.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Jenkins",
+      "evidence": "Built Jenkins CI/CD pipelines and Bash tooling; wrote a small Go CLI for deploys.",
+      "context": "role:1"
+    }
+  ],
+  "education": [
+    {
+      "level": "BS",
+      "field": "Information Technology"
+    }
+  ]
+}

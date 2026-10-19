@@ -1,0 +1,82 @@
+{
+  "roles": [
+    {
+      "title": "Full-Stack Developer",
+      "start": "2021-07",
+      "end": "present",
+      "skills_used": [
+        "Node.js",
+        "Express",
+        "MongoDB",
+        "Mongoose",
+        "React",
+        "Heroku",
+        "Docker"
+      ],
+      "evidence": "Full-Stack Developer, Northshore Software — Jul 2021 – Present\nBuilt Node.js and Express APIs backed by MongoDB with Mongoose.\nDeveloped React dashboards for scheduling and invoicing.\nDeployed services to Heroku and later to Docker containers."
+    },
+    {
+      "title": "Web Development Intern",
+      "start": "2020-05",
+      "end": "2020-08",
+      "skills_used": [
+        "Jest",
+        "JavaScript"
+      ],
+      "evidence": "Web Development Intern, Tangipahoa Parish IT — May 2020 – Aug 2020\nWrote Jest tests for a JavaScript permit-tracking site."
+    }
+  ],
+  "skills": [
+    {
+      "raw": "JavaScript",
+      "evidence": "JavaScript, Node.js, Express, React, MongoDB, Mongoose, Docker, Heroku, Jest",
+      "context": "role:1"
+    },
+    {
+      "raw": "Node.js",
+      "evidence": "Built Node.js and Express APIs backed by MongoDB with Mongoose.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Express",
+      "evidence": "Built Node.js and Express APIs backed by MongoDB with Mongoose.",
+      "context": "role:0"
+    },
+    {
+      "raw": "React",
+      "evidence": "Developed React dashboards for scheduling and invoicing.",
+      "context": "role:0"
+    },
+    {
+      "raw": "MongoDB",
+      "evidence": "Built Node.js and Express APIs backed by MongoDB with Mongoose.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Mongoose",
+      "evidence": "Built Node.js and Express APIs backed by MongoDB with Mongoose.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Docker",
+      "evidence": "Deployed services to Heroku and later to Docker containers.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Heroku",
+      "evidence": "Deployed services to Heroku and later to Docker containers.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Jest",
+      "evidence": "Wrote Jest tests for a JavaScript permit-tracking site.",
+      "context": "role:1"
+    }
+  ],
+  "education": [
+    {
+      "level": "B.S.",
+      "field": "Computer Science"
+    }
+  ]
+}

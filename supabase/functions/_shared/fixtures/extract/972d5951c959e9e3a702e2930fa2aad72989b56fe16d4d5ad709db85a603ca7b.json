@@ -1,0 +1,37 @@
+{
+  "roles": [
+    {
+      "title": "Java Developer",
+      "start": "2019",
+      "end": "2023",
+      "skills_used": [
+        "Spring Boot",
+        "MySQL"
+      ],
+      "evidence": "Built Spring Boot services on MySQL."
+    }
+  ],
+  "skills": [
+    {
+      "raw": "Java",
+      "evidence": "Java, Spring Boot, MySQL",
+      "context": "skills"
+    },
+    {
+      "raw": "Spring Boot",
+      "evidence": "Built Spring Boot services on MySQL.",
+      "context": "role:0"
+    },
+    {
+      "raw": "MySQL",
+      "evidence": "Built Spring Boot services on MySQL.",
+      "context": "role:0"
+    }
+  ],
+  "education": [
+    {
+      "level": "B.S.",
+      "field": "Computer Science"
+    }
+  ]
+}

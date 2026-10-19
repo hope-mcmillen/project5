@@ -299,13 +299,14 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 
 **Build**
 - **AI-07 `parse-resume`:**
-  1. Verify the JWT and ownership of `resume_id`.
-  2. Check for a cached extraction with the same `file_hash` and schema version.
+  1. Verify the JWT and ownership of `resume_id` (and that the storage folder is the owner's).
+  2. Download, hash the bytes server-side, and check for a cached extraction with that hash and schema version (never trust the client's `file_hash`).
   3. Set the status at each step (PARSING_LAYOUT, then EXTRACTING, then NORMALIZING) with an admin client.
-  4. Download from Storage, `analyzeLayout`, `sanitize`, then `llm.extract(resumeSchema)` with the resume inside `<resume>` tags.
+  4. `extractText`, `sanitize`, then `llm.extract(resumeSchema)` with the resume inside `<resume>` tags.
   5. Drop skills without valid evidence, then `mergeYears` and normalize.
   6. Insert `profile_versions` (next version) and `candidate_skills`. Save `extraction` and the provider and model.
   7. Set `READY`, or `FAILED` with a `failure_reason`. Never leave a row in a parsing state. Hard timeout at 60 s.
+  - *As built:* status changes and the save go through service-role RPCs in `supabase/migrations/20261018210000_resume_parse_rpcs.sql` (`claim_resume_parse`, `advance_resume_status`, `fail_resume_parse`, `save_resume_draft`), so every transition is compare-and-set and the draft save is one transaction. Skills and roles quoted from injection-like sentences are dropped, and roles must quote the text and match a start year in it.
 - **AI-19 Injection tests:** Deno tests run `parse-resume` (mock and, optionally, real) on the hidden-text fixture and on fixtures containing "ignore previous instructions" and "Age: 52". Assert no extra skills, no personal fields, and schema-valid output.
 
 **Done when:** An upload becomes a draft profile with live status, and the injection tests prove a resume can't manipulate the AI.
