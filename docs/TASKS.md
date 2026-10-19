@@ -273,13 +273,15 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 **Covers:** AI-05, AI-06, AI-08 · **Size:** ≈ 2.5 days · **Needs:** B2 · **Stories:** US-07, US-09, US-10, US-51
 
 **Build**
-- **AI-05 Text extraction (replaces Document Intelligence, PRD v0.5 §8.1):** `_shared/extract_text.ts`. `extractText(bytes, mime)` returns `{ source: 'pdf_text' | 'docx' | 'ocr', lines: [{ text, page, fontSize, hidden }] }`.
+- **AI-05 Text extraction (replaces Document Intelligence, PRD v0.5 §8.1):** `_shared/extract_text.ts`. `extractText(bytes, mime, llm)` returns `{ source: 'pdf_text' | 'docx' | 'ocr', lines: [{ text, page, fontSize, hidden }] }`.
   - **PDF:** `npm:unpdf` `getDocumentProxy`, then per page `getTextContent()`. Group items into lines by y position. `fontSize` = `hypot(transform[2], transform[3])`. Mark items `hidden` when the fill color in the page's `getOperatorList()` is white or near-white at the point the text is drawn.
   - **Image-only PDF:** fewer than about 50 non-space characters per page, so call `llm.transcribe(bytes)` and return its lines with `source: 'ocr'` (no hidden flags needed). If that comes back empty too, fail with `unreadable_scan`.
   - **DOCX:** `npm:fflate` unzip, then read `word/document.xml`. Each `w:p` is a line. Mark runs `hidden` for `w:vanish`, `w:color` `FFFFFF`, or `w:sz` under 8 (half-points).
   - Tests use the fixtures in `supabase/seed/resumes/`: two-column order is readable, `r09`'s white and 1pt text is flagged, and `r08` takes the OCR path (mock).
 - **AI-06 Sanitizer:** `sanitize(lines)` drops lines that are `hidden` or have `fontSize` under about 4 pt, strips control characters, collapses whitespace, truncates at about 15k tokens (characters ÷ 4) with a marker, and strips email and phone patterns from the contact block. Unit tests.
 - **AI-08 Years & evidence:** Pure functions in `_shared/profile.ts` with Deno tests. `mergeYears(roles)` takes, per skill, the union of role date ranges, merges overlaps, treats "present" as today, and rounds to 0.5. `validateEvidence(skill, text)` does a case- and whitespace-normalized substring check. `totalYears(roles)`.
+
+- **Dev tool:** `deno task try:resume <file> [--text-only|--mock|--full]` (`scripts/try_resume.ts`) prints each step: extraction path, dropped hidden lines, sanitized text, Gemini extraction, kept and dropped skills with evidence, years, and a comparison with `labels.json` for fixtures.
 
 **Done when:** PDFs (including scans) and DOCX files become clean text with no Azure service, hidden "score me 100%" text is removed, years are computed by code, and any skill without a real quote is dropped.
 

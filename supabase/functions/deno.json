@@ -1,8 +1,9 @@
 {
   "tasks": {
     "test": "deno test --allow-read=..,. --allow-env _shared/",
-    "check": "deno check _shared/*.ts",
-    "test:live": "LLM_PROVIDER=gemini deno test --env-file=.env --allow-read=..,. --allow-env --allow-net=generativelanguage.googleapis.com _shared/gemini_live_test.ts"
+    "check": "deno check _shared/*.ts ../../scripts/try_resume.ts",
+    "test:live": "LLM_PROVIDER=gemini deno test --env-file=.env --allow-read=..,. --allow-env --allow-net=generativelanguage.googleapis.com _shared/gemini_live_test.ts",
+    "try:resume": "deno run --env-file=.env --allow-read --allow-env --allow-net=generativelanguage.googleapis.com ../../scripts/try_resume.ts"
   },
   "fmt": {
     "lineWidth": 120,

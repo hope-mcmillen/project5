@@ -65,7 +65,7 @@ The formula is in PRD §8.4. When changing weights or the formula:
 
 ## Debugging "the score looks wrong"
 
-Walk the chain in order. Don't jump straight to prompt tweaks:
+Walk the chain in order. Don't jump straight to prompt tweaks. `deno task try:resume <file>` (from `supabase/functions`) prints steps 1–4 for any resume:
 1. **Raw text.** Did text extraction read the section at all? Check whether it took the OCR path (scan), how two-column lines were ordered, and whether the hidden-text filter dropped real text.
 2. **Extraction JSON.** Is the skill present, and does its evidence pass the check?
 3. **Normalization.** Did it map to the right canonical skill, or end up `unmapped` or wrong?

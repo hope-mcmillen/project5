@@ -192,7 +192,7 @@ Google Cloud,Cloud/DevOps,gcp|google cloud platform|gcloud
 AWS Lambda,Cloud/DevOps,lambda|lambda functions
 Amazon EC2,Cloud/DevOps,ec2|aws ec2
 Amazon S3,Cloud/DevOps,s3|aws s3
-Amazon ECS,Cloud/DevOps,ecs|aws fargate|fargate
+Amazon ECS,Cloud/DevOps,ecs|aws ecs|amazon elastic container service|aws fargate|fargate
 Amazon EKS,Cloud/DevOps,eks|aws eks
 AWS CloudFormation,Cloud/DevOps,cloudformation|cfn
 AWS CDK,Cloud/DevOps,cdk|cloud development kit
