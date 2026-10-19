@@ -1,0 +1,38 @@
+{
+  "roles": [
+    {
+      "title": "Mobile Developer",
+      "start": "2022-03",
+      "end": "present",
+      "skills_used": ["Flutter", "Dart", "Riverpod", "Firebase Auth", "Cloud Firestore", "Codemagic"],
+      "evidence": "Built a field-inspection app in Flutter and Dart used by 1,200 inspectors."
+    },
+    {
+      "title": "Junior Flutter Developer",
+      "start": "2020-06",
+      "end": "2022-02",
+      "skills_used": ["Flutter", "Bloc", "Figma", "REST APIs", "Git"],
+      "evidence": "Implemented screens from Figma designs using the Bloc pattern."
+    }
+  ],
+  "skills": [
+    { "raw": "Flutter", "evidence": "Built a field-inspection app in Flutter and Dart used by 1,200 inspectors.", "context": "role:0" },
+    { "raw": "Dart", "evidence": "Built a field-inspection app in Flutter and Dart used by 1,200 inspectors.", "context": "role:0" },
+    { "raw": "Riverpod", "evidence": "Migrated state management from Provider to Riverpod, cutting rebuild bugs by half.", "context": "role:0" },
+    { "raw": "state management", "evidence": "Migrated state management from Provider to Riverpod, cutting rebuild bugs by half.", "context": "role:0" },
+    { "raw": "Firebase Auth", "evidence": "Integrated Firebase Auth and Cloud Firestore with an offline-first sync queue.", "context": "role:0" },
+    { "raw": "Cloud Firestore", "evidence": "Integrated Firebase Auth and Cloud Firestore with an offline-first sync queue.", "context": "role:0" },
+    { "raw": "offline-first", "evidence": "Integrated Firebase Auth and Cloud Firestore with an offline-first sync queue.", "context": "role:0" },
+    { "raw": "Codemagic", "evidence": "Set up Codemagic CI to publish builds to TestFlight and Google Play.", "context": "role:0" },
+    { "raw": "TestFlight", "evidence": "Set up Codemagic CI to publish builds to TestFlight and Google Play.", "context": "role:0" },
+    { "raw": "Bloc", "evidence": "Implemented screens from Figma designs using the Bloc pattern.", "context": "role:1" },
+    { "raw": "Figma", "evidence": "Implemented screens from Figma designs using the Bloc pattern.", "context": "role:1" },
+    { "raw": "REST APIs", "evidence": "Consumed REST APIs for a restaurant ordering app.", "context": "role:1" },
+    { "raw": "Git", "evidence": "Did code review on pull requests in Git and wrote widget and unit tests.", "context": "role:1" },
+    { "raw": "code review", "evidence": "Did code review on pull requests in Git and wrote widget and unit tests.", "context": "role:1" },
+    { "raw": "unit tests", "evidence": "Did code review on pull requests in Git and wrote widget and unit tests.", "context": "role:1" }
+  ],
+  "education": [
+    { "level": "BS", "field": "Computer Science" }
+  ]
+}

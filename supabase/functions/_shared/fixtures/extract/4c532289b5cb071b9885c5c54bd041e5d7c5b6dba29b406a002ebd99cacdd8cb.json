@@ -1,0 +1,89 @@
+{
+  "title": "Data Engineer",
+  "location": "New Orleans, LA",
+  "remote": "onsite",
+  "job_type": "full_time",
+  "sponsorship": false,
+  "salary_min": 110000,
+  "salary_max": 135000,
+  "requirements": [
+    {
+      "raw": "SQL",
+      "required_hint": "required",
+      "min_years": 3,
+      "evidence": "3+ years of SQL."
+    },
+    {
+      "raw": "Python",
+      "required_hint": "required",
+      "min_years": 2,
+      "evidence": "2+ years of Python for data engineering."
+    },
+    {
+      "raw": "Apache Spark",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Hands-on Apache Spark (PySpark)."
+    },
+    {
+      "raw": "Apache Airflow",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Apache Airflow orchestration."
+    },
+    {
+      "raw": "Data modeling",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Data modeling and data warehousing concepts."
+    },
+    {
+      "raw": "data warehousing",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Data modeling and data warehousing concepts."
+    },
+    {
+      "raw": "AWS",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Experience with AWS."
+    },
+    {
+      "raw": "Kafka",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Kafka or another streaming platform."
+    },
+    {
+      "raw": "BigQuery",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Snowflake or BigQuery."
+    },
+    {
+      "raw": "Power BI",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Tableau or Power BI."
+    },
+    {
+      "raw": "Snowflake",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Snowflake or BigQuery."
+    },
+    {
+      "raw": "Tableau",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Tableau or Power BI."
+    },
+    {
+      "raw": "dbt",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "dbt."
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "title": "Backend Engineer, Python",
+  "location": null,
+  "remote": "remote",
+  "job_type": "full_time",
+  "sponsorship": true,
+  "salary_min": 120000,
+  "salary_max": 150000,
+  "requirements": [
+    {
+      "raw": "Python",
+      "required_hint": "required",
+      "min_years": 3,
+      "evidence": "3+ years of professional Python backend development."
+    },
+    {
+      "raw": "FastAPI",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Strong experience with FastAPI or Django."
+    },
+    {
+      "raw": "Django",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Strong experience with FastAPI or Django."
+    },
+    {
+      "raw": "PostgreSQL",
+      "required_hint": "required",
+      "min_years": 2,
+      "evidence": "2+ years with PostgreSQL, including schema design and query tuning."
+    },
+    {
+      "raw": "REST APIs",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Experience designing REST APIs."
+    },
+    {
+      "raw": "Docker",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Docker."
+    },
+    {
+      "raw": "pytest",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Unit testing with pytest."
+    },
+    {
+      "raw": "AWS",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "AWS (ECS, Lambda, S3)."
+    },
+    {
+      "raw": "ECS",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "AWS (ECS, Lambda, S3)."
+    },
+    {
+      "raw": "Kafka",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Event-driven architecture or Kafka."
+    },
+    {
+      "raw": "Celery",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Redis and Celery for background jobs."
+    },
+    {
+      "raw": "Event-driven architecture",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Event-driven architecture or Kafka."
+    },
+    {
+      "raw": "fintech",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Experience in payments or fintech; PCI DSS familiarity."
+    },
+    {
+      "raw": "payments",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Experience in payments or fintech; PCI DSS familiarity."
+    },
+    {
+      "raw": "Redis",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Redis and Celery for background jobs."
+    }
+  ]
+}

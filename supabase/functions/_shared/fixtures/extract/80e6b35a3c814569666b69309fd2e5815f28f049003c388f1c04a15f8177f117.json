@@ -1,0 +1,101 @@
+{
+  "title": "Machine Learning Engineer",
+  "location": "Houston, TX",
+  "remote": "hybrid",
+  "job_type": "full_time",
+  "sponsorship": true,
+  "salary_min": 140000,
+  "salary_max": 175000,
+  "requirements": [
+    {
+      "raw": "Python",
+      "required_hint": "required",
+      "min_years": 3,
+      "evidence": "3+ years of Python."
+    },
+    {
+      "raw": "machine learning",
+      "required_hint": "required",
+      "min_years": 2,
+      "evidence": "2+ years of machine learning in production."
+    },
+    {
+      "raw": "PyTorch",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "PyTorch or TensorFlow."
+    },
+    {
+      "raw": "scikit-learn",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "scikit-learn and Pandas."
+    },
+    {
+      "raw": "Pandas",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "scikit-learn and Pandas."
+    },
+    {
+      "raw": "SQL",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "SQL."
+    },
+    {
+      "raw": "Statistics",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Statistics fundamentals."
+    },
+    {
+      "raw": "Google Cloud",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Google Cloud."
+    },
+    {
+      "raw": "HIPAA",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "HIPAA or healthcare data experience."
+    },
+    {
+      "raw": "Large language models",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Large language models and prompt engineering."
+    },
+    {
+      "raw": "MLflow",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "MLOps tooling (MLflow, Kubeflow)."
+    },
+    {
+      "raw": "prompt engineering",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Large language models and prompt engineering."
+    },
+    {
+      "raw": "TensorFlow",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "PyTorch or TensorFlow."
+    },
+    {
+      "raw": "Vector databases",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Vector databases (pgvector, Pinecone)."
+    },
+    {
+      "raw": "pgvector",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Vector databases (pgvector, Pinecone)."
+    }
+  ]
+}

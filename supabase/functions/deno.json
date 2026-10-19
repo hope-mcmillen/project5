@@ -1,0 +1,19 @@
+{
+  "tasks": {
+    "test": "deno test --allow-read=..,. --allow-env _shared/",
+    "check": "deno check _shared/*.ts"
+  },
+  "fmt": {
+    "lineWidth": 120,
+    "exclude": [
+      "_shared/fixtures/"
+    ]
+  },
+  "lint": {
+    "rules": {
+      "tags": [
+        "recommended"
+      ]
+    }
+  }
+}

@@ -46,3 +46,11 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Secrets (TEAM_PLAN: shared privately, never committed)
+env/dev.json
+supabase/functions/.env
+supabase/.env
+.env
+.env.*
+!.env.example

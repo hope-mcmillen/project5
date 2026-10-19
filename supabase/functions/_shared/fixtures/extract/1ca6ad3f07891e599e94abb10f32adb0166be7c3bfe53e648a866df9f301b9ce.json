@@ -1,0 +1,101 @@
+{
+  "title": "Frontend Engineer (React)",
+  "location": "Austin, TX",
+  "remote": "hybrid",
+  "job_type": "full_time",
+  "sponsorship": false,
+  "salary_min": 105000,
+  "salary_max": 130000,
+  "requirements": [
+    {
+      "raw": "React",
+      "required_hint": "required",
+      "min_years": 2,
+      "evidence": "2+ years of React."
+    },
+    {
+      "raw": "TypeScript",
+      "required_hint": "required",
+      "min_years": 2,
+      "evidence": "2+ years of TypeScript."
+    },
+    {
+      "raw": "HTML",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Strong HTML and CSS, including responsive design."
+    },
+    {
+      "raw": "CSS",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Strong HTML and CSS, including responsive design."
+    },
+    {
+      "raw": "responsive design",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Strong HTML and CSS, including responsive design."
+    },
+    {
+      "raw": "REST",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Experience with REST or GraphQL APIs."
+    },
+    {
+      "raw": "Unit testing",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Unit testing (Jest or Vitest)."
+    },
+    {
+      "raw": "Accessibility",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Accessibility (WCAG 2.1 AA)."
+    },
+    {
+      "raw": "Cypress",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "End-to-end testing with Playwright or Cypress."
+    },
+    {
+      "raw": "E-commerce",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "E-commerce experience."
+    },
+    {
+      "raw": "GraphQL",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Experience with REST or GraphQL APIs."
+    },
+    {
+      "raw": "Jest",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Write tests with Jest and Playwright."
+    },
+    {
+      "raw": "Next.js",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Next.js."
+    },
+    {
+      "raw": "Playwright",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "End-to-end testing with Playwright or Cypress."
+    },
+    {
+      "raw": "Tailwind CSS",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Tailwind CSS."
+    }
+  ]
+}
