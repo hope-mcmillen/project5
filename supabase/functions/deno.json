@@ -1,12 +1,12 @@
 {
   "tasks": {
-    "test": "deno test --allow-read=..,. --allow-env _shared/ parse-resume/",
-    "check": "deno check _shared/*.ts parse-resume/*.ts ../../scripts/*.ts",
+    "test": "deno test --allow-read=..,. --allow-env _shared/ parse-resume/ parse-job/",
+    "check": "deno check _shared/*.ts parse-resume/*.ts parse-job/*.ts ../../scripts/*.ts",
     "test:live": "LLM_PROVIDER=gemini deno test --env-file=.env --allow-read=..,. --allow-env --allow-net=generativelanguage.googleapis.com _shared/gemini_live_test.ts",
     "try:resume": "deno run --env-file=.env --allow-read --allow-env --allow-net=generativelanguage.googleapis.com ../../scripts/try_resume.ts",
     "embed:taxonomy": "deno run --env-file=.env --allow-read=../.. --allow-write=../seed --allow-env --allow-net=generativelanguage.googleapis.com ../../scripts/embed_taxonomy.ts",
     "tune:threshold": "deno run --env-file=.env --allow-read=../.. --allow-env --allow-net=generativelanguage.googleapis.com ../../scripts/tune_threshold.ts",
-    "record:resumes": "deno run --env-file=.env --allow-read=../.. --allow-write=_shared/fixtures/extract --allow-env --allow-net=generativelanguage.googleapis.com ../../scripts/record_resume_fixtures.ts"
+    "record:fixtures": "deno run --env-file=.env --allow-read=../.. --allow-write=_shared/fixtures/extract --allow-env --allow-net=generativelanguage.googleapis.com ../../scripts/record_fixtures.ts"
   },
   "fmt": {
     "lineWidth": 120,

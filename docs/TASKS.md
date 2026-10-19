@@ -321,6 +321,8 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 4. Insert draft `job_requirements` (weight 2 if required, 1 if preferred) and pre-fill the job fields.
 5. Set `parse_status = READY`.
 
+*As built:* `_shared/job_pipeline.ts` + `_shared/requirements.ts`, saved atomically by `save_job_draft` (migration `20261018220000_parse_job_rpcs.sql`, which also adds `skills_centroid`, `start_job_parse`, `fail_job_parse`). Requirements need verified quotes (injection quotes dropped). Duplicates merge, "X or Y" alternatives become preferred with `either_of_group`, and caps of 8 required / 15 total are enforced (overflow → `trimmed[]`). `jobs.embedding` is set from the requirements' skill embeddings (PRD v0.6).
+
 **Done when:** A pasted description becomes draft requirements ready for the recruiter to review.
 
 #### B8 · As a recruiter or candidate, I want an explainable 0–100 Match Score for every candidate and job pair, so I can trust the ranking and see why.

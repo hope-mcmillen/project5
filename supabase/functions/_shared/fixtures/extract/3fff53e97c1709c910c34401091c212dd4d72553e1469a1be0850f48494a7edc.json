@@ -1,0 +1,125 @@
+{
+  "title": "Machine Learning Engineer",
+  "location": "Houston, TX",
+  "remote": "remote",
+  "job_type": "full_time",
+  "sponsorship": true,
+  "salary_min": 140000,
+  "salary_max": 175000,
+  "requirements": [
+    {
+      "raw": "Python",
+      "required_hint": "required",
+      "min_years": 3,
+      "evidence": "3+ years of Python."
+    },
+    {
+      "raw": "machine learning in production",
+      "required_hint": "required",
+      "min_years": 2,
+      "evidence": "2+ years of machine learning in production."
+    },
+    {
+      "raw": "PyTorch",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "PyTorch or TensorFlow."
+    },
+    {
+      "raw": "TensorFlow",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "PyTorch or TensorFlow."
+    },
+    {
+      "raw": "scikit-learn",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "scikit-learn and Pandas."
+    },
+    {
+      "raw": "Pandas",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "scikit-learn and Pandas."
+    },
+    {
+      "raw": "SQL",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "SQL."
+    },
+    {
+      "raw": "Statistics fundamentals",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Statistics fundamentals."
+    },
+    {
+      "raw": "Large language models",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Large language models and prompt engineering."
+    },
+    {
+      "raw": "prompt engineering",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Large language models and prompt engineering."
+    },
+    {
+      "raw": "Vector databases",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Vector databases (pgvector, Pinecone)."
+    },
+    {
+      "raw": "pgvector",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Vector databases (pgvector, Pinecone)."
+    },
+    {
+      "raw": "Pinecone",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Vector databases (pgvector, Pinecone)."
+    },
+    {
+      "raw": "MLOps tooling",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "MLOps tooling (MLflow, Kubeflow)."
+    },
+    {
+      "raw": "MLflow",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "MLOps tooling (MLflow, Kubeflow)."
+    },
+    {
+      "raw": "Kubeflow",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "MLOps tooling (MLflow, Kubeflow)."
+    },
+    {
+      "raw": "Google Cloud",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Google Cloud."
+    },
+    {
+      "raw": "HIPAA",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "HIPAA or healthcare data experience."
+    },
+    {
+      "raw": "healthcare data",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "HIPAA or healthcare data experience."
+    }
+  ]
+}

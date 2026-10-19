@@ -5,6 +5,8 @@
 import { assert, assertEquals } from "jsr:@std/assert@1.0.13";
 import { EMBED_DIMS, getProvider } from "./llm.ts";
 import { MATCH_THRESHOLD, normalizeSkills } from "./normalize.ts";
+import { parseJob } from "./job_pipeline.ts";
+import { MemoryJobRepo } from "./job_repo.ts";
 import { parseResume } from "./resume_pipeline.ts";
 import { MemoryResumeRepo } from "./resume_repo_memory.ts";
 import { seedSkillIndex } from "./seed_taxonomy.ts";
@@ -102,3 +104,23 @@ Deno.test(
     }
   },
 );
+
+Deno.test({ name: "live: parse-job on real Gemini respects caps and groups alternatives", ignore: !live }, async () => {
+  const index = await seedSkillIndex();
+  for (const file of ["job01_flutter_mobile.txt", "job05_frontend_react.txt"]) {
+    const repo = new MemoryJobRepo();
+    repo.recruiters.set("rec", "co");
+    const id = crypto.randomUUID();
+    repo.add({ id, company_id: "co", raw_description: await Deno.readTextFile(seed(`jobs/${file}`)) });
+    const res = await parseJob({ repo, llm: getProvider(), index, log: () => {} }, { jobId: id, userId: "rec" });
+    if (res.parse_status !== "READY") throw new Error(`${file}: ${JSON.stringify(res)}`);
+    const req = res.requirements.filter((r) => r.required).map((r) => r.name);
+    const alt = res.requirements.filter((r) => r.either_of_group).map((r) => `${r.name}#${r.either_of_group}`);
+    console.log(
+      `${file}: required [${req.join(", ")}] | alternatives [${alt.join(", ")}] | ` +
+        `${res.requirements.length} kept, trimmed [${res.trimmed.map((r) => r.name).join(", ")}], ` +
+        `unmapped [${res.unmapped.map((u) => u.raw).join(", ")}]`,
+    );
+    assert(res.requirements.length <= 15 && req.length <= 8);
+  }
+});

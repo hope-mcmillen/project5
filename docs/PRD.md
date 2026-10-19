@@ -1,10 +1,15 @@
 # ResuRhombus: Product Requirements & Architecture
 
-**Version:** 0.5 · **Updated:** 2026-10-18 · **Owner:** Kameron Arceneaux
+**Version:** 0.6 · **Updated:** 2026-10-19 · **Owner:** Kameron Arceneaux
 
 ---
 
 ## 0. Changelog
+
+### v0.6 decisions
+- **"X or Y" job requirements are alternatives.** When one sentence lists skills joined by "or" ("Riverpod or Bloc", "FastAPI or Django"), `parse-job` saves them as *preferred* and tags them with an `either_of_group` hint for the review screen. Saving them all as required would charge a candidate the 15-point missing-required penalty for the option they didn't pick. True "one of" scoring is open question Q13.
+- **Job (and profile) retrieval vectors come from the taxonomy, not the AI.** `jobs.embedding` is the unit-length average of its requirements' skill embeddings (`skills_centroid()`, migration `20261018220000`). It's recomputed in SQL whenever requirements change, with no AI call. Profiles should do the same from their confirmed skills (Q14). Vectors are still only used for the `get_feed` prefilter (§8.4).
+- **`parse-job` enforces the requirement caps itself.** Gemini regularly proposes 14 to 19 requirements. The first 8 required stay required, extra required ones become preferred, and anything past 15 is returned as `trimmed[]` (unsaved) for the recruiter to swap in (R-JOB-1).
 
 ### v0.5 decisions
 - **Google Gemini (AI Studio API key) is the only LLM provider.** It replaces the OpenAI API and Azure OpenAI from v0.4, because that's the key the team has. The adapter interface stays, so another provider could still be added later. `mock` remains for tests, CI, and seeding. See §9.3.
@@ -661,3 +666,5 @@ The demo must work right away, with a populated recruiter board, before anyone u
 | Q7 | Does withdrawing an application free a slot in the daily cap? | No. This prevents gaming. |
 | Q11 | Do we need a billing-enabled Gemini key, given free-tier data use and rate limits (§9.3)? | Free tier for development and the class demo with synthetic data. Switch to a billing-enabled key before any real user uploads a resume. |
 | Q12 | Is the in-code white-text check (PDF operator list) worth the effort, or is the font-size check enough? | Build both. The `r09` fixture uses both tricks, and the injection test (AI-19) must pass on it. |
+| Q13 | Should the Match Score support true "one of" groups (coverage = best member) instead of demoting alternatives to preferred? | Yes, in B8 if time allows: add a nullable `either_of_group` column to `job_requirements` and score each group as one requirement. Until then, preferred is the safe approximation. |
+| Q14 | Who sets `profile_versions.embedding`? | `confirm_profile` (A) sets it with `skills_centroid(confirmed skill ids)`, just as `save_job_draft` does for jobs. That keeps profile and job vectors comparable and needs no AI call. |

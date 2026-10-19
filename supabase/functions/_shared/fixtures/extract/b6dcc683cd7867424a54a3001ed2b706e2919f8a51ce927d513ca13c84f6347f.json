@@ -1,0 +1,119 @@
+{
+  "title": "Mobile Engineer (Flutter)",
+  "location": "Baton Rouge, LA",
+  "remote": "hybrid",
+  "job_type": "full_time",
+  "sponsorship": false,
+  "salary_min": 95000,
+  "salary_max": 120000,
+  "requirements": [
+    {
+      "raw": "Flutter",
+      "required_hint": "required",
+      "min_years": 2,
+      "evidence": "2+ years building production apps with Flutter and Dart."
+    },
+    {
+      "raw": "Dart",
+      "required_hint": "required",
+      "min_years": 2,
+      "evidence": "2+ years building production apps with Flutter and Dart."
+    },
+    {
+      "raw": "Riverpod",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Experience with a state management approach (Riverpod or Bloc)."
+    },
+    {
+      "raw": "Bloc",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Experience with a state management approach (Riverpod or Bloc)."
+    },
+    {
+      "raw": "REST APIs",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Experience consuming REST APIs."
+    },
+    {
+      "raw": "Git",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Comfortable with Git and code review."
+    },
+    {
+      "raw": "code review",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Comfortable with Git and code review."
+    },
+    {
+      "raw": "Firebase",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Firebase (Auth, Firestore, push notifications)."
+    },
+    {
+      "raw": "Auth",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Firebase (Auth, Firestore, push notifications)."
+    },
+    {
+      "raw": "Firestore",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Firebase (Auth, Firestore, push notifications)."
+    },
+    {
+      "raw": "push notifications",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Firebase (Auth, Firestore, push notifications)."
+    },
+    {
+      "raw": "iOS",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Native iOS (Swift) or Android (Kotlin) experience."
+    },
+    {
+      "raw": "Swift",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Native iOS (Swift) or Android (Kotlin) experience."
+    },
+    {
+      "raw": "Android",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Native iOS (Swift) or Android (Kotlin) experience."
+    },
+    {
+      "raw": "Kotlin",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Native iOS (Swift) or Android (Kotlin) experience."
+    },
+    {
+      "raw": "Accessibility",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Accessibility (WCAG) experience."
+    },
+    {
+      "raw": "WCAG",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Accessibility (WCAG) experience."
+    },
+    {
+      "raw": "HIPAA",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Healthcare or HIPAA-regulated work."
+    }
+  ]
+}
