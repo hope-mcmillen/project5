@@ -289,7 +289,7 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 **Covers:** AI-10, AI-11 · **Size:** ≈ 1.5 days · **Needs:** B3, A2 · **Stories:** US-14, US-54
 
 **Build**
-- **AI-10 Normalization:** Migration for `match_skills(p_embedding, p_threshold, p_k)`, returning `skill_id` and similarity via `1 - (embedding <=> p_embedding)` ordered by distance. `_shared/normalize.ts` tries (1) a lowercase exact or alias match (`aliases @> array[x]`), then (2) batch-embeds the unmatched strings and calls `match_skills` at threshold 0.88, then (3) leaves `skill_id = null` (unmapped).
+- **AI-10 Normalization:** Migration for `match_skills(p_embedding, p_threshold, p_k)`, returning `skill_id` and similarity via `1 - (embedding <=> p_embedding)` ordered by distance. `_shared/normalize.ts` tries (1) a lowercase exact or alias match (`aliases @> array[x]`), then (2) batch-embeds the unmatched strings and calls `match_skills` at threshold 0.89 (tuned with `deno task tune:threshold`), then (3) leaves `skill_id = null` (unmapped).
 - **AI-11 Taxonomy embeddings:** `scripts/embed_taxonomy.ts` (Deno) reads `skills.csv`, embeds `name + aliases` in batches of 100, and writes `supabase/seed/skills_embeddings.sql` with vector literals. Run once and commit the output.
 
 **Done when:** Free-text skills map onto the taxonomy, and seeding never calls the AI for embeddings.

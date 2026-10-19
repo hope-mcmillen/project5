@@ -1,9 +1,11 @@
 // Opt-in contract test against the real Gemini API (uses quota; on the free
 // tier Google may use the inputs, which are synthetic fixtures). Skipped
 // unless LLM_PROVIDER=gemini. Run with:  deno task test:live (forces gemini)
-// Three calls total: one job extraction, one embedding batch, one transcription.
+// Four calls total: one job extraction, two embedding batches, one transcription.
 import { assert, assertEquals } from "jsr:@std/assert@1.0.13";
 import { EMBED_DIMS, getProvider } from "./llm.ts";
+import { MATCH_THRESHOLD, normalizeSkills } from "./normalize.ts";
+import { seedSkillIndex } from "./seed_taxonomy.ts";
 import { JOB_SYSTEM_PROMPT, wrapUntrusted } from "./prompts.ts";
 import { EXTRACTION_SCHEMAS, validateExtraction } from "./schemas.ts";
 
@@ -48,7 +50,7 @@ Deno.test(
       "Kubernetes~k8s": cos(kube, k8s),
       "React~Kubernetes": cos(react, kube),
     };
-    console.table(sims); // useful for tuning the 0.88 match_skills threshold (B5)
+    console.table(sims); // useful for sanity-checking the 0.89 match_skills threshold (B5)
     assert(sims["React~ReactJS"] > sims["React~Kubernetes"]);
     assert(sims["Kubernetes~k8s"] > sims["React~Kubernetes"]);
   },
@@ -59,4 +61,18 @@ Deno.test({ name: "live: transcribe reads the scanned resume", ignore: !live }, 
   const { text, usage } = await getProvider().transcribe(pdf);
   console.log(`transcribed ${text.length} chars, tokens=${usage.inputTokens}+${usage.outputTokens}`);
   for (const s of ["Java", "Spring Boot", "MySQL"]) assert(text.includes(s), `missing ${s}`);
+});
+
+Deno.test({ name: "live: labeled alias pairs normalize at the tuned threshold", ignore: !live }, async () => {
+  const pairs: Array<{ query: string; expect: string | null }> = JSON.parse(
+    await Deno.readTextFile(new URL("../../tests/fixtures/alias_pairs.json", import.meta.url)),
+  ).pairs;
+  const res = await normalizeSkills(pairs.map((p) => p.query), getProvider(), await seedSkillIndex());
+  const right = res.filter((r, i) => r.name === pairs[i].expect).length;
+  const falseMaps = res.filter((r, i) => pairs[i].expect === null && r.name !== null).map((r) => `${r.raw}→${r.name}`);
+  console.log(
+    `threshold ${MATCH_THRESHOLD}: ${right}/${pairs.length} correct; false maps: ${falseMaps.join(", ") || "none"}`,
+  );
+  assert(right / pairs.length >= 0.9, "accuracy dropped below 90%: re-run deno task tune:threshold");
+  assert(falseMaps.length <= 1);
 });

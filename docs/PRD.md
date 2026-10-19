@@ -386,7 +386,7 @@ The LLM returns **facts with evidence**. It never returns scores and never does 
 - Keep a **canonical skill taxonomy** of about 500 to 2,000 entries, seeded from a public source (e.g., O*NET / ESCO tech skills, or Stack Overflow survey tags). Each entry has an id, name, category, aliases, and an embedding.
 - Normalization order:
   1. Exact or alias match
-  2. Embedding nearest neighbor with cosine at least 0.88
+  2. Embedding nearest neighbor with cosine at least **0.89** (tuned on 75 labeled strings in `supabase/tests/fixtures/alias_pairs.json`: 96% correct, no false maps. Skills are embedded as "name: aliases".)
   3. Otherwise mark as `unmapped`. Unmapped skills are kept for the profile but not scored, and they go into a review queue.
 - A `skill_relation` table holds partial credit for related skills (e.g., MySQL→PostgreSQL 0.6, Java→Kotlin 0.5). The table is curated, not learned.
 

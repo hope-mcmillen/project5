@@ -50,10 +50,10 @@ export function getProvider(): LlmProvider; // switch on Deno.env.get("LLM_PROVI
 ## Normalization
 
 1. Lowercase plus alias table lookup. This is exact and cheap.
-2. Otherwise, embed the raw string and call the `match_skills(query vector, threshold 0.88, k 3)` RPC.
+2. Otherwise, embed the raw string and call the `match_skills(query vector, threshold 0.89, k 3)` RPC. Taxonomy skills are embedded as "name: aliases" (`skillEmbedText`).
 3. Otherwise, store it as `unmapped`. It stays on the profile but isn't scored, and it's logged for taxonomy review.
 
-Tune the 0.88 threshold with a small labeled list of alias pairs. Don't guess.
+The 0.89 threshold was tuned on `supabase/tests/fixtures/alias_pairs.json` (96%, no false maps; 0.88 maps "Microsoft Word"-style non-skills, 0.90 starts missing real ones). Re-run `deno task tune:threshold` after changing the taxonomy or embedding text. Don't guess.
 
 ## Scoring changes
 
