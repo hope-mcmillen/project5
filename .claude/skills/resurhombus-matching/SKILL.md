@@ -60,7 +60,7 @@ The 0.89 threshold was tuned on `supabase/tests/fixtures/alias_pairs.json` (96%,
 The formula is in PRD §8.4. When changing weights or the formula:
 1. Update the SQL function **and** the TypeScript mirror (if one exists for previews) together.
 2. Bump `scoring_version`.
-3. Run the regression fixture: about 50 labeled resume×job pairs in `supabase/tests/fixtures/match_pairs.json` with expected bands. Report the band-agreement % before and after.
+3. Run the regression: 74 hand-labeled resume×job pairs in `supabase/tests/fixtures/match_pairs.json` (`score_test.ts` prints a confusion table and fails below 80%). `deno task tune:score` sweeps parameters. Report the band-agreement % before and after. v1 → v2 went 70% → 84%. Don't relabel pairs to make a formula pass. Labels are human judgment of fit.
 4. Update PRD §8.4.
 
 ## Debugging "the score looks wrong"

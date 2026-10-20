@@ -332,6 +332,8 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 - **AI-14 `compute_match()`:** A SQL function implementing PRD §8.4. Per requirement: `coverage` is 1 for an exact match, else the best `skill_relations.credit`, else 0. `depth = min(1, years / min_years)` (1 if `min_years` is 0, 0.5 if years is null). `score = coverage × (0.6 + 0.4 × depth)`. `raw` is the weighted average. The penalty is 0.15 per missing required skill. `score = round(100 × clamp(raw − penalty, 0, 1))`. Returns `{score, breakdown}` ([SCHEMA.md §6](SCHEMA.md#6-json-shapes)). Mark it `stable`.
 - **AI-17 Regression test:** `supabase/tests/fixtures/match_pairs.json` with about 50 hand-labeled resume × job pairs and expected bands. A pgTAP or Deno test computes scores, asserts at least 80% band agreement, and prints a confusion table.
 
+*As built (PRD v0.7):* the AI-17 regression showed the v1 formula disagreed with humans on every Stretch-or-better pair, so B8 ships **v2** (85% required / 15% preferred, no extra penalty): 84% band agreement on 74 labeled pairs. `compute_match()` + `match_band()` are in migration `20261019100000_compute_match.sql`. The TypeScript mirror is `_shared/score.ts`, and SQL/TS parity was verified in Postgres on all 74 pairs. Tasks: `tune:score`, `build:match-pairs`.
+
 **Done when:** Every pair gets an explainable score plus the per-skill data behind the radar, and formula changes are checked against human judgment.
 
 #### B9 · As a candidate, I want a ranked deck of jobs I'm eligible for, so I see my best opportunities first.

@@ -110,7 +110,9 @@ export function draftRequirements(
   for (const r of requirements) {
     if (r.either_of_group) groupSize.set(r.either_of_group, (groupSize.get(r.either_of_group) ?? 0) + 1);
   }
-  for (const r of requirements) if (r.either_of_group && groupSize.get(r.either_of_group)! < 2) r.either_of_group = null;
+  for (const r of requirements) {
+    if (r.either_of_group && groupSize.get(r.either_of_group)! < 2) r.either_of_group = null;
+  }
   return { requirements, unmapped, trimmed: ordered.slice(MAX_REQUIREMENTS), dropped };
 }
 

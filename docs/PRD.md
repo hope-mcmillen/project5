@@ -1,10 +1,14 @@
 # ResuRhombus: Product Requirements & Architecture
 
-**Version:** 0.6 · **Updated:** 2026-10-19 · **Owner:** Kameron Arceneaux
+**Version:** 0.7 · **Updated:** 2026-10-19 · **Owner:** Kameron Arceneaux
 
 ---
 
 ## 0. Changelog
+
+### v0.7 decisions
+- **Match Score v2: 85% required, 15% preferred, no extra penalty.** v1 averaged all requirements together and then subtracted 0.15 per missing required skill. Against 74 hand-labeled resume × job pairs (`supabase/tests/fixtures/match_pairs.json`), v1 agreed with human bands 70% of the time and 0% on pairs humans rated Stretch or better. The Flutter developer scored 45 for the Flutter job, because job descriptions list about 10 nice-to-haves that outweighed the must-haves, and missing must-haves were counted twice. v2 agrees 84% of the time (45% on Stretch or better) and halves the mean band error (0.47 → 0.20). `scoring_version` is now `v2`. See §8.4.
+- **Most remaining disagreements are extraction recall, not the formula.** Resumes rarely state basics like "code review", "unit testing", "HTML/CSS", or "data modeling", so those show up as missing required skills. Q15 tracks it.
 
 ### v0.6 decisions
 - **"X or Y" job requirements are alternatives.** When one sentence lists skills joined by "or" ("Riverpod or Bloc", "FastAPI or Django"), `parse-job` saves them as *preferred* and tags them with an `either_of_group` hint for the review screen. Saving them all as required would charge a candidate the 15-point missing-required penalty for the option they didn't pick. True "one of" scoring is open question Q13.
@@ -395,7 +399,7 @@ The LLM returns **facts with evidence**. It never returns scores and never does 
   3. Otherwise mark as `unmapped`. Unmapped skills are kept for the profile but not scored, and they go into a review queue.
 - A `skill_relation` table holds partial credit for related skills (e.g., MySQL→PostgreSQL 0.6, Java→Kotlin 0.5). The table is curated, not learned.
 
-### 8.4 Match Score formula (v1)
+### 8.4 Match Score formula (v2)
 
 For a job with requirements *r* (each has a canonical skill, minimum years *yᵣ*, and weight *wᵣ*; Required weight is 2, Preferred is 1):
 
@@ -403,15 +407,18 @@ For a job with requirements *r* (each has a canonical skill, minimum years *yᵣ
 coverage(r)  = max over candidate skills c of relation(c, r.skill)   // 1.0 exact, 0–0.9 related, 0 none
 depth(r)     = yᵣ == 0 ? 1 : min(1, y_c / yᵣ)                        // y_c null → 0.5
 score(r)     = coverage(r) × (0.6 + 0.4 × depth(r))                 // having the skill matters more than years
-raw          = Σ wᵣ·score(r) / Σ wᵣ
-penalty      = 0.15 × (# required skills with coverage = 0)
-Match Score  = round(100 × clamp(raw − penalty, 0, 1))
+req          = Σ wᵣ·score(r) / Σ wᵣ   over required r       // pref: the same over preferred r
+raw          = 0.85 × req + 0.15 × pref                        // only one group listed → that group's average
+Match Score  = round(100 × clamp(raw, 0, 1))                    // rounded to 6 decimals first (exact .5 rounds up)
 ```
+
+- A missing required skill costs a lot through the 85% share (one of five required ≈ −17 points). v1's extra 0.15 penalty counted it twice and was removed in v0.7.
+- Implemented in SQL as `public.compute_match()` with a tested TypeScript mirror (`_shared/score.ts`). Both must change together. `deno task tune:score` re-runs the sweep against the labeled pairs, and the regression test fails below 80% band agreement.
 
 - Per-requirement `score(r)` values feed the **radar axes** directly. For category axes, average the scores within each category.
 - **Vectors are used for retrieval, not for the final number.** A pgvector ANN query (job-requirements embedding vs. profile embedding) selects about the top 500 candidate jobs for a feed. Those are then scored exactly with the formula above.
 - Scores are recalculated when the profile changes, the job's requirements change, or `scoring_version` is bumped.
-- Before launch, tune weights against a small labeled set of about 50 resume×job pairs rated by hand.
+- Weights were tuned against 74 hand-labeled resume×job pairs (v0.7). Re-tune when the taxonomy, extraction, or bands change.
 
 ### 8.5 LLM safety & robustness
 - **Prompt injection:** Resume and job description text is wrapped as untrusted data, and the system prompt says to extract facts only. The output must match a strict JSON schema (structured outputs). The LLM has **no influence on the score** beyond the facts it extracts. Any skill whose evidence string doesn't appear in the source text is dropped.
@@ -667,4 +674,5 @@ The demo must work right away, with a populated recruiter board, before anyone u
 | Q11 | Do we need a billing-enabled Gemini key, given free-tier data use and rate limits (§9.3)? | Free tier for development and the class demo with synthetic data. Switch to a billing-enabled key before any real user uploads a resume. |
 | Q12 | Is the in-code white-text check (PDF operator list) worth the effort, or is the font-size check enough? | Build both. The `r09` fixture uses both tricks, and the injection test (AI-19) must pass on it. |
 | Q13 | Should the Match Score support true "one of" groups (coverage = best member) instead of demoting alternatives to preferred? | Yes, in B8 if time allows: add a nullable `either_of_group` column to `job_requirements` and score each group as one requirement. Until then, preferred is the safe approximation. |
+| Q15 | How do we stop basics that resumes imply but don't state ("code review", "unit testing", "HTML/CSS") from counting as missing required skills? | In B12, measure extraction recall on these, then try (a) prompting for practices as well as tools, or (b) letting `parse-job` mark such basics preferred. Check each change against `match_pairs.json`. |
 | Q14 | Who sets `profile_versions.embedding`? | `confirm_profile` (A) sets it with `skills_centroid(confirmed skill ids)`, just as `save_job_draft` does for jobs. That keeps profile and job vectors comparable and needs no AI call. |

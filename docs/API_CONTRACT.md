@@ -194,7 +194,7 @@ One entry per job requirement. It's stored on `applications.breakdown`, returned
 | `score` | number 0–1 | `coverage × (0.6 + 0.4 × depth)`. One radar spoke |
 
 **Radar:** use one spoke per requirement, or one per category with the average `score` of that category's entries.
-**Gaps:** entries with `matched_via = "none"`. Required gaps cost 15 points each.
+**Gaps:** entries with `matched_via = "none"`. A required gap costs much more than a preferred one, because required skills make up 85% of the score (PRD §8.4, v2).
 
 ---
 
@@ -206,10 +206,10 @@ compute_match(p_profile_version_id uuid, p_job_id uuid) returns jsonb  -- stable
 **Caller:** other RPCs (`swipe`, `get_feed`, `save_requirements`) and the seed. The app doesn't call it directly.
 **Formula:** PRD §8.4 (`scoring_version` 1).
 
-**Example:** the default mock resume (`default.resume.json`, Flutter developer, years as of Oct 2026) against job01. Score **76**, band `Good`.
+**Example:** the default mock resume (`default.resume.json`, Flutter developer, years as of Oct 2026) against job01. Score **92**, band `Strong` (scoring v2).
 ```json
 {
-  "score": 76,
+  "score": 92,
   "breakdown": [
     {"skill_id": "…", "name": "Flutter", "category": "Frameworks", "required": true, "weight": 2, "min_years": 2, "candidate_years": 6.5, "matched_via": "exact", "coverage": 1.0, "depth": 1.0, "score": 1.0},
     {"skill_id": "…", "name": "Dart", "category": "Languages", "required": true, "weight": 2, "min_years": 2, "candidate_years": 4.5, "matched_via": "exact", "coverage": 1.0, "depth": 1.0, "score": 1.0},
@@ -229,7 +229,7 @@ compute_match(p_profile_version_id uuid, p_job_id uuid) returns jsonb  -- stable
   ]
 }
 ```
-Check: raw = (6 × 2 × 1.0 + 4 × 1 × 1.0) / (6 × 2 + 9 × 1) = 16 / 21 = 0.762. No required gaps, so the penalty is 0. round(76.2) = **76**.
+Check: required average = 6 × 2 × 1.0 / (6 × 2) = 1.0. Preferred average = 4 × 1 × 1.0 / 9 = 0.444. raw = 0.85 × 1.0 + 0.15 × 0.444 = 0.917, so round(91.7) = **92**.
 
 For radar testing, these entries show the other cases (a related match, partial depth, and a required gap):
 ```json
@@ -271,8 +271,8 @@ Feed Rank only orders the deck. **`match_score` never changes because of swipes 
       "salary_min": 95000,
       "salary_max": 120000,
       "published_at": "2026-10-12T14:00:00Z",
-      "match_score": 76,
-      "band": "Good",
+      "match_score": 92,
+      "band": "Strong",
       "top_matches": ["Flutter", "Dart", "Riverpod"],
       "gaps": ["Accessibility", "HIPAA Compliance", "Kotlin", "Push Notifications", "Swift"],
       "required_gaps": [],
