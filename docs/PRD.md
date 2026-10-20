@@ -681,3 +681,14 @@ The demo must work right away, with a populated recruiter board, before anyone u
 | Q13 | Should the Match Score support true "one of" groups (coverage = best member) instead of demoting alternatives to preferred? | Yes, in B8 if time allows: add a nullable `either_of_group` column to `job_requirements` and score each group as one requirement. Until then, preferred is the safe approximation. |
 | Q15 | How do we stop basics that resumes imply but don't state ("code review", "unit testing", "HTML/CSS") from counting as missing required skills? | In B12, measure extraction recall on these, then try (a) prompting for practices as well as tools, or (b) letting `parse-job` mark such basics preferred. Check each change against `match_pairs.json`. |
 | Q14 | Who sets `profile_versions.embedding`? | `confirm_profile` (A) sets it with `skills_centroid(confirmed skill ids)`, just as `save_job_draft` does for jobs. That keeps profile and job vectors comparable and needs no AI call. |
+
+### Backend foundation implementation note (A2, October 20, 2026)
+
+The migrations now implement §9.4 tables and §9.5 access boundaries with explicit
+privileges as well as RLS. Candidate profile confirmation, preference validation,
+job state, and application mutations run through A's RPC interfaces, specified
+with exact parameters in API_CONTRACT.md §7 and scheduled for A3–A11. Direct
+client updates cannot change roles, activate profile versions, mark resumes
+parsed, set company verification, publish jobs or transition applications. The
+pipeline view is caller-only; both views are security invoker. Resume object
+paths are relative to the private `resumes` bucket: `{uid}/{uuid}.pdf|docx`.
