@@ -1,0 +1,24 @@
+# Replace these team aliases with real GitHub handles or org teams before
+# enabling required code-owner reviews. Actual assignments: docs/TEAM_PLAN.md.
+# /supabase/migrations/ @PERSON_A
+# /supabase/tests/ @PERSON_A
+# /supabase/seed.sql @PERSON_A
+# /supabase/config.toml @PERSON_A
+# /supabase/functions/resume-url/ @PERSON_A
+# /supabase/functions/delete-account/ @PERSON_A
+# /supabase/functions/notify/ @PERSON_A
+# /supabase/functions/_shared/ @PERSON_B
+# /supabase/functions/parse-resume/ @PERSON_B
+# /supabase/functions/parse-job/ @PERSON_B
+# /lib/ui/ @PERSON_C
+# /lib/core/models/ @PERSON_C
+# /lib/features/onboarding/ @PERSON_C
+# /lib/features/deck/ @PERSON_C
+# /lib/features/deep_dive/ @PERSON_C
+# /lib/features/pipeline/ @PERSON_C
+# /lib/features/profile/ @PERSON_C
+# /lib/app/ @PERSON_D
+# /lib/features/auth/ @PERSON_D
+# /lib/features/company/ @PERSON_D
+# /lib/features/jobs/ @PERSON_D
+# /lib/features/board/ @PERSON_D
