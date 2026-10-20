@@ -1,0 +1,7 @@
+Sample Candidate
+Software Developer
+SKILLS
+Java, Spring Boot, MySQL
+EXPERIENCE
+Software Developer, Example Co.  2020 - 2024
+  - Built Spring Boot services on MySQL.

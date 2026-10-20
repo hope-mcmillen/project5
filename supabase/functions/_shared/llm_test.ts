@@ -23,8 +23,19 @@ Deno.test("getProvider: unset or unknown fails loudly instead of defaulting", ()
   assertThrows(() => getProvider(env({ LLM_PROVIDER: "claude" })), LlmConfigError, '"claude"');
 });
 
-Deno.test("getProvider: gemini is not wired up until B3", () => {
-  assertThrows(() => getProvider(env({ LLM_PROVIDER: "gemini" })), LlmConfigError, "not implemented");
+Deno.test("getProvider: gemini needs a key and keeps the embedding model pinned", () => {
+  assertThrows(() => getProvider(env({ LLM_PROVIDER: "gemini" })), LlmConfigError, "GEMINI_API_KEY");
+  const p = getProvider(env({ LLM_PROVIDER: "gemini", GEMINI_API_KEY: "test-key" }));
+  assertEquals(p.name, "gemini"); // no network: the SDK loads lazily on first call
+  assertThrows(
+    () => getProvider(env({ LLM_PROVIDER: "gemini", GEMINI_API_KEY: "k", LLM_EMBED_MODEL: "text-embedding-3-small" })),
+    LlmConfigError,
+    "must stay gemini-embedding-001",
+  );
+  const migrating = getProvider(
+    env({ LLM_PROVIDER: "gemini", GEMINI_API_KEY: "k", LLM_EMBED_MODEL: "other", ALLOW_EMBED_MODEL_CHANGE: "true" }),
+  );
+  assertEquals(migrating.name, "gemini");
 });
 
 Deno.test("getProvider: OpenAI/Azure were dropped in PRD v0.5", () => {

@@ -1,0 +1,63 @@
+{
+  "roles": [
+    {
+      "title": "Android Developer",
+      "start": "2023-01",
+      "end": "present",
+      "skills_used": [
+        "Jetpack Compose",
+        "Kotlin",
+        "Gradle",
+        "Android Studio"
+      ],
+      "evidence": "Android Developer, Jefferson Parish Digital — Jan 2023 – Present"
+    },
+    {
+      "title": "Senior Accountant",
+      "start": "1996-06",
+      "end": "2022-12",
+      "skills_used": [
+        "Microsoft Excel"
+      ],
+      "evidence": "Senior Accountant, Crescent City CPAs — Jun 1996 – Dec 2022"
+    }
+  ],
+  "skills": [
+    {
+      "raw": "Kotlin",
+      "evidence": "Built Jetpack Compose screens in Kotlin for a permit app.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Android SDK",
+      "evidence": "Kotlin, Android SDK, Jetpack Compose, Gradle, Android Studio",
+      "context": "skills"
+    },
+    {
+      "raw": "Jetpack Compose",
+      "evidence": "Built Jetpack Compose screens in Kotlin for a permit app.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Gradle",
+      "evidence": "Configured Gradle build flavors in Android Studio.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Android Studio",
+      "evidence": "Configured Gradle build flavors in Android Studio.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Microsoft Excel",
+      "evidence": "Built Microsoft Excel models for month-end close.",
+      "context": "role:1"
+    }
+  ],
+  "education": [
+    {
+      "level": "BS",
+      "field": "Accounting"
+    }
+  ]
+}

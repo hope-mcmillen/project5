@@ -203,7 +203,7 @@ All are `security definer` with `set search_path = public`, and each checks the 
 | `advance(p_application_id, p_note = null)` | recruiter | A | → INTERVIEW_REQUESTED |
 | `reject(p_application_id, p_reason = null)` / `undo_reject(p_application_id)` | recruiter | A | Undo works for 10 s |
 | `get_interview_list(p_job_id = null) → jsonb[]` | recruiter | A | Advanced candidates, with identity |
-| `match_skills(p_embedding vector, p_threshold = 0.88, p_k = 3)` | Edge Functions | B | Nearest canonical skills |
+| `match_skills(p_embedding vector, p_threshold = 0.89, p_k = 3)` | Edge Functions | B | Nearest canonical skills |
 | `compute_match(p_profile_version_id, p_job_id) → {score, breakdown}` | other RPCs | B | PRD §8.4 formula |
 | `get_feed(p_limit = 20, p_cursor text = null) → {cards jsonb[], next_cursor}` | candidate | B | Hard filters, then vector prefilter, then score, then Feed Rank |
 | `register_device(p_token, p_platform)` | any | A | *(Later)* |

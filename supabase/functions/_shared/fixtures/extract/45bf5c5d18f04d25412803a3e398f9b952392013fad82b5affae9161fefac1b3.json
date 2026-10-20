@@ -1,0 +1,93 @@
+{
+  "roles": [
+    {
+      "title": "Backend Engineer",
+      "start": "2021-01",
+      "end": "present",
+      "skills_used": [
+        "REST APIs",
+        "FastAPI",
+        "PostgreSQL",
+        "Celery",
+        "Redis",
+        "Docker",
+        "AWS ECS"
+      ],
+      "evidence": "Backend Engineer, Tidewater Payments — Jan 2021 – Present"
+    },
+    {
+      "title": "Software Developer",
+      "start": "2018-07",
+      "end": "2020-12",
+      "skills_used": [
+        "Django",
+        "SQLAlchemy",
+        "pytest"
+      ],
+      "evidence": "Software Developer, Gulf Coast Insurance Group — Jul 2018 – Dec 2020"
+    }
+  ],
+  "skills": [
+    {
+      "raw": "Python",
+      "evidence": "Python",
+      "context": "skills"
+    },
+    {
+      "raw": "FastAPI",
+      "evidence": "Designed REST APIs in FastAPI serving 3M requests per day.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Django",
+      "evidence": "Maintained a Django claims portal and its SQLAlchemy reporting scripts.",
+      "context": "role:1"
+    },
+    {
+      "raw": "PostgreSQL",
+      "evidence": "Led performance tuning of PostgreSQL queries and indexes, dropping p95 latency from 900ms to 120ms.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Redis",
+      "evidence": "Moved nightly settlement jobs to Celery workers backed by Redis.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Celery",
+      "evidence": "Moved nightly settlement jobs to Celery workers backed by Redis.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Docker",
+      "evidence": "Containerized services with Docker and deployed them on AWS ECS.",
+      "context": "role:0"
+    },
+    {
+      "raw": "AWS",
+      "evidence": "AWS",
+      "context": "skills"
+    },
+    {
+      "raw": "pytest",
+      "evidence": "Wrote pytest suites that raised coverage from 40% to 85%.",
+      "context": "role:1"
+    },
+    {
+      "raw": "REST APIs",
+      "evidence": "Designed REST APIs in FastAPI serving 3M requests per day.",
+      "context": "role:0"
+    },
+    {
+      "raw": "SQLAlchemy",
+      "evidence": "Maintained a Django claims portal and its SQLAlchemy reporting scripts.",
+      "context": "role:1"
+    }
+  ],
+  "education": [
+    {
+      "level": "B.S.",
+      "field": "Computer Engineering"
+    }
+  ]
+}

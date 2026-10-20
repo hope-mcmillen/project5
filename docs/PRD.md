@@ -1,10 +1,23 @@
 # ResuRhombus: Product Requirements & Architecture
 
-**Version:** 0.5 · **Updated:** 2026-10-18 · **Owner:** Kameron Arceneaux
+**Version:** 0.8 · **Updated:** 2026-10-19 · **Owner:** Kameron Arceneaux
 
 ---
 
 ## 0. Changelog
+
+### v0.8 decisions
+- **The feed prefilters by skill overlap, not vector distance.** Measured on 600 jobs, averaged ("centroid") vectors were too generic: score-0 DevOps jobs sat closer to a Flutter developer than a score-100 Flutter job, so the best match fell outside the "nearest 500". `get_feed` now keeps the 500 jobs whose requirement weight the candidate covers best (exact or related skills), and uses vector distance only as a tie-break. A job sharing no skill would score 0, so it's never shown, even with "show stretch roles". Q14 (profile vectors) matters less as a result. See §8.4 and §8.6.
+- **Feed Rank v1 details:** freshness falls from 1 to 0 over 30 days (in whole days, so ranks are stable within a day). Exploration is a per-day hash of the job id. Affinity starts neutral at 0.5: a "company" pass zeroes that company, "salary" passes favor better-paying jobs, two or more "location" passes favor remote jobs, and two or more "stack" passes favor closer matches. None of this touches the Match Score.
+
+### v0.7 decisions
+- **Match Score v2: 85% required, 15% preferred, no extra penalty.** v1 averaged all requirements together and then subtracted 0.15 per missing required skill. Against 74 hand-labeled resume × job pairs (`supabase/tests/fixtures/match_pairs.json`), v1 agreed with human bands 70% of the time and 0% on pairs humans rated Stretch or better. The Flutter developer scored 45 for the Flutter job, because job descriptions list about 10 nice-to-haves that outweighed the must-haves, and missing must-haves were counted twice. v2 agrees 84% of the time (45% on Stretch or better) and halves the mean band error (0.47 → 0.20). `scoring_version` is now `v2`. See §8.4.
+- **Most remaining disagreements are extraction recall, not the formula.** Resumes rarely state basics like "code review", "unit testing", "HTML/CSS", or "data modeling", so those show up as missing required skills. Q15 tracks it.
+
+### v0.6 decisions
+- **"X or Y" job requirements are alternatives.** When one sentence lists skills joined by "or" ("Riverpod or Bloc", "FastAPI or Django"), `parse-job` saves them as *preferred* and tags them with an `either_of_group` hint for the review screen. Saving them all as required would charge a candidate the 15-point missing-required penalty for the option they didn't pick. True "one of" scoring is open question Q13.
+- **Job (and profile) retrieval vectors come from the taxonomy, not the AI.** `jobs.embedding` is the unit-length average of its requirements' skill embeddings (`skills_centroid()`, migration `20261018220000`). It's recomputed in SQL whenever requirements change, with no AI call. Profiles should do the same from their confirmed skills (Q14). Vectors are still only used for the `get_feed` prefilter (§8.4).
+- **`parse-job` enforces the requirement caps itself.** Gemini regularly proposes 14 to 19 requirements. The first 8 required stay required, extra required ones become preferred, and anything past 15 is returned as `trimmed[]` (unsaved) for the recruiter to swap in (R-JOB-1).
 
 ### v0.5 decisions
 - **Google Gemini (AI Studio API key) is the only LLM provider.** It replaces the OpenAI API and Azure OpenAI from v0.4, because that's the key the team has. The adapter interface stays, so another provider could still be added later. `mock` remains for tests, CI, and seeding. See §9.3.
@@ -386,11 +399,11 @@ The LLM returns **facts with evidence**. It never returns scores and never does 
 - Keep a **canonical skill taxonomy** of about 500 to 2,000 entries, seeded from a public source (e.g., O*NET / ESCO tech skills, or Stack Overflow survey tags). Each entry has an id, name, category, aliases, and an embedding.
 - Normalization order:
   1. Exact or alias match
-  2. Embedding nearest neighbor with cosine at least 0.88
+  2. Embedding nearest neighbor with cosine at least **0.89** (tuned on 75 labeled strings in `supabase/tests/fixtures/alias_pairs.json`: 96% correct, no false maps. Skills are embedded as "name: aliases".)
   3. Otherwise mark as `unmapped`. Unmapped skills are kept for the profile but not scored, and they go into a review queue.
 - A `skill_relation` table holds partial credit for related skills (e.g., MySQL→PostgreSQL 0.6, Java→Kotlin 0.5). The table is curated, not learned.
 
-### 8.4 Match Score formula (v1)
+### 8.4 Match Score formula (v2)
 
 For a job with requirements *r* (each has a canonical skill, minimum years *yᵣ*, and weight *wᵣ*; Required weight is 2, Preferred is 1):
 
@@ -398,15 +411,18 @@ For a job with requirements *r* (each has a canonical skill, minimum years *yᵣ
 coverage(r)  = max over candidate skills c of relation(c, r.skill)   // 1.0 exact, 0–0.9 related, 0 none
 depth(r)     = yᵣ == 0 ? 1 : min(1, y_c / yᵣ)                        // y_c null → 0.5
 score(r)     = coverage(r) × (0.6 + 0.4 × depth(r))                 // having the skill matters more than years
-raw          = Σ wᵣ·score(r) / Σ wᵣ
-penalty      = 0.15 × (# required skills with coverage = 0)
-Match Score  = round(100 × clamp(raw − penalty, 0, 1))
+req          = Σ wᵣ·score(r) / Σ wᵣ   over required r       // pref: the same over preferred r
+raw          = 0.85 × req + 0.15 × pref                        // only one group listed → that group's average
+Match Score  = round(100 × clamp(raw, 0, 1))                    // rounded to 6 decimals first (exact .5 rounds up)
 ```
 
+- A missing required skill costs a lot through the 85% share (one of five required ≈ −17 points). v1's extra 0.15 penalty counted it twice and was removed in v0.7.
+- Implemented in SQL as `public.compute_match()` with a tested TypeScript mirror (`_shared/score.ts`). Both must change together. `deno task tune:score` re-runs the sweep against the labeled pairs, and the regression test fails below 80% band agreement.
+
 - Per-requirement `score(r)` values feed the **radar axes** directly. For category axes, average the scores within each category.
-- **Vectors are used for retrieval, not for the final number.** A pgvector ANN query (job-requirements embedding vs. profile embedding) selects about the top 500 candidate jobs for a feed. Those are then scored exactly with the formula above.
+- **Retrieval narrows by skill overlap; the score decides.** `get_feed` keeps about the 500 jobs whose requirement weight the candidate covers best (exact or related skills), with vector distance only as a tie-break. Those are then scored exactly with the formula above. (v0.8: pure vector retrieval was measured to drop the best matches. See the changelog.)
 - Scores are recalculated when the profile changes, the job's requirements change, or `scoring_version` is bumped.
-- Before launch, tune weights against a small labeled set of about 50 resume×job pairs rated by hand.
+- Weights were tuned against 74 hand-labeled resume×job pairs (v0.7). Re-tune when the taxonomy, extraction, or bands change.
 
 ### 8.5 LLM safety & robustness
 - **Prompt injection:** Resume and job description text is wrapped as untrusted data, and the system prompt says to extract facts only. The output must match a strict JSON schema (structured outputs). The LLM has **no influence on the score** beyond the facts it extracts. Any skill whose evidence string doesn't appear in the source text is dropped.
@@ -419,7 +435,8 @@ Match Score  = round(100 × clamp(raw − penalty, 0, 1))
 feed_rank = 0.70·match + 0.15·freshness + 0.10·preference_affinity + 0.05·exploration
 ```
 - `preference_affinity` comes from pass reasons and swipe history, e.g., a candidate who keeps passing remote-optional jobs at large companies. It's a simple per-user weight vector in v1. An ML model is Phase 3.
-- Diversity rule: no more than 2 cards in a row from the same company.
+- Diversity rule: no more than 2 cards in a row from the same company. Applied within each page, with the run carried across pages in the cursor (best effort: if only one company is left, it repeats).
+- v1 parts (`feed_freshness`, `feed_affinity`, `feed_exploration` in migration `20261019120000_get_feed.sql`): freshness falls from 1 to 0 over 30 days. Exploration is a per-day hash. Affinity starts at 0.5, a "company" pass sets it to 0, "salary" passes add 0.25 for better-paying jobs, two or more "location" passes add 0.25 for remote jobs, and two or more "stack" passes add up to ±0.125 by match.
 
 ### 8.7 Compliance notes (verify with counsel before launch)
 - Automated scoring in hiring may be regulated. Examples are NYC Local Law 144 (bias audits for automated employment decision tools) and the EU AI Act, which classifies employment AI as high-risk.
@@ -505,7 +522,7 @@ Two implementations exist: `GeminiProvider` (official `@google/genai` SDK) and `
 |---|---|---|
 | `LLM_PROVIDER` | `gemini` \| `mock` | Picks the implementation. No default: unset fails loudly. |
 | `GEMINI_API_KEY` | | Google AI Studio key. Local `.env` (gitignored) or `supabase secrets set`. |
-| `LLM_EXTRACT_MODEL` | `gemini-2.5-flash` | Any current Flash-class model. Verify available model names before launch. |
+| `LLM_EXTRACT_MODEL` | `gemini-3.8-flash` | Any current Flash-class model. Verify available model names before launch. |
 | `LLM_EMBED_MODEL` | `gemini-embedding-001` | **Pinned** (see below) |
 | `LLM_DAILY_TOKEN_BUDGET` | `200000` | Budget guard |
 
@@ -661,3 +678,6 @@ The demo must work right away, with a populated recruiter board, before anyone u
 | Q7 | Does withdrawing an application free a slot in the daily cap? | No. This prevents gaming. |
 | Q11 | Do we need a billing-enabled Gemini key, given free-tier data use and rate limits (§9.3)? | Free tier for development and the class demo with synthetic data. Switch to a billing-enabled key before any real user uploads a resume. |
 | Q12 | Is the in-code white-text check (PDF operator list) worth the effort, or is the font-size check enough? | Build both. The `r09` fixture uses both tricks, and the injection test (AI-19) must pass on it. |
+| Q13 | Should the Match Score support true "one of" groups (coverage = best member) instead of demoting alternatives to preferred? | Yes, in B8 if time allows: add a nullable `either_of_group` column to `job_requirements` and score each group as one requirement. Until then, preferred is the safe approximation. |
+| Q15 | How do we stop basics that resumes imply but don't state ("code review", "unit testing", "HTML/CSS") from counting as missing required skills? | In B12, measure extraction recall on these, then try (a) prompting for practices as well as tools, or (b) letting `parse-job` mark such basics preferred. Check each change against `match_pairs.json`. |
+| Q14 | Who sets `profile_versions.embedding`? | `confirm_profile` (A) sets it with `skills_centroid(confirmed skill ids)`, just as `save_job_draft` does for jobs. That keeps profile and job vectors comparable and needs no AI call. |

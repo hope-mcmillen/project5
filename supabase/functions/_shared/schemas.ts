@@ -15,7 +15,7 @@
 // extractions are keyed by (file_hash, schema version).
 import { z } from "npm:zod@3.25.76";
 
-export const EXTRACTION_SCHEMA_VERSION = 1;
+export const EXTRACTION_SCHEMA_VERSION = 2; // v2: one skill per entry (split grouped skills)
 
 const nullableString = (description: string) => ({ type: ["string", "null"], description });
 
@@ -42,7 +42,8 @@ export const resumeJsonSchema = {
           skills_used: {
             type: "array",
             items: { type: "string" },
-            description: "Technical skills this role's text shows being used, as written in the resume.",
+            description:
+              "Individual technical skills this role's text shows being used, one name per item, as written.",
           },
           evidence: { type: "string", description: "Verbatim quote from this role's text." },
         },
@@ -50,14 +51,22 @@ export const resumeJsonSchema = {
     },
     skills: {
       type: "array",
-      description: "Every technical skill in the resume, once each.",
+      description:
+        'Every technical skill in the resume, once each. One entry per individual skill: split lists such as "Flutter and Dart" or "Firebase (Auth, Firestore)" into separate entries.',
       items: {
         type: "object",
         additionalProperties: false,
         required: ["raw", "evidence", "context"],
         properties: {
-          raw: { type: "string", description: "The skill exactly as written." },
-          evidence: { type: "string", description: "Verbatim quote from the resume that mentions the skill." },
+          raw: {
+            type: "string",
+            description: 'A single skill name as written, e.g. "Flutter", never "Flutter and Dart".',
+          },
+          evidence: {
+            type: "string",
+            description:
+              "Verbatim quote from the resume that mentions the skill. Split skills may share the same quote.",
+          },
           context: nullableString('"role:<index>" if it comes from a role, "skills" if only listed, else null.'),
         },
       },
@@ -124,16 +133,23 @@ export const jobJsonSchema = {
     salary_max: { type: ["integer", "null"], description: "Annual USD. null if not stated." },
     requirements: {
       type: "array",
-      description: "Technical skills the job asks for, once each.",
+      description:
+        'Technical skills the job asks for, once each. One entry per individual skill: split lists such as "Flutter and Dart" or "Firebase (Auth, Firestore)" into separate entries.',
       items: {
         type: "object",
         additionalProperties: false,
         required: ["raw", "required_hint", "min_years", "evidence"],
         properties: {
-          raw: { type: "string", description: "The skill exactly as written." },
+          raw: {
+            type: "string",
+            description: 'A single skill name as written, e.g. "Flutter", never "Flutter and Dart".',
+          },
           required_hint: { type: "string", enum: ["required", "preferred"] },
           min_years: { type: ["number", "null"], description: "Minimum years if stated, else null." },
-          evidence: { type: "string", description: "Verbatim quote from the description." },
+          evidence: {
+            type: "string",
+            description: "Verbatim quote from the description. Split skills may share the same quote.",
+          },
         },
       },
     },

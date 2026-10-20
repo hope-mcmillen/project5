@@ -1,0 +1,107 @@
+{
+  "title": "DevOps / Site Reliability Engineer",
+  "location": null,
+  "remote": "remote",
+  "job_type": "full_time",
+  "sponsorship": true,
+  "salary_min": 130000,
+  "salary_max": 160000,
+  "requirements": [
+    {
+      "raw": "DevOps",
+      "required_hint": "required",
+      "min_years": 4,
+      "evidence": "4+ years in DevOps or SRE roles."
+    },
+    {
+      "raw": "SRE",
+      "required_hint": "required",
+      "min_years": 4,
+      "evidence": "4+ years in DevOps or SRE roles."
+    },
+    {
+      "raw": "Kubernetes",
+      "required_hint": "required",
+      "min_years": 3,
+      "evidence": "3+ years running Kubernetes in production."
+    },
+    {
+      "raw": "Terraform",
+      "required_hint": "required",
+      "min_years": 2,
+      "evidence": "2+ years of Terraform."
+    },
+    {
+      "raw": "AWS",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "AWS."
+    },
+    {
+      "raw": "Docker",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Docker."
+    },
+    {
+      "raw": "Linux administration",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Linux administration and Bash scripting."
+    },
+    {
+      "raw": "Bash scripting",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "Linux administration and Bash scripting."
+    },
+    {
+      "raw": "CI/CD pipeline design",
+      "required_hint": "required",
+      "min_years": null,
+      "evidence": "CI/CD pipeline design."
+    },
+    {
+      "raw": "Helm",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Helm and Argo CD."
+    },
+    {
+      "raw": "Argo CD",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Helm and Argo CD."
+    },
+    {
+      "raw": "Prometheus",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Prometheus and Grafana."
+    },
+    {
+      "raw": "Grafana",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Prometheus and Grafana."
+    },
+    {
+      "raw": "Go",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Go or Python for tooling."
+    },
+    {
+      "raw": "Python",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Go or Python for tooling."
+    },
+    {
+      "raw": "Security hardening",
+      "required_hint": "preferred",
+      "min_years": null,
+      "evidence": "Security hardening experience."
+    }
+  ]
+}

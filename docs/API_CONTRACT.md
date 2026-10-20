@@ -65,7 +65,7 @@ The function returns when the row reaches `READY` or `FAILED` (60 s hard limit).
   "unmapped_count": 2
 }
 ```
-`cached` is `true` when the same file (by SHA-256) with the same `EXTRACTION_SCHEMA_VERSION` was parsed before, so no AI call was made.
+`cached` is `true` when the same file (SHA-256 computed by the server from the stored bytes, never the client's `file_hash`) with the same `EXTRACTION_SCHEMA_VERSION` was parsed before, so no AI call was made. Calling `parse-resume` again on a `READY` resume returns its latest draft with `cached: true` and doesn't re-parse.
 
 **Response `200` (failed)**: parsing failures are a normal outcome, not an HTTP error. The app shows the manual fallback (`create_manual_profile`).
 ```json
@@ -84,10 +84,12 @@ The function returns when the row reaches `READY` or `FAILED` (60 s hard limit).
 
 | HTTP | `code` | When |
 |---|---|---|
+| 400 | `invalid_request` | Body isn't JSON or `resume_id` isn't a UUID |
 | 401 | `unauthorized` | Missing or invalid JWT |
-| 403 | `not_owner` | Resume belongs to someone else |
+| 403 | `not_owner` | Resume (or its storage folder) belongs to someone else |
 | 404 | `resume_not_found` | No such `resume_id` |
-| 409 | `already_parsing` | Row is already in a parsing state |
+| 409 | `already_parsing` | Row is already in a parsing state (a run stuck for over 2 minutes can be retried) |
+| 500 | `config_error` / `internal` | Server misconfiguration or an unexpected error. The row is still left `FAILED`, never mid-parse. |
 
 **Reading the draft:** after `READY`, read the draft skills with a normal select on `candidate_skills` for `profile_version_id` (RLS: own rows only). Each row:
 ```json
@@ -117,7 +119,7 @@ Turns a pasted job description into **draft** requirements. The recruiter review
 { "job_id": "…" }
 ```
 
-**Response `200`**: example from `supabase/seed/jobs/job01_flutter_mobile.txt` (mock fixture `default.job.json`).
+**Response `200`**: from a real Gemini run on `supabase/seed/jobs/job01_flutter_mobile.txt` (shortened).
 ```json
 {
   "job_id": "…",
@@ -133,41 +135,43 @@ Turns a pasted job description into **draft** requirements. The recruiter review
   },
   "requirements": [
     { "id": "…", "skill_id": "…", "name": "Flutter", "category": "Frameworks", "required": true, "min_years": 2, "weight": 2,
-      "evidence": "2+ years building production apps with Flutter and Dart." },
+      "evidence": "2+ years building production apps with Flutter and Dart.", "either_of_group": null },
     { "id": "…", "skill_id": "…", "name": "Dart", "category": "Languages", "required": true, "min_years": 2, "weight": 2,
-      "evidence": "2+ years building production apps with Flutter and Dart." },
-    { "id": "…", "skill_id": "…", "name": "State Management", "category": "Domain", "required": true, "min_years": 0, "weight": 2,
-      "evidence": "Experience with a state management approach (Riverpod or Bloc)." },
+      "evidence": "2+ years building production apps with Flutter and Dart.", "either_of_group": null },
     { "id": "…", "skill_id": "…", "name": "REST APIs", "category": "Tools", "required": true, "min_years": 0, "weight": 2,
-      "evidence": "Experience consuming REST APIs." },
-    { "id": "…", "skill_id": "…", "name": "Git", "category": "Tools", "required": true, "min_years": 0, "weight": 2,
-      "evidence": "Comfortable with Git and code review." },
-    { "id": "…", "skill_id": "…", "name": "Code Review", "category": "Domain", "required": true, "min_years": 0, "weight": 2,
-      "evidence": "Comfortable with Git and code review." },
-    { "id": "…", "skill_id": "…", "name": "Firebase", "category": "Cloud/DevOps", "required": false, "min_years": 0, "weight": 1,
-      "evidence": "Firebase (Auth, Firestore, push notifications)." },
+      "evidence": "Experience consuming REST APIs.", "either_of_group": null },
     { "id": "…", "skill_id": "…", "name": "Riverpod", "category": "Frameworks", "required": false, "min_years": 0, "weight": 1,
-      "evidence": "Own state management with Riverpod and keep our offline-first appointment cache reliable." }
+      "evidence": "Experience with a state management approach (Riverpod or Bloc).", "either_of_group": 1 },
+    { "id": "…", "skill_id": "…", "name": "Bloc", "category": "Frameworks", "required": false, "min_years": 0, "weight": 1,
+      "evidence": "Experience with a state management approach (Riverpod or Bloc).", "either_of_group": 1 },
+    { "id": "…", "skill_id": "…", "name": "Swift", "category": "Languages", "required": false, "min_years": 0, "weight": 1,
+      "evidence": "Native iOS (Swift) or Android (Kotlin) experience.", "either_of_group": 2 }
   ],
   "unmapped": [
-    { "raw": "WCAG audits", "required_hint": "preferred", "min_years": null, "evidence": "…" }
-  ]
+    { "raw": "Auth", "required_hint": "preferred", "min_years": null, "evidence": "Firebase (Auth, Firestore, push notifications)." }
+  ],
+  "trimmed": []
 }
 ```
-- `requirements` are already saved as draft `job_requirements` rows (weight 2 if required, 1 if preferred), at most 15 total and 8 required. The full fixture has 15. This example is shortened.
+- `requirements` are already saved as draft `job_requirements` rows (weight 2 if required, 1 if preferred), required first, at most **15 total and 8 required**. Saving also pre-fills the job fields and sets `jobs.embedding`.
 - `min_years` is `0` when the description doesn't state a minimum.
+- `either_of_group`: requirements with the same number were alternatives in one sentence ("Riverpod **or** Bloc"). They're saved as *preferred* so a candidate isn't penalized for missing the one they didn't pick. Show them as "one of". It's `null` for ordinary requirements. Not stored in the database: it's only a hint for the review screen.
 - `unmapped` lists skills the AI found that aren't in the taxonomy. They aren't saved, because only mapped skills can be scored. Show them so the recruiter can pick the closest skill or ignore them.
-- Job fields are only pre-filled where the description states them. Otherwise they're `null`.
+- `trimmed` lists mapped requirements cut by the 15-requirement cap (lowest priority first). Not saved. The recruiter can swap one in for another requirement.
+- Job fields are only pre-filled where the description states them and the recruiter hasn't already set them. Re-parsing a draft replaces its requirements.
+- Requirements whose quote isn't really in the description, or reads like an instruction to an AI, are dropped silently.
 
 **Errors**
 
 | HTTP | `code` | When |
 |---|---|---|
+| 400 | `invalid_request` | Body isn't JSON or `job_id` isn't a UUID |
 | 401 | `unauthorized` | Missing or invalid JWT |
 | 403 | `not_company_recruiter` | Caller isn't a recruiter in the job's company |
 | 404 | `job_not_found` | No such `job_id` |
 | 409 | `job_not_draft` | Job is already published (use `save_requirements` to edit) |
-| 200 | (`parse_status: "FAILED"`, `failure_reason`) | Same reasons as `parse-resume`, except `unreadable_scan` |
+| 500 | `config_error` / `internal` | Server misconfiguration or an unexpected error (`parse_status` is left `FAILED`) |
+| 200 | (`parse_status: "FAILED"`, `failure_reason`) | `timeout`, `budget_exceeded`, or `internal`. The draft's previous requirements, if any, are kept. |
 
 ---
 
@@ -190,7 +194,7 @@ One entry per job requirement. It's stored on `applications.breakdown`, returned
 | `score` | number 0–1 | `coverage × (0.6 + 0.4 × depth)`. One radar spoke |
 
 **Radar:** use one spoke per requirement, or one per category with the average `score` of that category's entries.
-**Gaps:** entries with `matched_via = "none"`. Required gaps cost 15 points each.
+**Gaps:** entries with `matched_via = "none"`. A required gap costs much more than a preferred one, because required skills make up 85% of the score (PRD §8.4, v2).
 
 ---
 
@@ -202,10 +206,10 @@ compute_match(p_profile_version_id uuid, p_job_id uuid) returns jsonb  -- stable
 **Caller:** other RPCs (`swipe`, `get_feed`, `save_requirements`) and the seed. The app doesn't call it directly.
 **Formula:** PRD §8.4 (`scoring_version` 1).
 
-**Example:** the default mock resume (`default.resume.json`, Flutter developer, years as of Oct 2026) against job01. Score **76**, band `Good`.
+**Example:** the default mock resume (`default.resume.json`, Flutter developer, years as of Oct 2026) against job01. Score **92**, band `Strong` (scoring v2).
 ```json
 {
-  "score": 76,
+  "score": 92,
   "breakdown": [
     {"skill_id": "…", "name": "Flutter", "category": "Frameworks", "required": true, "weight": 2, "min_years": 2, "candidate_years": 6.5, "matched_via": "exact", "coverage": 1.0, "depth": 1.0, "score": 1.0},
     {"skill_id": "…", "name": "Dart", "category": "Languages", "required": true, "weight": 2, "min_years": 2, "candidate_years": 4.5, "matched_via": "exact", "coverage": 1.0, "depth": 1.0, "score": 1.0},
@@ -225,7 +229,7 @@ compute_match(p_profile_version_id uuid, p_job_id uuid) returns jsonb  -- stable
   ]
 }
 ```
-Check: raw = (6 × 2 × 1.0 + 4 × 1 × 1.0) / (6 × 2 + 9 × 1) = 16 / 21 = 0.762. No required gaps, so the penalty is 0. round(76.2) = **76**.
+Check: required average = 6 × 2 × 1.0 / (6 × 2) = 1.0. Preferred average = 4 × 1 × 1.0 / 9 = 0.444. raw = 0.85 × 1.0 + 0.15 × 0.444 = 0.917, so round(91.7) = **92**.
 
 For radar testing, these entries show the other cases (a related match, partial depth, and a required gap):
 ```json
@@ -267,8 +271,8 @@ Feed Rank only orders the deck. **`match_score` never changes because of swipes 
       "salary_min": 95000,
       "salary_max": 120000,
       "published_at": "2026-10-12T14:00:00Z",
-      "match_score": 76,
-      "band": "Good",
+      "match_score": 92,
+      "band": "Strong",
       "top_matches": ["Flutter", "Dart", "Riverpod"],
       "gaps": ["Accessibility", "HIPAA Compliance", "Kotlin", "Push Notifications", "Swift"],
       "required_gaps": [],
@@ -280,7 +284,10 @@ Feed Rank only orders the deck. **`match_score` never changes because of swipes 
 ```
 - `top_matches`: up to 3 matched requirement names, required first, then by `score`.
 - `gaps`: every requirement with `matched_via = "none"`. `required_gaps` is the required subset, for the low-match warning.
-- `next_cursor` is **opaque**. Pass it back unchanged. It's `null` when there are no more cards.
+- `next_cursor` is **opaque**. Pass it back unchanged. It's `null` when there are no more cards. Pages never repeat or skip a card, as long as the cursor is used the same day. A new day re-ranks, so start again from `null`.
+- `p_limit` is clamped to 1–50.
+- Only jobs sharing at least one skill with the profile (exactly or via a related skill) are considered, so "show stretch roles" never shows score-0 jobs.
+- Measured: a 20-card page over 600 open jobs takes about 85 ms (target p95 < 300 ms).
 - An empty `cards` array with `next_cursor: null` means the deck is empty (show the empty state).
 
 **Errors:** `not_candidate`, `profile_not_confirmed` (send the user to onboarding), `invalid_cursor`.

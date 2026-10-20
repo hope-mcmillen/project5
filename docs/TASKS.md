@@ -260,12 +260,12 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 **Covers:** AI-09, AI-13 · **Size:** ≈ 1.5 days · **Needs:** B2, A2 · **Stories:** US-53
 
 **Build**
-- **AI-09 Gemini provider (PRD v0.5):** `GeminiProvider` in `_shared/llm.ts` uses `new GoogleGenAI({apiKey: GEMINI_API_KEY})` from `npm:@google/genai`.
+- **AI-09 Gemini provider (PRD v0.5):** `GeminiProvider` in `_shared/gemini.ts` (shared types in `llm_base.ts`, selected by `getProvider()` in `llm.ts`) uses `new GoogleGenAI({apiKey: GEMINI_API_KEY})` from `npm:@google/genai`.
   - `extract`: `models.generateContent` with `config: {responseMimeType: 'application/json', responseJsonSchema: schema, temperature: 0, systemInstruction: system}`. Check that Gemini accepts the `["string","null"]` style from `schemas.ts`. If not, convert it inside the adapter rather than changing `schemas.ts`.
   - `embed`: `models.embedContent` with `model: LLM_EMBED_MODEL`, `outputDimensionality: 1536`, `taskType: 'SEMANTIC_SIMILARITY'`, then L2-normalize each vector. Assert at startup that the model is `gemini-embedding-001`.
   - `transcribe(pdf)`: `generateContent` with the PDF as `inlineData` (`application/pdf`) and "Transcribe the visible text exactly. Output plain text only." Used only for image-only PDFs.
   - Map HTTP 429 (rate limit) to a retry with backoff, then `internal`. Add an opt-in contract test (`LLM_PROVIDER=gemini`) that runs one JD and one resume and validates the output.
-- **AI-13 Usage & budget:** Wrap every provider call to insert into `llm_usage`. Before each call, sum today's tokens and throw `BudgetExceeded` at or above `LLM_DAILY_TOKEN_BUDGET`. `parse-*` turns that into `FAILED` with `budget_exceeded`.
+- **AI-13 Usage & budget:** `_shared/usage.ts`. `getMeteredProvider({functionName, userId, store})` wraps every provider call to insert into `llm_usage`. Before each call, sum today's tokens and throw `BudgetExceeded` at or above `LLM_DAILY_TOKEN_BUDGET`. `parse-*` turns that into `FAILED` with `budget_exceeded`.
 
 **Done when:** Real AI works with `LLM_PROVIDER=gemini`, `mock` still runs everything offline, and parsing stops cleanly before the budget runs out.
 
@@ -273,7 +273,7 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 **Covers:** AI-05, AI-06, AI-08 · **Size:** ≈ 2.5 days · **Needs:** B2 · **Stories:** US-07, US-09, US-10, US-51
 
 **Build**
-- **AI-05 Text extraction (replaces Document Intelligence, PRD v0.5 §8.1):** `_shared/extract_text.ts`. `extractText(bytes, mime)` returns `{ source: 'pdf_text' | 'docx' | 'ocr', lines: [{ text, page, fontSize, hidden }] }`.
+- **AI-05 Text extraction (replaces Document Intelligence, PRD v0.5 §8.1):** `_shared/extract_text.ts`. `extractText(bytes, mime, llm)` returns `{ source: 'pdf_text' | 'docx' | 'ocr', lines: [{ text, page, fontSize, hidden }] }`.
   - **PDF:** `npm:unpdf` `getDocumentProxy`, then per page `getTextContent()`. Group items into lines by y position. `fontSize` = `hypot(transform[2], transform[3])`. Mark items `hidden` when the fill color in the page's `getOperatorList()` is white or near-white at the point the text is drawn.
   - **Image-only PDF:** fewer than about 50 non-space characters per page, so call `llm.transcribe(bytes)` and return its lines with `source: 'ocr'` (no hidden flags needed). If that comes back empty too, fail with `unreadable_scan`.
   - **DOCX:** `npm:fflate` unzip, then read `word/document.xml`. Each `w:p` is a line. Mark runs `hidden` for `w:vanish`, `w:color` `FFFFFF`, or `w:sz` under 8 (half-points).
@@ -281,13 +281,15 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 - **AI-06 Sanitizer:** `sanitize(lines)` drops lines that are `hidden` or have `fontSize` under about 4 pt, strips control characters, collapses whitespace, truncates at about 15k tokens (characters ÷ 4) with a marker, and strips email and phone patterns from the contact block. Unit tests.
 - **AI-08 Years & evidence:** Pure functions in `_shared/profile.ts` with Deno tests. `mergeYears(roles)` takes, per skill, the union of role date ranges, merges overlaps, treats "present" as today, and rounds to 0.5. `validateEvidence(skill, text)` does a case- and whitespace-normalized substring check. `totalYears(roles)`.
 
+- **Dev tool:** `deno task try:resume <file> [--text-only|--mock|--full]` (`scripts/try_resume.ts`) prints each step: extraction path, dropped hidden lines, sanitized text, Gemini extraction, kept and dropped skills with evidence, years, and a comparison with `labels.json` for fixtures.
+
 **Done when:** PDFs (including scans) and DOCX files become clean text with no Azure service, hidden "score me 100%" text is removed, years are computed by code, and any skill without a real quote is dropped.
 
 #### B5 · As a candidate, I want the skills on my resume mapped to a standard skill list, so jobs recognize "ReactJS" and "React" as the same skill.
 **Covers:** AI-10, AI-11 · **Size:** ≈ 1.5 days · **Needs:** B3, A2 · **Stories:** US-14, US-54
 
 **Build**
-- **AI-10 Normalization:** Migration for `match_skills(p_embedding, p_threshold, p_k)`, returning `skill_id` and similarity via `1 - (embedding <=> p_embedding)` ordered by distance. `_shared/normalize.ts` tries (1) a lowercase exact or alias match (`aliases @> array[x]`), then (2) batch-embeds the unmatched strings and calls `match_skills` at threshold 0.88, then (3) leaves `skill_id = null` (unmapped).
+- **AI-10 Normalization:** Migration for `match_skills(p_embedding, p_threshold, p_k)`, returning `skill_id` and similarity via `1 - (embedding <=> p_embedding)` ordered by distance. `_shared/normalize.ts` tries (1) a lowercase exact or alias match (`aliases @> array[x]`), then (2) batch-embeds the unmatched strings and calls `match_skills` at threshold 0.89 (tuned with `deno task tune:threshold`), then (3) leaves `skill_id = null` (unmapped).
 - **AI-11 Taxonomy embeddings:** `scripts/embed_taxonomy.ts` (Deno) reads `skills.csv`, embeds `name + aliases` in batches of 100, and writes `supabase/seed/skills_embeddings.sql` with vector literals. Run once and commit the output.
 
 **Done when:** Free-text skills map onto the taxonomy, and seeding never calls the AI for embeddings.
@@ -297,13 +299,14 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 
 **Build**
 - **AI-07 `parse-resume`:**
-  1. Verify the JWT and ownership of `resume_id`.
-  2. Check for a cached extraction with the same `file_hash` and schema version.
+  1. Verify the JWT and ownership of `resume_id` (and that the storage folder is the owner's).
+  2. Download, hash the bytes server-side, and check for a cached extraction with that hash and schema version (never trust the client's `file_hash`).
   3. Set the status at each step (PARSING_LAYOUT, then EXTRACTING, then NORMALIZING) with an admin client.
-  4. Download from Storage, `analyzeLayout`, `sanitize`, then `llm.extract(resumeSchema)` with the resume inside `<resume>` tags.
+  4. `extractText`, `sanitize`, then `llm.extract(resumeSchema)` with the resume inside `<resume>` tags.
   5. Drop skills without valid evidence, then `mergeYears` and normalize.
   6. Insert `profile_versions` (next version) and `candidate_skills`. Save `extraction` and the provider and model.
   7. Set `READY`, or `FAILED` with a `failure_reason`. Never leave a row in a parsing state. Hard timeout at 60 s.
+  - *As built:* status changes and the save go through service-role RPCs in `supabase/migrations/20261018210000_resume_parse_rpcs.sql` (`claim_resume_parse`, `advance_resume_status`, `fail_resume_parse`, `save_resume_draft`), so every transition is compare-and-set and the draft save is one transaction. Skills and roles quoted from injection-like sentences are dropped, and roles must quote the text and match a start year in it.
 - **AI-19 Injection tests:** Deno tests run `parse-resume` (mock and, optionally, real) on the hidden-text fixture and on fixtures containing "ignore previous instructions" and "Age: 52". Assert no extra skills, no personal fields, and schema-valid output.
 
 **Done when:** An upload becomes a draft profile with live status, and the injection tests prove a resume can't manipulate the AI.
@@ -318,6 +321,8 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 4. Insert draft `job_requirements` (weight 2 if required, 1 if preferred) and pre-fill the job fields.
 5. Set `parse_status = READY`.
 
+*As built:* `_shared/job_pipeline.ts` + `_shared/requirements.ts`, saved atomically by `save_job_draft` (migration `20261018220000_parse_job_rpcs.sql`, which also adds `skills_centroid`, `start_job_parse`, `fail_job_parse`). Requirements need verified quotes (injection quotes dropped). Duplicates merge, "X or Y" alternatives become preferred with `either_of_group`, and caps of 8 required / 15 total are enforced (overflow → `trimmed[]`). `jobs.embedding` is set from the requirements' skill embeddings (PRD v0.6).
+
 **Done when:** A pasted description becomes draft requirements ready for the recruiter to review.
 
 #### B8 · As a recruiter or candidate, I want an explainable 0–100 Match Score for every candidate and job pair, so I can trust the ranking and see why.
@@ -326,6 +331,8 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 **Build**
 - **AI-14 `compute_match()`:** A SQL function implementing PRD §8.4. Per requirement: `coverage` is 1 for an exact match, else the best `skill_relations.credit`, else 0. `depth = min(1, years / min_years)` (1 if `min_years` is 0, 0.5 if years is null). `score = coverage × (0.6 + 0.4 × depth)`. `raw` is the weighted average. The penalty is 0.15 per missing required skill. `score = round(100 × clamp(raw − penalty, 0, 1))`. Returns `{score, breakdown}` ([SCHEMA.md §6](SCHEMA.md#6-json-shapes)). Mark it `stable`.
 - **AI-17 Regression test:** `supabase/tests/fixtures/match_pairs.json` with about 50 hand-labeled resume × job pairs and expected bands. A pgTAP or Deno test computes scores, asserts at least 80% band agreement, and prints a confusion table.
+
+*As built (PRD v0.7):* the AI-17 regression showed the v1 formula disagreed with humans on every Stretch-or-better pair, so B8 ships **v2** (85% required / 15% preferred, no extra penalty): 84% band agreement on 74 labeled pairs. `compute_match()` + `match_band()` are in migration `20261019100000_compute_match.sql`. The TypeScript mirror is `_shared/score.ts`, and SQL/TS parity was verified in Postgres on all 74 pairs. Tasks: `tune:score`, `build:match-pairs`.
 
 **Done when:** Every pair gets an explainable score plus the per-skill data behind the radar, and formula changes are checked against human judgment.
 
@@ -341,12 +348,16 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 6. Diversity: no more than 2 cards in a row from the same company.
 7. Return cards plus `next_cursor = (rank, job_id)`.
 
+*As built (PRD v0.8):* `get_feed` + `feed_freshness` / `feed_affinity` / `feed_exploration` in migration `20261019120000_get_feed.sql`. Step 3 uses a **skill-overlap** prefilter, because centroid vectors dropped the best match in a 600-job test. Vectors only break ties. Cards are built only for the returned page (650 ms → 85 ms). There are 27 pgTAP tests in `supabase/tests/get_feed.test.sql`.
+
 **Done when:** Candidates get eligible jobs best match first, page by page, and pass reasons nudge the order without changing any score.
 
 #### B10 · As a presenter, I want generated demo data covering every status and score band, so the demo looks alive without live AI.
 **Covers:** AI-20 · **Size:** ≈ 2 days · **Needs:** B8, A6 · **Stories:** US-54
 
 **Build:** `scripts/generate_seed.ts` with a fixed random seed generates about 30 candidates, with skills chosen to hit Strong, Good, Stretch, and Low bands against each of the 6 jobs. Also generate about 60 applications across **every** status (with matching `status_events`), about 150 swipes with pass reasons, and precomputed scores and embeddings. Output `supabase/seed/demo_data.sql`, which A6's `seed.sql` includes.
+
+*As built:* `scripts/generate_seed.ts` (`deno task generate:seed`) → `supabase/seed/demo_data.sql` + `demo_manifest.json`. It's deterministic, makes no AI calls, and computes scores and vectors in SQL at load time. It follows PRD §9.8: 3 companies, 6 jobs (1 DRAFT, 1 CLOSED), 30 candidates, 60 applications in all six statuses, and 136 swipes. Fixed company ids for A6's demo accounts are in `supabase/seed/README.md`. Verified in Postgres (SQL = TypeScript on 180 pairs; `get_feed` tests pass on the seeded database).
 
 **Done when:** The demo has a full board and real pipelines from the first screen.
 
