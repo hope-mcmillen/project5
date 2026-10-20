@@ -83,7 +83,7 @@ erDiagram
 | `skills` | Canonical taxonomy, seeded (AI-01) | Unique `name`, `category`, `aliases text[]` (GIN index), `embedding` (HNSW cosine index) |
 | `skill_relations` | Curated partial credit between related skills | `(skill_id, related_skill_id)` with `credit` between 0 and 1, e.g. MySQL → PostgreSQL = 0.6 |
 | `candidates` | Candidate-specific data | `active_version_id` points to the confirmed profile used for matching. `preferences jsonb` holds the hard filters (shape below). `discoverable` is for Phase 2. |
-| `resumes` | One row per uploaded file | `storage_path` = `resumes/{uid}/{uuid}.pdf\|docx`. `file_hash` (sha256, extraction cache). `status` is UPLOADED → PARSING_LAYOUT → EXTRACTING → NORMALIZING → READY / FAILED. `failure_reason`. `extraction` holds the validated LLM JSON. |
+| `resumes` | One row per uploaded file | `storage_path` = `{uid}/{uuid}.pdf\|docx` inside the `resumes` bucket. `file_hash` (sha256, extraction cache). `status` is UPLOADED → PARSING_LAYOUT → EXTRACTING → NORMALIZING → READY / FAILED. `failure_reason`. `extraction` holds the validated LLM JSON. |
 | `profile_versions` | Versioned candidate profile | Unique `(candidate_id, version)`. `source` is `resume` or `manual`. `confirmed` is required before swiping. `total_years`, `education`, `embedding`. |
 | `candidate_skills` | Skills in one profile version | `skill_id` is null when unmapped (kept but not scored). `raw_name`. `years` is null when the skill is only listed, not evidenced. `evidence` is a quote from the resume. `source` is `ai` or `user`. Unique per version and skill. |
 
@@ -265,3 +265,15 @@ All are `security definer` with `set search_path = public`, and each checks the 
   "education": [{ "level": "BS", "field": "Computer Science" }]
 }
 ```
+
+## 7. Implemented foundation (A2, October 20, 2026)
+
+The three `20261018{090000,100000,110000}` migrations precede B's scoring
+migrations and implement the reference tables, explicit column privileges, RLS,
+security-invoker views and Realtime publication. Helpers `my_company_id()`,
+`my_owned_company_id()` and self-scoped `has_my_application(uuid)` avoid recursive
+policies. Clients cannot directly change role, verification, active profile, parse
+state, job lifecycle or application status. These writes use the scheduled RPCs.
+`my_applications` also filters by caller ID, so recruiters cannot use the candidate
+pipeline view as an alternate board. Storage paths are bucket-relative; pass
+`resumes` separately to the Storage API. Business RPCs remain A3–A11 work.

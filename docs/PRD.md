@@ -661,3 +661,14 @@ The demo must work right away, with a populated recruiter board, before anyone u
 | Q7 | Does withdrawing an application free a slot in the daily cap? | No. This prevents gaming. |
 | Q11 | Do we need a billing-enabled Gemini key, given free-tier data use and rate limits (§9.3)? | Free tier for development and the class demo with synthetic data. Switch to a billing-enabled key before any real user uploads a resume. |
 | Q12 | Is the in-code white-text check (PDF operator list) worth the effort, or is the font-size check enough? | Build both. The `r09` fixture uses both tricks, and the injection test (AI-19) must pass on it. |
+
+### Backend foundation implementation note (A2, October 20, 2026)
+
+The migrations now implement §9.4 tables and §9.5 access boundaries with explicit
+privileges as well as RLS. Candidate profile confirmation, preference validation,
+job state, and application mutations run through A's RPC interfaces, specified
+with exact parameters in API_CONTRACT.md §7 and scheduled for A3–A11. Direct
+client updates cannot change roles, activate profile versions, mark resumes
+parsed, set company verification, publish jobs or transition applications. The
+pipeline view is caller-only; both views are security invoker. Resume object
+paths are relative to the private `resumes` bucket: `{uid}/{uuid}.pdf|docx`.

@@ -7,7 +7,7 @@ This is the handoff between backend and frontend (PL-27). Frontend fakes return 
 | Section | Owner | Status |
 |---|---|---|
 | [Conventions](#1-conventions) | A + B | Draft |
-| Database & status RPCs (`swipe`, `get_board`, `advance`, …) | A | **To do (A2)** |
+| [Database & status RPCs](#7-database-and-status-rpcs-person-a-pl-27) | A | Draft (A2); business RPC implementation A3–A11 |
 | [`parse-resume`](#2-parse-resume-edge-function) | B | Draft |
 | [`parse-job`](#3-parse-job-edge-function) | B | Draft |
 | [`breakdown` shape](#4-breakdown-shape) | B | Draft |
@@ -284,3 +284,197 @@ Feed Rank only orders the deck. **`match_score` never changes because of swipes 
 - An empty `cards` array with `next_cursor: null` means the deck is empty (show the empty state).
 
 **Errors:** `not_candidate`, `profile_not_confirmed` (send the user to onboarding), `invalid_cursor`.
+
+---
+
+## 7. Database and status RPCs (Person A, PL-27)
+
+**Draft for frontend review.** A2 supplies the schema and access policies; the
+business RPCs below are scheduled for A3–A11. A documented signature does not mean
+its implementation has landed. Do not replace B's parsing/scoring sections.
+All UUID parameters use PostgreSQL `uuid`; timestamps use `timestamptz`; JSON is
+`jsonb`; enums are listed in SCHEMA.md §3. RPCs run atomically. Unauthorized calls
+return `P0001` and the documented message. Direct table writes can instead return
+Postgres `42501` (permission denied/RLS); uniqueness violations use `23505`.
+`void` RPCs return JSON `null`. All application RPCs require a valid user JWT.
+
+### 7.1 Identity and company onboarding (A3–A4)
+
+| Signature → result | Caller | Errors (`P0001`) | Example JSON result |
+|---|---|---|---|
+| `current_app_role() → app_role` | authenticated, policies | — (null before role choice) | `"candidate"` |
+| `my_company_id() → uuid` | authenticated, policies | — (null before joining) | `"20000000-0000-0000-0000-000000000001"` |
+| `my_owned_company_id() → uuid` | authenticated, policies | — (null unless owner) | `null` |
+| `has_my_application(p_job_id uuid) → boolean` | authenticated, policies; only tests caller's own applications | — | `true` |
+| `set_initial_role(p_role app_role) → void` | user with null role | `not_authenticated`, `role_already_set`, `invalid_role` | `null` |
+| `create_company(p_name text, p_website text default null) → companies` | recruiter with no company | `not_recruiter`, `already_in_company`, `invalid_company` | Company object below |
+| `create_invite(p_expires_in_days integer default 7) → text` | company owner | `not_owner`, `invalid_expiry` | `"ABCD2345"` |
+| `join_company(p_code text) → companies` | recruiter with no company | `not_recruiter`, `already_in_company`, `invalid_invite` | Company object below |
+| `revoke_invite(p_code text) → void` | owner of code's company | `not_owner`, `invalid_invite` | `null` |
+
+Company result (create/join):
+```json
+{
+  "id": "20000000-0000-0000-0000-000000000001",
+  "name": "Rhombus Labs", "website": "https://rhombus.example.test",
+  "logo_path": null, "verified": false,
+  "created_by": "10000000-0000-0000-0000-000000000003",
+  "is_seed": false, "created_at": "2026-10-21T14:00:00Z",
+  "updated_at": "2026-10-21T14:00:00Z"
+}
+```
+Invite expiration is 1–30 days. Codes are 8 uppercase unambiguous characters;
+expired, revoked, exhausted and nonexistent codes all produce `invalid_invite`.
+Role choice is immutable once set, including for Google accounts. An invalid
+non-null enum string is rejected as PostgreSQL `22P02` before the function runs.
+
+### 7.2 Reviewed profiles and preferences (A5)
+
+| Signature → result | Caller | Errors (`P0001`) | Example JSON result |
+|---|---|---|---|
+| `create_manual_profile() → profile_versions` | candidate | `not_candidate` | Profile object below |
+| `confirm_profile(p_version_id uuid, p_skills jsonb) → void` | owning candidate | `not_candidate`, `not_owner`, `invalid_skills`, `profile_already_confirmed` | `null` |
+| `save_preferences(p_prefs jsonb) → void` | candidate | `not_candidate`, `invalid_preferences` | `null` |
+
+Manual profile result:
+```json
+{
+  "id": "30000000-0000-0000-0000-000000000001",
+  "candidate_id": "10000000-0000-0000-0000-000000000001", "resume_id": null,
+  "version": 1, "source": "manual", "confirmed": false, "confirmed_at": null,
+  "total_years": null, "education": [], "embedding": null,
+  "embedding_model": null, "is_seed": false, "created_at": "2026-10-21T20:00:00Z"
+}
+```
+`p_skills` is an array of skill objects. `skill_id` may be null for unmapped
+skills; `raw_name` is required, nonempty text; `years` is nonnegative numeric or
+null; `evidence` is text or null. Edited rows must be recorded as `source='user'`,
+never trusted as AI evidence. Confirmation sets the active version atomically.
+```json
+{
+  "p_version_id": "30000000-0000-0000-0000-000000000001",
+  "p_skills": [{"skill_id": null, "raw_name": "Custom Tool", "years": 1.5, "evidence": "Built internal tooling"}]
+}
+```
+Preferences replace the object rather than merge it. Allowed optional keys are
+`locations: string[]`, `remote: remote_type[]`, `job_types: job_type[]`,
+`needs_sponsorship: boolean`, `salary_min: nonnegative integer`,
+`include_stretch: boolean`. Unknown keys, nulls and wrong types are rejected.
+```json
+{"p_prefs":{"locations":["Baton Rouge, LA"],"remote":["remote","hybrid"],"job_types":["full_time"],"needs_sponsorship":false,"salary_min":70000,"include_stretch":false}}
+```
+
+Resume rows store bucket-relative paths: `{uid}/{uuid}.pdf` or `.docx`. The bucket
+name `resumes` is passed separately to Storage APIs. A5 supplies bucket policies;
+A2 already blocks registering another user's path and client-forged parse state.
+
+### 7.3 Applying, passing and the candidate pipeline (A7–A8)
+
+| Signature → result | Caller | Errors (`P0001`) | Example JSON result |
+|---|---|---|---|
+| `swipe(p_job_id uuid, p_direction swipe_direction, p_reason pass_reason default null) → jsonb` | candidate with confirmed profile | `not_candidate`, `profile_not_confirmed`, `job_not_open`, `daily_cap_reached`, `already_swiped`, `invalid_reason` | Swipe object below |
+| `undo_swipe(p_swipe_id uuid) → void` | owning candidate | `not_candidate`, `not_owner`, `undo_window_expired` | `null` |
+| `set_pass_reason(p_swipe_id uuid, p_reason pass_reason) → void` | owning candidate | `not_candidate`, `not_owner`, `not_left_swipe` | `null` |
+| `withdraw(p_application_id uuid) → void` | owning candidate | `not_candidate`, `not_owner`, `invalid_transition` | `null` |
+| `get_application_contact(p_application_id uuid) → jsonb` | owning candidate at INTERVIEW_REQUESTED | `not_candidate`, `not_owner`, `contact_not_available` | `{"name":"Demo Recruiter","email":"recruiter@rhombus.example.test","note":"Please suggest interview times."}` |
+
+Right swipe response:
+```json
+{"swipe_id":"60000000-0000-0000-0000-000000000001","application_id":"50000000-0000-0000-0000-000000000001","committed_at":"2026-10-22T14:00:05Z"}
+```
+Left swipe returns the same keys with `application_id` and `committed_at` null.
+Undo is allowed for five seconds for either direction; an expired right swipe
+must use `withdraw` instead. The cap counts right swipes in the UTC day and must
+be serialized per candidate so concurrent requests cannot bypass it. A right
+swipe cannot include a pass reason. `compute_match` is owned by B; any temporary
+50-point stub must be explicitly marked and replaced before final acceptance.
+
+### 7.4 Recruiter jobs, blind board and decisions (A8)
+
+| Signature → result | Caller | Errors (`P0001`) | Example JSON result |
+|---|---|---|---|
+| `save_requirements(p_job_id uuid, p_requirements jsonb) → void` | recruiter in job's company | `not_recruiter`, `not_owner`, `invalid_requirements` | `null` |
+| `set_job_status(p_job_id uuid, p_status job_status) → void` | recruiter in job's company | `not_recruiter`, `not_owner`, `invalid_transition`, `requirements_not_ready` | `null` |
+| `get_board(p_job_id uuid, p_filters jsonb default '{}', p_limit integer default 50, p_offset integer default 0) → jsonb` | recruiter in job's company | `not_recruiter`, `not_owner`, `invalid_filters`, `invalid_pagination` | Array of tiles below |
+| `get_candidate_detail(p_application_id uuid) → jsonb` | recruiter in job's company | `not_recruiter`, `not_owner`, `application_not_committed` | Detail object below |
+| `open_application(p_application_id uuid) → void` | recruiter in job's company | `not_recruiter`, `not_owner`, `application_not_committed`, `invalid_transition` | `null` |
+| `advance(p_application_id uuid, p_note text default null) → void` | recruiter in job's company | `not_recruiter`, `not_owner`, `application_not_committed`, `invalid_transition` | `null` |
+| `reject(p_application_id uuid, p_reason text default null) → void` | recruiter in job's company | `not_recruiter`, `not_owner`, `application_not_committed`, `invalid_transition` | `null` |
+| `undo_reject(p_application_id uuid) → void` | recruiter in job's company | `not_recruiter`, `not_owner`, `invalid_transition`, `undo_window_expired` | `null` |
+| `get_interview_list(p_job_id uuid default null) → jsonb` | recruiter; own company only | `not_recruiter`, `not_owner` | Array of advanced detail objects |
+
+`p_requirements` is an array of `{skill_id: uuid, required: boolean,
+min_years: nonnegative number, weight: integer 1..3, evidence: string|null}`;
+at most 15 total and 8 required. Duplicate/unmapped skills are rejected. Embedding
+and live rescoring integration belong to B; do not silently drop that dependency.
+```json
+{"p_job_id":"40000000-0000-0000-0000-000000000001","p_requirements":[{"skill_id":"70000000-0000-0000-0000-000000000001","required":true,"min_years":2,"weight":2,"evidence":"Two years of Flutter"}]}
+```
+Allowed job transitions: DRAFT→OPEN, OPEN→PAUSED/CLOSED, PAUSED→OPEN/CLOSED;
+CLOSED is terminal. Publishing requires READY parsing and at least one validated
+requirement. Closing/expiry turns nonterminal applications into JOB_CLOSED with
+status events in the same transaction. Candidate transitions follow SCHEMA.md §3;
+opening an UNDER_REVIEW application is idempotent. Reject undo lasts 10 seconds.
+Internal reject reasons never appear in any candidate-visible response.
+
+Board filters are optional `statuses: application_status[]` and
+`min_score: integer 0..100`. Unknown keys/types are rejected. Limit is 1–100;
+offset is nonnegative. The default excludes NOT_SELECTED, WITHDRAWN, JOB_CLOSED.
+All responses exclude pending applications, including detail and interviews.
+Sort by match_score descending, committed_at ascending, id ascending as tie-break.
+Empty lists return `[]`.
+
+The tile key set is exactly the following (no identity or profile IDs):
+```json
+[{
+  "application_id":"50000000-0000-0000-0000-000000000001","handle":"◆ 4F2A",
+  "match_score":87,"band":"Strong","total_years":4.5,
+  "top_skills":["Flutter","Dart","Firebase"],"gaps":["Kubernetes"],
+  "status":"APPLIED","committed_at":"2026-10-22T14:00:05Z"
+}]
+```
+Detail adds `breakdown` (the exact §4 array) and `skills` (reviewed skill evidence).
+Before advancement it has no `identity` key. At INTERVIEW_REQUESTED it also adds
+`identity: {display_name: string|null, email: string}`. Resume links are requested
+separately from `resume-url`; evidence should not expose raw contact information.
+```json
+{
+  "application_id":"50000000-0000-0000-0000-000000000001","handle":"◆ 4F2A",
+  "match_score":87,"band":"Strong","total_years":4.5,
+  "top_skills":["Flutter"],"gaps":[],"status":"INTERVIEW_REQUESTED",
+  "committed_at":"2026-10-22T14:00:05Z","breakdown":[],
+  "skills":[{"name":"Flutter","years":3,"evidence":"Built mobile applications"}],
+  "identity":{"display_name":"Demo Candidate","email":"candidate@example.test"}
+}
+```
+`get_interview_list` returns an array of these advanced detail objects. The example's
+empty breakdown is valid for an empty fixture; real scored jobs return §4 entries.
+
+### 7.5 Secure links, deletion and notifications (A9–A11)
+
+All Edge requests use `Content-Type: application/json`. User endpoints require
+`Authorization: Bearer <user JWT>` and verify it server-side. They never accept a
+client-supplied user ID as authority. Errors use the §1 Edge error envelope.
+
+| Endpoint / signature | Caller / payload | Success example | Error codes |
+|---|---|---|---|
+| `resume-url` Edge | own-company recruiter after advance; `{"application_id":"50000000-0000-0000-0000-000000000001"}` | `{"url":"http://127.0.0.1:54321/storage/v1/object/sign/resumes/10000000-0000-0000-0000-000000000001/resume.pdf?token=example"}` | `unauthorized`, `not_recruiter`, `not_owner`, `resume_not_available`, `internal` |
+| `delete-account` Edge | candidate; `{}` | `{"deleted":true}` | `unauthorized`, `not_candidate`, `internal` |
+| `register_device(p_token text, p_platform text) → void` | authenticated; platform `android`, `web` | `null` | `not_authenticated`, `invalid_device` |
+| `notify` Edge webhook | trusted system secret; payload below | `{"delivered":1}` | `unauthorized`, `invalid_event`, `delivery_failed`, `internal` |
+
+Signed resume URLs expire after 600 seconds. Missing, wrong-company, pending or
+non-advanced applications must not yield URLs. Deletion removes owned Storage
+objects, anonymizes retained applications, deletes candidate-owned rows and the
+auth user; failures must be explicit and retries safe. It is not accepted until
+the no-remaining-data integration test passes.
+
+The notify handler validates the webhook source and reloads the actual event
+from the database, rather than trusting recipient IDs or statuses in the body.
+Only INTERVIEW_REQUESTED and NOT_SELECTED send notifications; other events return
+`{"delivered":0}`. No contact details, resume contents or internal reject reasons
+belong in notification payloads. Requires FCM service-account secrets and device
+testing before A11 can be called complete.
+```json
+{"type":"INSERT","schema":"public","table":"status_events","record":{"id":42,"application_id":"50000000-0000-0000-0000-000000000001","to_status":"INTERVIEW_REQUESTED"}}
+```
