@@ -348,12 +348,16 @@ Folders: `supabase/functions/parse-resume`, `parse-job`, `_shared/`, scoring SQL
 6. Diversity: no more than 2 cards in a row from the same company.
 7. Return cards plus `next_cursor = (rank, job_id)`.
 
+*As built (PRD v0.8):* `get_feed` + `feed_freshness` / `feed_affinity` / `feed_exploration` in migration `20261019120000_get_feed.sql`. Step 3 uses a **skill-overlap** prefilter, because centroid vectors dropped the best match in a 600-job test. Vectors only break ties. Cards are built only for the returned page (650 ms → 85 ms). There are 27 pgTAP tests in `supabase/tests/get_feed.test.sql`.
+
 **Done when:** Candidates get eligible jobs best match first, page by page, and pass reasons nudge the order without changing any score.
 
 #### B10 · As a presenter, I want generated demo data covering every status and score band, so the demo looks alive without live AI.
 **Covers:** AI-20 · **Size:** ≈ 2 days · **Needs:** B8, A6 · **Stories:** US-54
 
 **Build:** `scripts/generate_seed.ts` with a fixed random seed generates about 30 candidates, with skills chosen to hit Strong, Good, Stretch, and Low bands against each of the 6 jobs. Also generate about 60 applications across **every** status (with matching `status_events`), about 150 swipes with pass reasons, and precomputed scores and embeddings. Output `supabase/seed/demo_data.sql`, which A6's `seed.sql` includes.
+
+*As built:* `scripts/generate_seed.ts` (`deno task generate:seed`) → `supabase/seed/demo_data.sql` + `demo_manifest.json`. It's deterministic, makes no AI calls, and computes scores and vectors in SQL at load time. It follows PRD §9.8: 3 companies, 6 jobs (1 DRAFT, 1 CLOSED), 30 candidates, 60 applications in all six statuses, and 136 swipes. Fixed company ids for A6's demo accounts are in `supabase/seed/README.md`. Verified in Postgres (SQL = TypeScript on 180 pairs; `get_feed` tests pass on the seeded database).
 
 **Done when:** The demo has a full board and real pipelines from the first screen.
 

@@ -1,10 +1,14 @@
 # ResuRhombus: Product Requirements & Architecture
 
-**Version:** 0.7 · **Updated:** 2026-10-19 · **Owner:** Kameron Arceneaux
+**Version:** 0.8 · **Updated:** 2026-10-19 · **Owner:** Kameron Arceneaux
 
 ---
 
 ## 0. Changelog
+
+### v0.8 decisions
+- **The feed prefilters by skill overlap, not vector distance.** Measured on 600 jobs, averaged ("centroid") vectors were too generic: score-0 DevOps jobs sat closer to a Flutter developer than a score-100 Flutter job, so the best match fell outside the "nearest 500". `get_feed` now keeps the 500 jobs whose requirement weight the candidate covers best (exact or related skills), and uses vector distance only as a tie-break. A job sharing no skill would score 0, so it's never shown, even with "show stretch roles". Q14 (profile vectors) matters less as a result. See §8.4 and §8.6.
+- **Feed Rank v1 details:** freshness falls from 1 to 0 over 30 days (in whole days, so ranks are stable within a day). Exploration is a per-day hash of the job id. Affinity starts neutral at 0.5: a "company" pass zeroes that company, "salary" passes favor better-paying jobs, two or more "location" passes favor remote jobs, and two or more "stack" passes favor closer matches. None of this touches the Match Score.
 
 ### v0.7 decisions
 - **Match Score v2: 85% required, 15% preferred, no extra penalty.** v1 averaged all requirements together and then subtracted 0.15 per missing required skill. Against 74 hand-labeled resume × job pairs (`supabase/tests/fixtures/match_pairs.json`), v1 agreed with human bands 70% of the time and 0% on pairs humans rated Stretch or better. The Flutter developer scored 45 for the Flutter job, because job descriptions list about 10 nice-to-haves that outweighed the must-haves, and missing must-haves were counted twice. v2 agrees 84% of the time (45% on Stretch or better) and halves the mean band error (0.47 → 0.20). `scoring_version` is now `v2`. See §8.4.
@@ -416,7 +420,7 @@ Match Score  = round(100 × clamp(raw, 0, 1))                    // rounded to 6
 - Implemented in SQL as `public.compute_match()` with a tested TypeScript mirror (`_shared/score.ts`). Both must change together. `deno task tune:score` re-runs the sweep against the labeled pairs, and the regression test fails below 80% band agreement.
 
 - Per-requirement `score(r)` values feed the **radar axes** directly. For category axes, average the scores within each category.
-- **Vectors are used for retrieval, not for the final number.** A pgvector ANN query (job-requirements embedding vs. profile embedding) selects about the top 500 candidate jobs for a feed. Those are then scored exactly with the formula above.
+- **Retrieval narrows by skill overlap; the score decides.** `get_feed` keeps about the 500 jobs whose requirement weight the candidate covers best (exact or related skills), with vector distance only as a tie-break. Those are then scored exactly with the formula above. (v0.8: pure vector retrieval was measured to drop the best matches. See the changelog.)
 - Scores are recalculated when the profile changes, the job's requirements change, or `scoring_version` is bumped.
 - Weights were tuned against 74 hand-labeled resume×job pairs (v0.7). Re-tune when the taxonomy, extraction, or bands change.
 
@@ -431,7 +435,8 @@ Match Score  = round(100 × clamp(raw, 0, 1))                    // rounded to 6
 feed_rank = 0.70·match + 0.15·freshness + 0.10·preference_affinity + 0.05·exploration
 ```
 - `preference_affinity` comes from pass reasons and swipe history, e.g., a candidate who keeps passing remote-optional jobs at large companies. It's a simple per-user weight vector in v1. An ML model is Phase 3.
-- Diversity rule: no more than 2 cards in a row from the same company.
+- Diversity rule: no more than 2 cards in a row from the same company. Applied within each page, with the run carried across pages in the cursor (best effort: if only one company is left, it repeats).
+- v1 parts (`feed_freshness`, `feed_affinity`, `feed_exploration` in migration `20261019120000_get_feed.sql`): freshness falls from 1 to 0 over 30 days. Exploration is a per-day hash. Affinity starts at 0.5, a "company" pass sets it to 0, "salary" passes add 0.25 for better-paying jobs, two or more "location" passes add 0.25 for remote jobs, and two or more "stack" passes add up to ±0.125 by match.
 
 ### 8.7 Compliance notes (verify with counsel before launch)
 - Automated scoring in hiring may be regulated. Examples are NYC Local Law 144 (bias audits for automated employment decision tools) and the EU AI Act, which classifies employment AI as high-risk.
