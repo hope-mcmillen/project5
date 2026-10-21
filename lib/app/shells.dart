@@ -38,36 +38,87 @@ class CandidateShell extends StatelessWidget {
   }
 }
 
-/// Navigation for the recruiter tabs: Jobs · Interviews · Company.
+/// Navigation for the recruiter tabs: Jobs · Interviews · Company (RC-05).
 ///
-/// TODO(RC-05): NavigationRail on wide screens (≥ 900 px), bottom bar on phones.
+/// A bottom [NavigationBar] on phones, a [NavigationRail] from
+/// [railBreakpoint] (extended with labels from [extendedBreakpoint]), so the
+/// portal feels native on Android and on laptop web.
 class RecruiterShell extends StatelessWidget {
   const RecruiterShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  static const railBreakpoint = 900.0;
+  static const extendedBreakpoint = 1200.0;
+
+  static const _tabs = [
+    (icon: Icons.work_outline, selected: Icons.work, label: 'Jobs'),
+    (
+      icon: Icons.event_available_outlined,
+      selected: Icons.event_available,
+      label: 'Interviews',
+    ),
+    (
+      icon: Icons.apartment_outlined,
+      selected: Icons.apartment,
+      label: 'Company',
+    ),
+  ];
+
+  void _select(int index) => navigationShell.goBranch(
+    index,
+    // Tapping the current tab again returns to its first page.
+    initialLocation: index == navigationShell.currentIndex,
+  );
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
-        ),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.work_outline), label: 'Jobs'),
-          NavigationDestination(
-            icon: Icon(Icons.event_available_outlined),
-            label: 'Interviews',
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        if (width < railBreakpoint) {
+          return Scaffold(
+            body: navigationShell,
+            bottomNavigationBar: NavigationBar(
+              selectedIndex: navigationShell.currentIndex,
+              onDestinationSelected: _select,
+              destinations: [
+                for (final tab in _tabs)
+                  NavigationDestination(
+                    icon: Icon(tab.icon),
+                    selectedIcon: Icon(tab.selected),
+                    label: tab.label,
+                  ),
+              ],
+            ),
+          );
+        }
+        final extended = width >= extendedBreakpoint;
+        return Scaffold(
+          body: Row(
+            children: [
+              NavigationRail(
+                selectedIndex: navigationShell.currentIndex,
+                onDestinationSelected: _select,
+                extended: extended,
+                labelType: extended
+                    ? NavigationRailLabelType.none
+                    : NavigationRailLabelType.all,
+                destinations: [
+                  for (final tab in _tabs)
+                    NavigationRailDestination(
+                      icon: Icon(tab.icon),
+                      selectedIcon: Icon(tab.selected),
+                      label: Text(tab.label),
+                    ),
+                ],
+              ),
+              const VerticalDivider(width: 1, thickness: 1),
+              Expanded(child: navigationShell),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.apartment_outlined),
-            label: 'Company',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

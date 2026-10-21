@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/models/app_role.dart';
+import '../features/auth/data/auth_repository.dart';
 import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/auth/presentation/reset_password_screen.dart';
 import '../features/auth/presentation/role_choice_screen.dart';
@@ -28,28 +31,42 @@ import '../features/onboarding/presentation/upload_resume_screen.dart';
 import '../features/pipeline/presentation/application_detail_screen.dart';
 import '../features/pipeline/presentation/pipeline_screen.dart';
 import '../features/profile/presentation/candidate_profile_screen.dart';
-import 'dev_session.dart';
+import 'route_session.dart';
 import 'routes.dart';
 import 'shells.dart';
+import 'splash_screen.dart';
 
 /// Where a signed-in user belongs right now.
-String homeFor(DevSession session) => switch (session.role) {
+String homeFor(RouteSession session) => switch (session.role) {
   AppRole.candidate =>
     session.candidateOnboarded ? Routes.deck : Routes.candidateConsent,
   AppRole.recruiter =>
     session.recruiterHasCompany ? Routes.jobs : Routes.companyOnboarding,
-  null => Routes.welcome,
+  null => session.isSignedIn ? Routes.roleChoice : Routes.welcome,
 };
 
-/// Route guard (PRD A-5). Returns a new location, or null to allow.
+/// Route guard (PRD A-5, PL-11). Returns a new location, or null to allow.
 ///
-/// SCAFFOLD: reads the fake [DevSession]. The rules stay the same when
-/// PL-11 swaps in Supabase auth + `profiles.role`. RLS remains the real
-/// enforcement; this guard is for UX only.
-String? resolveRedirect(DevSession session, Uri uri) {
+/// RLS remains the real enforcement; this guard is for UX only.
+String? resolveRedirect(RouteSession session, Uri uri) {
   final path = uri.path;
-  final isPublic =
-      Routes.publicPaths.contains(path) || path == Routes.roleChoice;
+
+  // Hold every location on the splash until the session is known, then
+  // continue to where the user was going.
+  if (session.status case SessionStatus.loading || SessionStatus.error) {
+    if (path == Routes.splash) return null;
+    return Uri(
+      path: Routes.splash,
+      queryParameters: {'from': uri.toString()},
+    ).toString();
+  }
+  if (path == Routes.splash) {
+    final from = uri.queryParameters['from'];
+    final target = from == null || from.startsWith(Routes.splash) ? '/' : from;
+    return resolveRedirect(session, Uri.parse(target)) ?? target;
+  }
+
+  final isPublic = Routes.publicPaths.contains(path);
 
   if (!session.isSignedIn) {
     if (path == Routes.recruiterAlias) {
@@ -58,8 +75,19 @@ String? resolveRedirect(DevSession session, Uri uri) {
     return isPublic ? null : Routes.welcome;
   }
 
+  // A reset link signs the user in; keep them on the reset page until the
+  // new password is saved.
+  if (session.passwordRecovery) {
+    return path == Routes.resetPassword ? null : Routes.resetPassword;
+  }
+
+  // Signed in without a role (first Google sign-in): role choice only.
+  if (session.role == null) {
+    return path == Routes.roleChoice ? null : Routes.roleChoice;
+  }
+
   final home = homeFor(session);
-  if (path == '/' || isPublic) return home;
+  if (path == '/' || isPublic || path == Routes.roleChoice) return home;
 
   final isCandidateArea = path.startsWith('/c/');
   final isRecruiterArea = path.startsWith('/r/');
@@ -75,17 +103,55 @@ String? resolveRedirect(DevSession session, Uri uri) {
     if (!session.recruiterHasCompany && !path.startsWith('/r/onboarding')) {
       return home;
     }
+    if (session.recruiterHasCompany && path.startsWith('/r/onboarding')) {
+      return home;
+    }
   }
   return null;
 }
 
-GoRouter buildRouter(DevSession session) {
+/// Re-runs the route guard whenever the auth session, profile or recovery
+/// state changes (`refreshListenable`).
+class RouterRefresh extends ChangeNotifier {
+  void refresh() => notifyListeners();
+}
+
+/// The app's router, driven by the auth providers.
+final routerProvider = Provider<GoRouter>((ref) {
+  final refresh = RouterRefresh();
+  ref
+    ..listen(authStateProvider, (_, _) => refresh.refresh())
+    ..listen(profileProvider, (_, _) => refresh.refresh())
+    ..listen(passwordRecoveryProvider, (_, _) => refresh.refresh());
+  final router = buildRouter(
+    session: () => RouteSession.read(ref),
+    refreshListenable: refresh,
+  );
+  ref.onDispose(() {
+    router.dispose();
+    refresh.dispose();
+  });
+  return router;
+});
+
+/// Builds the router. [session] is read on every navigation; tests pass a
+/// fixed one.
+GoRouter buildRouter({
+  required RouteSession Function() session,
+  Listenable? refreshListenable,
+  String initialLocation = Routes.splash,
+}) {
   return GoRouter(
-    initialLocation: Routes.welcome,
-    refreshListenable: session,
-    redirect: (context, state) => resolveRedirect(session, state.uri),
+    initialLocation: initialLocation,
+    refreshListenable: refreshListenable,
+    redirect: (context, state) => resolveRedirect(session(), state.uri),
     errorBuilder: (context, state) => NotFoundScreen(uri: state.uri),
     routes: [
+      GoRoute(
+        path: Routes.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
+
       // ---------- Public ----------
       GoRoute(
         path: Routes.welcome,
