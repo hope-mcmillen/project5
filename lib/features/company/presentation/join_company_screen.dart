@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/dev_session.dart';
 import '../../../app/routes.dart';
+import '../../../app/scaffold_hooks.dart';
+import '../../../core/models/app_role.dart';
 import '../../../ui/scaffold/placeholder_page.dart';
 
 /// Join company: 8-character invite code → join_company RPC.
 ///
 /// SCAFFOLD: placeholder body only. Replace it when implementing RC-07, PL-13, PL-15.
-class JoinCompanyScreen extends StatelessWidget {
+class JoinCompanyScreen extends ConsumerWidget {
   const JoinCompanyScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return PlaceholderPage(
       title: 'Join company',
       description: '8-character invite code → join_company RPC.',
@@ -21,7 +23,7 @@ class JoinCompanyScreen extends StatelessWidget {
         PageLink(
           '[Fake] Join with code',
           Routes.jobs,
-          onBefore: () => devSession.completeCompanyOnboarding(),
+          onBefore: () => finishOnboardingForScaffold(ref, AppRole.recruiter),
         ),
       ],
     );

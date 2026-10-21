@@ -70,3 +70,28 @@ final profileProvider = FutureProvider<AccountProfile?>((ref) async {
   if (userId == null) return null;
   return ref.watch(authRepositoryProvider).fetchProfile();
 });
+
+/// True after the user opened a password-reset link, until they set a new
+/// password or sign out. The router keeps them on the reset page meanwhile.
+final passwordRecoveryProvider = NotifierProvider<PasswordRecovery, bool>(
+  PasswordRecovery.new,
+);
+
+class PasswordRecovery extends Notifier<bool> {
+  @override
+  bool build() {
+    ref.listen(authStateProvider, (_, next) {
+      final event = next.value;
+      if (event == null) return;
+      if (event.passwordRecovery) {
+        state = true;
+      } else if (event.user == null) {
+        state = false;
+      }
+    });
+    return false;
+  }
+
+  /// Call once the new password is saved.
+  void complete() => state = false;
+}

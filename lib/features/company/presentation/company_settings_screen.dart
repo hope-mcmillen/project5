@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/dev_session.dart';
 import '../../../app/routes.dart';
+import '../../auth/data/auth_repository.dart';
 import '../../../ui/scaffold/placeholder_page.dart';
 
 /// Company: Company info, verified badge, invite codes (generate / copy / revoke), sign out.
 ///
 /// SCAFFOLD: placeholder body only. Replace it when implementing RC-18, PL-26.
-class CompanySettingsScreen extends StatelessWidget {
+class CompanySettingsScreen extends ConsumerWidget {
   const CompanySettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return PlaceholderPage(
       title: 'Company',
       description: 'Company info, verified badge, invite codes (generate / copy / revoke), sign out.',
@@ -21,7 +22,7 @@ class CompanySettingsScreen extends StatelessWidget {
         PageLink(
           'Sign out',
           Routes.welcome,
-          onBefore: () => devSession.signOut(),
+          onBefore: () => ref.read(authRepositoryProvider).signOut(),
         ),
       ],
     );

@@ -35,10 +35,11 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen>
       () => ref.read(authRepositoryProvider).updatePassword(_password.text),
     );
     if (!ok || !mounted) return;
+    ref.read(passwordRecoveryProvider.notifier).complete();
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text('Password updated.')));
     // The recovery session is a normal session; the router sends the user
-    // home from '/'.
+    // home.
     context.go('/');
   }
 

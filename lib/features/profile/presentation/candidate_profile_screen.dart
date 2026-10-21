@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/dev_session.dart';
 import '../../../app/routes.dart';
+import '../../auth/data/auth_repository.dart';
 import '../../../ui/scaffold/placeholder_page.dart';
 
 /// Profile: Confirmed skills summary, links to preferences and resume re-upload, sign out, delete account.
 ///
 /// SCAFFOLD: placeholder body only. Replace it when implementing CA-08, PL-09, PL-24.
-class CandidateProfileScreen extends StatelessWidget {
+class CandidateProfileScreen extends ConsumerWidget {
   const CandidateProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return PlaceholderPage(
       title: 'Profile',
       description: 'Confirmed skills summary, links to preferences and resume re-upload, sign out, delete account.',
@@ -27,7 +28,7 @@ class CandidateProfileScreen extends StatelessWidget {
         PageLink(
           'Sign out',
           Routes.welcome,
-          onBefore: () => devSession.signOut(),
+          onBefore: () => ref.read(authRepositoryProvider).signOut(),
         ),
       ],
     );
