@@ -297,8 +297,8 @@ Feed Rank only orders the deck. **`match_score` never changes because of swipes 
 ## 7. Database and status RPCs (Person A, PL-27)
 
 **Draft for frontend review.** A2 supplies the schema and access policies; the
-identity/company RPCs in §7.1 are implemented and locally tested (A3–A4).
-The remaining business RPCs are scheduled for A5–A10; A11 notifications are
+identity/company RPCs in §7.1 and profile RPCs in §7.2 are implemented
+and locally tested (A3–A5). The remaining business RPCs are scheduled for A7–A10; A11 notifications are
 excluded by the user. A documented signature does not mean its implementation
 has landed. Do not replace B's parsing/scoring sections.
 All UUID parameters use PostgreSQL `uuid`; timestamps use `timestamptz`; JSON is
@@ -362,7 +362,17 @@ Manual profile result:
 `p_skills` is an array of skill objects. `skill_id` may be null for unmapped
 skills; `raw_name` is required, nonempty text; `years` is nonnegative numeric or
 null; `evidence` is text or null. Edited rows must be recorded as `source='user'`,
-never trusted as AI evidence. Confirmation sets the active version atomically.
+never trusted as AI evidence. Confirmation sets the active version atomically and rebuilds its taxonomy
+embedding using B's `skills_centroid`; the model is `gemini-embedding-001@1536`
+when a vector exists, otherwise null. Unchanged AI rows retain their provenance;
+edited or newly added rows are `user`. Re-confirming an accepted snapshot fails.
+Manual version numbering is serialized with resume parsing. At most 100 skills
+are accepted; names are trimmed to 1–120 characters, evidence is at most 2000
+characters, years are 0–99.9 with at most one decimal, and duplicate/unknown
+canonical IDs or duplicate case-insensitive unmapped names are rejected. No
+client `source` or other unknown properties are accepted. Empty fallback profiles
+are allowed. Parsed career totals are preserved; manual totals use the greatest
+skill duration rather than adding overlapping years.
 ```json
 {
   "p_version_id": "30000000-0000-0000-0000-000000000001",
@@ -372,7 +382,9 @@ never trusted as AI evidence. Confirmation sets the active version atomically.
 Preferences replace the object rather than merge it. Allowed optional keys are
 `locations: string[]`, `remote: remote_type[]`, `job_types: job_type[]`,
 `needs_sponsorship: boolean`, `salary_min: nonnegative integer`,
-`include_stretch: boolean`. Unknown keys, nulls and wrong types are rejected.
+`include_stretch: boolean`. Arrays are limited to 50 entries; strings must be
+1–120 characters; salary must fit a nonnegative 32-bit integer. Unknown keys,
+nulls and wrong types are rejected.
 ```json
 {"p_prefs":{"locations":["Baton Rouge, LA"],"remote":["remote","hybrid"],"job_types":["full_time"],"needs_sponsorship":false,"salary_min":70000,"include_stretch":false}}
 ```
@@ -380,6 +392,12 @@ Preferences replace the object rather than merge it. Allowed optional keys are
 Resume rows store bucket-relative paths: `{uid}/{uuid}.pdf` or `.docx`. The bucket
 name `resumes` is passed separately to Storage APIs. A5 supplies bucket policies;
 A2 already blocks registering another user's path and client-forged parse state.
+The `resumes` bucket is private, limits each upload to 5 MiB, and accepts PDF/DOCX
+MIME types only. A candidate can read/insert/delete only their own objects;
+filenames must be a UUID plus `.pdf` or `.docx`. Uploads are immutable: use a new
+UUID for a replacement rather than upsert. Recruiters have no direct access.
+`company-logos` is public (PNG/JPEG/WebP, 5 MiB); only a company's owner can write
+or delete its `{company_id}/...` objects.
 
 ### 7.3 Applying, passing and the candidate pipeline (A7–A8)
 

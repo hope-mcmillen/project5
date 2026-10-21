@@ -704,3 +704,19 @@ owner workspace and generate, consume or revoke expiring invite codes. Profile
 and invite locks prevent multiple-company races and invite-cap overruns. Domain
 verification is deferred to A10; new companies are unverified. A11 push
 notifications are excluded from this user's delivery scope.
+
+### Profile/storage and local demo implementation (A5–A6, October 21, 2026)
+
+Resume uploads use a private 5 MiB PDF/DOCX bucket with immutable UUID filenames
+and candidate-folder RLS. Company logos are public images, writable only by the
+company owner. Manual profiles share candidate-level version locks with resume
+parsing. Confirmation validates skills, keeps unchanged AI provenance, marks
+edits as user-supplied, and recomputes the confirmed taxonomy embedding per Q14.
+Confirmed snapshots are immutable; activation and skill replacement are atomic.
+Preferences use the strict API_CONTRACT.md §7.2 shape.
+
+Local reset now loads B's taxonomy, precomputed vectors and generated demo world
+through config.toml before seed.sql configures usable local Auth identities.
+Demo credentials live only in seed.sql and the README's local-dev section. The
+README explains the current frontend scaffold and its pending Supabase wiring;
+the verified backend APIs do not imply a completed frontend user flow.

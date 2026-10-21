@@ -26,8 +26,9 @@ untested or externally blocked acceptance criteria as complete.
   Hosted project URL is known; authenticated project access, Google OAuth activation and GitHub admin setup remain unverified.
 - A2: three schema/RLS migrations and the Person A API contract draft implemented;
   local reset, lint and 42 access tests pass. Team contract approval remains pending.
-- A3–A4: backend implemented and locally verified; feature branch review/CI pending.
-- A5–A10: scheduled; not yet implemented.
+- A3–A4: backend implemented, locally verified and passing GitHub CI; teammate review pending.
+- A5–A6: backend/storage, demo login setup and README implemented and locally verified; CI/review pending.
+- A7–A10: scheduled; not yet implemented.
 - A11: out of scope per user, not completed.
 - Keep personal work on feature branches; do not merge master without required review.
 - Person B's work was merged into `origin/master` as `db084f3` (PR #1).
@@ -46,7 +47,7 @@ These require authenticated account access or teammate input, not just code:
   auto-request behavior still depend on merging it and repository settings.
 - Team API freeze/review by C and D; cross-team full-loop rehearsal.
 - Push notifications / Firebase / FCM are excluded by the user; do not request FCM credentials or implement A11.
-- B5 embeddings / B8 scoring integration must be validated when B's branch lands.
+- B5 embeddings / B8 scoring are integrated from master. A5 confirms reviewed profiles with B's centroid; the seed-score checks validate B's live scorer. A7 still needs the swipe integration.
 
 ## Verification
 
@@ -106,7 +107,40 @@ and remaining dependencies explicitly.
 - A company test initially used fixture codes containing the forbidden letter L;
   corrected those fixture codes. No failing assertions remain.
 - Generated database types refreshed for merged B RPCs and A3/A4. CI now runs
-  the concurrency and real Auth/API smoke tests as well as pgTAP. CI's remote
-  result is reported after publishing; required teammate review remains pending.
+  the concurrency and real Auth/API smoke tests as well as pgTAP.
+- Published commit `ed352c0` on `origin/feat/A3-account-company-onboarding`.
+- GitHub Backend checks PASSED for that exact commit:
+  https://github.com/hope-mcmillen/project5/actions/runs/39648320373
+- This CI evidence was added after publishing; include the delivery-log update
+  in the next scheduled work commit. Required teammate review remains pending.
 - Google provider enablement/hosted auth and admin-only GitHub settings remain
   external gates; A10 domain verification remains scheduled for Thursday.
+
+### Wednesday, October 21 — profile/storage/demo run
+
+- Branch: `feat/A5-profile-storage-demo`, based on published A3/A4 `ed352c0`.
+- A5: private immutable resume uploads, owner-only company logo writes,
+  serialized manual versions, transactional confirmation with reviewed skill
+  validation/provenance/centroid, and strict preference replacement.
+- A6: loads B's 343 skills/132 relations/precomputed vectors/demo world without
+  modifying B's generated files. Local seed creates usable email identities for
+  two documented demo accounts; 3 companies, 30 candidates, 4 recruiters and 60
+  applications across all six statuses are verified. One company is verified.
+- Caught and fixed the interaction where A3's trigger creates candidate rows
+  before B's seed reaches them: A's seed now marks those rows `is_seed=true`.
+- README rewritten with local setup, Android emulator addressing, defines,
+  provider selection, test commands and the frontend scaffold limitation.
+  Credentials appear only in seed.sql and README's local-dev section.
+- Clean local database reset passes all migrations and four ordered seed files.
+- `supabase test db`: 239 assertions pass across six files.
+- `company_concurrency.py`: all six real concurrent-session checks pass, now
+  including manual version numbering and immutable confirmation.
+- `auth_smoke.py`: real local signup/role/company/invite checks pass.
+- `profile_storage_smoke.py`: both seeded logins pass; real profile confirmation
+  and preferences pass; private PDF upload/exact owner download pass; other
+  candidates, recruiters, public URLs, cross-folder uploads, invalid MIME types
+  and oversized uploads are denied. Synthetic test users/objects are removed.
+- CI now runs the Storage/demo-login checks as well. Generated database types
+  refreshed. Hosted project writes were not performed.
+- Frontend main.dart still does not initialize Supabase; the README explicitly
+  identifies this C/D integration dependency rather than claiming a full UI demo.

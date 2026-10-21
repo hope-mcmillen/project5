@@ -28,7 +28,7 @@ def uid():
     return str(uuid.uuid4())
 
 
-users = {key: uid() for key in ('choice', 'create', 'owner1', 'owner2', 'join', 'slot1', 'slot2')}
+users = {key: uid() for key in ('choice', 'create', 'owner1', 'owner2', 'join', 'slot1', 'slot2', 'manual')}
 companies = [uid(), uid()]
 # Generated fixture codes use the same unambiguous alphabet as production.
 alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
@@ -42,7 +42,7 @@ def assert_sql(sql, expected, message):
         raise AssertionError(f'{message}: expected {expected!r}, got {actual!r}')
 
 
-def race(calls, expected_error):
+def race(calls, expected_error=None):
     gate = threading.Barrier(2)
 
     def run(call):
@@ -57,6 +57,10 @@ def race(calls, expected_error):
         results = list(pool.map(run, calls))
     successes = sum(result.returncode == 0 for result in results)
     errors = [result.stderr for result in results if result.returncode]
+    if expected_error is None:
+        if successes != 2:
+            raise AssertionError(f'Expected two successful serialized calls, got {successes}')
+        return
     if successes != 1 or len(errors) != 1 or expected_error not in errors[0]:
         raise AssertionError(f'Expected one success and {expected_error}; got '
                              f'{successes} successes, {errors!r}')
@@ -65,7 +69,7 @@ def race(calls, expected_error):
 try:
     # An auth insertion is committed before opening the independent sessions.
     values = ','.join(
-        f"('{user}','race-{user}@example.test','{json.dumps({} if key == 'choice' else {'role':'recruiter'})}'::jsonb)"
+        f"('{user}','race-{user}@example.test','{json.dumps({} if key == 'choice' else {'role':'candidate' if key == 'manual' else 'recruiter'})}'::jsonb)"
         for key, user in users.items())
     execute(f'insert into auth.users(id,email,raw_user_meta_data) values {values};')
     execute(f"""
@@ -104,6 +108,18 @@ try:
     assert_sql(f"select uses from public.company_invites where code='{codes[2]}';", '1', 'single-use code remains capped')
     assert_sql(f"select count(*) from public.recruiters where profile_id in ('{users['slot1']}','{users['slot2']}');", '1', 'only one recruiter joined')
     print('PASS: concurrent use cannot exceed an invite cap')
+
+    race([(users['manual'], 'select (public.create_manual_profile()).id'),
+          (users['manual'], 'select (public.create_manual_profile()).id')])
+    assert_sql(f"select array_agg(version order by version)::text from public.profile_versions where candidate_id='{users['manual']}';",
+               '{1,2}', 'concurrent manual versions are unique and consecutive')
+    print('PASS: concurrent manual profiles get distinct consecutive versions')
+    version = execute(f"select id from public.profile_versions where candidate_id='{users['manual']}' and version=1;").stdout.strip()
+    race([(users['manual'], f"select public.confirm_profile('{version}','[{{\"raw_name\":\"First\",\"years\":1}}]'::jsonb)"),
+          (users['manual'], f"select public.confirm_profile('{version}','[{{\"raw_name\":\"Second\",\"years\":2}}]'::jsonb)")], 'profile_already_confirmed')
+    assert_sql(f"select count(*) from public.candidate_skills where profile_version_id='{version}';", '1', 'only winning reviewed skill persisted')
+    assert_sql(f"select active_version_id::text from public.candidates where profile_id='{users['manual']}';", version, 'active version remains consistent')
+    print('PASS: concurrent confirmation cannot overwrite an accepted profile snapshot')
 finally:
     execute(f"delete from public.companies where created_by in ({user_ids}); "
             f"delete from auth.users where id in ({user_ids});")

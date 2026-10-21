@@ -159,10 +159,12 @@ Folders: `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, non-AI 
 #### A5 · As a candidate, I want my resume stored privately and my reviewed profile and preferences saved, so only I control what is used for matching.
 **Covers:** PL-14, PL-17 · **Size:** ≈ 1 day · **Needs:** A2, A3 · **Stories:** US-07, US-09, US-11, US-12, US-49
 
+**Person A progress (October 21):** Storage policies, manual/confirmed profiles and strict preferences implemented; database and real Storage/API checks pass locally. Final confirmed embeddings use B's taxonomy centroid per PRD Q14.
+
 **Build**
 - **PL-14 Storage:** A migration inserting into `storage.buckets`: private `resumes` (5 MB limit, PDF and DOCX only) and public `company-logos`. Policies on `storage.objects`: for `resumes`, `(storage.foldername(name))[1] = auth.uid()::text` for select and insert. For logos, write only if the caller owns that company. Add a test that a user can't read another user's folder.
 - **PL-17 Profile RPCs:**
-  - `confirm_profile(p_version_id, p_skills jsonb)`: in one transaction, check ownership, replace the version's `candidate_skills` (edited rows get `source = 'user'`), set `confirmed`, `confirmed_at`, and `total_years`, and set `candidates.active_version_id`. The profile embedding is filled by B's parse step.
+  - `confirm_profile(p_version_id, p_skills jsonb)`: in one transaction, check ownership, replace the version's `candidate_skills` (edited rows get `source = 'user'`), set `confirmed`, `confirmed_at`, and `total_years`, and set `candidates.active_version_id`. The final confirmed embedding is rebuilt from reviewed skill IDs with B's `skills_centroid` (PRD Q14).
   - `create_manual_profile()`: an empty version with `source = 'manual'`.
   - `save_preferences(p_prefs)`: validates keys and types against the [SCHEMA.md §6](SCHEMA.md#6-json-shapes) shape and rejects unknown keys.
 
@@ -170,6 +172,8 @@ Folders: `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, non-AI 
 
 #### A6 · As a presenter, I want demo accounts, realistic starter data, and a clear README, so anyone can run and demo the project in minutes.
 **Covers:** PL-16, PL-25 · **Size:** ≈ 1.5 days · **Needs:** A4, B1, B5 · **Stories:** US-54
+
+**Person A progress (October 21):** Local reset loads all taxonomy/vectors/demo data; both documented accounts authenticate successfully. README and example Flutter defines added. Frontend Supabase initialization remains the frontend team's integration work.
 
 **Build**
 - **PL-16 Seed v1:** In `supabase/seed.sql`, import the taxonomy from B1's CSV with B5's embeddings as `'[…]'::vector` literals, insert 3 companies (one verified), and insert demo users into `auth.users` (`crypt(password, gen_salt('bf'))`, `email_confirmed_at = now()`) with matching `auth.identities` rows. Every row has `is_seed = true`.
