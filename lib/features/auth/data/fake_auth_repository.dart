@@ -99,7 +99,7 @@ class FakeAuthRepository implements AuthRepository {
       _events.add(AuthEvent(currentUser, passwordRecovery: passwordRecovery));
 
   @override
-  Future<void> signUpWithEmail({
+  Future<bool> signUpWithEmail({
     required String email,
     required String password,
     required AppRole role,
@@ -124,6 +124,7 @@ class FakeAuthRepository implements AuthRepository {
     );
     _signedInEmail = key;
     _emit();
+    return true;
   }
 
   @override

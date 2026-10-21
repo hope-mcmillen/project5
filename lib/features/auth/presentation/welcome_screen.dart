@@ -1,34 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
-import '../../../ui/scaffold/placeholder_page.dart';
+import '../../../core/models/app_role.dart';
+import 'widgets/auth_layout.dart';
+import 'widgets/role_choice_card.dart';
 
-/// Welcome: Role choice: "I'm looking for a job" / "I'm hiring" as two RoleChoiceCards (PRD §4).
-///
-/// SCAFFOLD: placeholder body only. Replace it when implementing PL-10.
-class WelcomeScreen extends StatelessWidget {
+/// Welcome: pick "I'm looking for a job" or "I'm hiring", then sign up
+/// (PRD §4, US-01). `?role=recruiter` (the `/recruiter` link) preselects.
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key, this.preselectedRole});
 
   final String? preselectedRole;
 
   @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  late AppRole? _role = AppRole.values.asNameMap()[widget.preselectedRole];
+
+  @override
   Widget build(BuildContext context) {
-    return PlaceholderPage(
-      title: 'Welcome',
-      description: 'Role choice: "I\'m looking for a job" / "I\'m hiring" as two RoleChoiceCards (PRD §4).',
-      tasks: const ['PL-10'],
-      stories: const ['US-01'],
-      params: {'Pre-selected role': preselectedRole ?? 'none'},
-      links: [
-        PageLink(
-          'I\'m looking for a job → Sign up',
-          '${Routes.signUp}?role=candidate',
+    return AuthLayout(
+      title: 'Welcome to ResuRhombus',
+      subtitle: 'Matches built on skills. How will you use it?',
+      showBack: false,
+      maxWidth: 720,
+      children: [
+        RoleChoicePicker(
+          selected: _role,
+          onChanged: (role) => setState(() => _role = role),
         ),
-        PageLink('I\'m hiring → Sign up', '${Routes.signUp}?role=recruiter'),
-        PageLink(
-          'I already have an account → Sign in',
-          Routes.signIn,
-          mode: LinkMode.push,
+        const SizedBox(height: 24),
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SubmitButton(
+                  label: 'Continue',
+                  onPressed: _role == null
+                      ? null
+                      : () =>
+                            context.go('${Routes.signUp}?role=${_role!.name}'),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => context.push(Routes.signIn),
+                  child: const Text('I already have an account · Sign in'),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );

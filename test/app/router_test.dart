@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project5/app/app.dart';
 import 'package:project5/app/dev_session.dart';
+import 'package:project5/app/fake_overrides.dart';
+import 'package:project5/features/auth/data/fake_auth_repository.dart';
 import 'package:project5/app/router.dart';
 import 'package:project5/app/routes.dart';
 import 'package:project5/core/models/app_role.dart';
@@ -102,7 +105,14 @@ void main() {
       String location,
     ) async {
       final router = buildRouter(session);
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: fakeRepositoryOverrides(
+            auth: FakeAuthRepository(latency: Duration.zero),
+          ),
+          child: MaterialApp.router(routerConfig: router),
+        ),
+      );
       router.go(location);
       await tester.pumpAndSettle();
       expect(
@@ -111,7 +121,7 @@ void main() {
         reason: 'redirected away from $location',
       );
       expect(
-        find.byType(PlaceholderPage),
+        find.byType(Scaffold),
         findsWidgets,
         reason: 'no page for $location',
       );
@@ -145,18 +155,36 @@ void main() {
 
   testWidgets('click-through: candidate sign-up to deck', (tester) async {
     addTearDown(devSession.signOut);
-    await tester.pumpWidget(const ResuRhombusApp());
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: fakeRepositoryOverrides(
+          auth: FakeAuthRepository(latency: Duration.zero),
+        ),
+        child: const ResuRhombusApp(),
+      ),
+    );
     await tester.pumpAndSettle();
-    expect(find.text('Welcome'), findsWidgets);
+    expect(find.text('Welcome to ResuRhombus'), findsOneWidget);
 
     Future<void> tap(String label) async {
-      await tester.scrollUntilVisible(find.text(label), 100);
-      await tester.tap(find.text(label));
+      await tester.ensureVisible(find.text(label).last);
+      await tester.tap(find.text(label).last);
       await tester.pumpAndSettle();
     }
 
-    await tap("I'm looking for a job → Sign up");
-    await tap('[Fake] Create candidate account');
+    await tap("I'm looking for a job");
+    await tap('Continue');
+    expect(find.text('Create your account'), findsOneWidget);
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Email'),
+      'new.candidate@example.test',
+    );
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Password'),
+      'password1',
+    );
+    await tap('I agree to the Terms of Service and Privacy Policy');
+    await tap('Create account');
     expect(
       find.text('Before we start'),
       findsWidgets,
