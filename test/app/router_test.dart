@@ -144,6 +144,8 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
+          // A fresh container per page, so fakes don't carry over.
+          key: UniqueKey(),
           overrides: fakeRepositoryOverrides(
             auth: FakeAuthRepository(latency: Duration.zero),
           ),

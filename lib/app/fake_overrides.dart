@@ -13,12 +13,15 @@ import '../features/jobs/data/job_repository.dart';
 ///
 /// Shared by `main_fake.dart` and widget tests. Candidate-side fakes (C1)
 /// belong in this list too.
-List<Override> fakeRepositoryOverrides({FakeAuthRepository? auth}) {
+List<Override> fakeRepositoryOverrides({
+  FakeAuthRepository? auth,
+  FakeCompanyRepository? companies,
+}) {
   final fakeAuth = auth ?? FakeAuthRepository();
   return [
     authRepositoryProvider.overrideWithValue(fakeAuth),
     companyRepositoryProvider.overrideWithValue(
-      FakeCompanyRepository(auth: fakeAuth),
+      companies ?? FakeCompanyRepository(auth: fakeAuth),
     ),
     jobRepositoryProvider.overrideWithValue(FakeJobRepository()),
     boardRepositoryProvider.overrideWithValue(FakeBoardRepository()),

@@ -64,3 +64,8 @@ class AppFailure implements Exception {
   @override
   String toString() => 'AppFailure($code): $message';
 }
+
+/// Riverpod retry policy for the app: never retry automatically. Contract
+/// errors (`not_owner`, `invalid_invite`, …) won't change on retry, and
+/// every data screen offers its own Retry button.
+Duration? noAutomaticRetry(int retryCount, Object error) => null;
