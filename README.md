@@ -52,6 +52,25 @@ The define names are `SUPABASE_URL` and `SUPABASE_ANON_KEY` (see
 scaffold does not initialize Supabase yet. Backend accounts can already be used
 through Supabase Auth/Studio and the documented APIs.
 
+### Running the app on Supabase
+
+1. Copy the example config: `cp env/example.json env/dev.json` (gitignored).
+2. Fill in `env/dev.json`:
+   - Local stack: `SUPABASE_URL` is `http://127.0.0.1:54321` (or
+     `http://10.0.2.2:54321` on the Android emulator) and `SUPABASE_ANON_KEY`
+     is the anon/publishable key from `supabase status`.
+   - Hosted project: use the project URL and its anon/publishable key from the
+     Supabase dashboard (Project Settings → API). Never use the service-role key.
+3. Run with the config:
+
+```sh
+flutter run --dart-define-from-file=env/dev.json            # Android
+flutter run -d chrome --dart-define-from-file=env/dev.json  # web
+```
+
+`lib/main.dart` initializes Supabase from these values. If they are missing,
+the app shows a setup message instead of starting.
+
 ### Local-dev demo accounts
 
 These intentionally public credentials work **only in the locally seeded demo**.
