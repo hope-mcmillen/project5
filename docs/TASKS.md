@@ -134,6 +134,8 @@ Folders: `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, non-AI 
 #### A3 · As a user, I want my account created with the role I chose and kept separate from everyone else's, so I can sign up safely and only see my own data.
 **Covers:** PL-07, PL-08, PL-12 · **Size:** ≈ 2 days · **Needs:** A2 · **Stories:** US-01, US-02, US-06
 
+**Person A progress (October 21):** Backend implemented and locally tested, including real Auth signups and concurrent role choices. CI/review and hosted Google sign-in remain separate acceptance gates.
+
 **Build**
 - **PL-07 Sign-up trigger:** `handle_new_user()` is `security definer`, runs `after insert on auth.users`, and inserts a `profiles` row with `role` from `raw_user_meta_data->>'role'` **only** when it is `candidate` or `recruiter`. Otherwise it leaves `role` null and never raises (Google sign-in may have no metadata). For candidates it also inserts a `candidates` row. Add `set_initial_role(p_role)`, which only works while `role is null` and creates the `candidates` row if needed.
 - **PL-08 Role helpers:** `current_app_role()` (`stable security definer set search_path = public`) returns the caller's `profiles.role`. Add `my_company_id()` in the same style. Refactor policies to use them, wrapping `(select auth.uid())` so it's evaluated once per query.
@@ -143,6 +145,8 @@ Folders: `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, non-AI 
 
 #### A4 · As a recruiter, I want to create a company, invite teammates, and join with a code, so my team can post jobs from one workspace.
 **Covers:** PL-13 · **Size:** ≈ 1 day · **Needs:** A3 · **Stories:** US-30, US-31, US-32
+
+**Person A progress (October 21):** All four company/invite RPCs implemented and locally tested, including concurrent joins and invite-cap enforcement. Domain verification is deferred to A10.
 
 **Build**
 - `create_company(p_name, p_website)`: the role must be recruiter with no existing company. Inserts the company and a `recruiters(owner)` row, and sets `verified` (a simple version is fine; see A10).

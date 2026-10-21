@@ -145,7 +145,7 @@ create table public.candidates (
 create table public.resumes (
   id              uuid primary key default gen_random_uuid(),
   candidate_id    uuid not null references public.candidates (profile_id) on delete cascade,
-  storage_path    text not null unique,             -- resumes/{auth.uid()}/{uuid}.{pdf|docx}
+  storage_path    text not null unique,             -- bucket-relative {auth.uid()}/{uuid}.{pdf|docx}
   file_hash       text not null,                    -- sha256, used for extraction cache
   mime_type       text not null check (mime_type in (
                     'application/pdf',
@@ -351,7 +351,8 @@ select
   j.title as job_title, c.name as company_name, c.verified as company_verified
 from public.applications a
 join public.jobs j on j.id = a.job_id
-join public.companies c on c.id = j.company_id;
+join public.companies c on c.id = j.company_id
+where a.candidate_id = (select auth.uid());
 
 -- -----------------------------------------------------------------------------
 -- Row-Level Security: enabled everywhere; policies live in the migrations.

@@ -31,7 +31,8 @@ $$;
 
 insert into auth.users (id) select pg_temp.id(k) from (values ('cand'), ('cand2'), ('rec')) v(k);
 insert into public.profiles (id, role) values
-  (pg_temp.id('cand'), 'candidate'), (pg_temp.id('cand2'), 'candidate'), (pg_temp.id('rec'), 'recruiter');
+  (pg_temp.id('cand'), 'candidate'), (pg_temp.id('cand2'), 'candidate'), (pg_temp.id('rec'), 'recruiter')
+on conflict (id) do update set role = excluded.role;
 insert into public.candidates (profile_id) values (pg_temp.id('cand')), (pg_temp.id('cand2'));
 insert into public.profile_versions (id, candidate_id, version, confirmed)
 values ('dddddddd-0000-4000-8000-00000000000a', pg_temp.id('cand'), 1, true),

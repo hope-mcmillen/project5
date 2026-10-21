@@ -1,0 +1,1 @@
+-- Local synthetic demo data is added by A6. Never call an LLM while seeding.
