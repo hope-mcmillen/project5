@@ -553,6 +553,9 @@ isOneToOne: false
 "compute_match":
 { Args: { "p_job_id": string,"p_profile_version_id": string }; Returns: Json
                            },
+"confirm_profile":
+{ Args: { "p_skills": Json,"p_version_id": string }; Returns: undefined
+                           },
 "create_company":
 { Args: { "p_name": string,"p_website"?: string }; Returns: {
               "created_at": string,
@@ -574,6 +577,28 @@ isOneToOne: false
 "create_invite":
 { Args: { "p_expires_in_days"?: number }; Returns: string
                            },
+"create_manual_profile":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "candidate_id": string,
+"confirmed": boolean,
+"confirmed_at": string | null,
+"created_at": string,
+"education": NonNullable<Json>,
+"embedding": string | null,
+"embedding_model": string | null,
+"id": string,
+"is_seed": boolean,
+"resume_id": string | null,
+"source": Database["public"]['Enums']["profile_source"],
+"total_years": number | null,
+"version": number
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "profile_versions"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "current_app_role":
 { Args: Record<PropertyKey, never>; Returns: Database["public"]['Enums']["app_role"]
                            },
@@ -635,6 +660,9 @@ isOneToOne: false
                            },
 "save_job_draft":
 { Args: { "p_fields": Json,"p_job_id": string,"p_requirements": Json }; Returns: Json
+                           },
+"save_preferences":
+{ Args: { "p_prefs": Json }; Returns: undefined
                            },
 "save_resume_draft":
 { Args: { "p_education": Json,"p_extraction": Json,"p_file_hash": string,"p_llm_model": string,"p_llm_provider": string,"p_resume_id": string,"p_schema_version": number,"p_skills": Json,"p_total_years": number }; Returns: {

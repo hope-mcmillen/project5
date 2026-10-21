@@ -288,3 +288,17 @@ the caller's profile; joining also locks the invite and checks expiry against
 the wall clock after waiting. All mutation RPCs are authenticated-only with
 explicit authorization and a fixed search path. New companies remain unverified
 until A10. Storage/logo upload remains A5.
+
+## 9. Private storage and reviewed profiles (A5–A6, October 21, 2026)
+
+Migrations `20261021150000_private_storage.sql` and
+`20261021151000_confirm_profiles_preferences.sql` add bucket policies and the
+three profile/preferences RPCs. Exact validation limits, provenance, total-years
+semantics and immutable upload rules are in API_CONTRACT.md §7.2. Final profile
+vectors use B's taxonomy centroid, matching job vectors without AI calls.
+
+Local seeds load `seed/skills.sql`, `seed/skills_embeddings.sql`,
+`seed/demo_data.sql`, then `seed.sql`. Generated B data is preserved verbatim;
+A's seed marks trigger-created candidate rows as synthetic and configures two
+working local Auth identities. Only the README's local-dev section documents
+demo credentials.

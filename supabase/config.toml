@@ -16,7 +16,7 @@ enabled = true
 schema_paths = []
 [db.seed]
 enabled = true
-sql_paths = ["./seed.sql"]
+sql_paths = ["./seed/skills.sql", "./seed/skills_embeddings.sql", "./seed/demo_data.sql", "./seed.sql"]
 [realtime]
 enabled = true
 [studio]
