@@ -544,17 +544,111 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "current_app_role":
+            "advance_resume_status":
+{ Args: { "p_from": Database["public"]['Enums']["resume_status"],"p_resume_id": string,"p_to": Database["public"]['Enums']["resume_status"] }; Returns: boolean
+                           },
+"claim_resume_parse":
+{ Args: { "p_resume_id": string,"p_stale_seconds"?: number }; Returns: boolean
+                           },
+"compute_match":
+{ Args: { "p_job_id": string,"p_profile_version_id": string }; Returns: Json
+                           },
+"create_company":
+{ Args: { "p_name": string,"p_website"?: string }; Returns: {
+              "created_at": string,
+"created_by": string | null,
+"id": string,
+"is_seed": boolean,
+"logo_path": string | null,
+"name": string,
+"updated_at": string,
+"verified": boolean,
+"website": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "companies"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"create_invite":
+{ Args: { "p_expires_in_days"?: number }; Returns: string
+                           },
+"current_app_role":
 { Args: Record<PropertyKey, never>; Returns: Database["public"]['Enums']["app_role"]
+                           },
+"fail_job_parse":
+{ Args: { "p_job_id": string }; Returns: boolean
+                           },
+"fail_resume_parse":
+{ Args: { "p_reason": string,"p_resume_id": string }; Returns: boolean
+                           },
+"feed_affinity":
+{ Args: { "p_candidate_id": string,"p_company_id": string,"p_match_score": number,"p_remote": Database["public"]['Enums']["remote_type"],"p_salary_max": number }; Returns: number
+                           },
+"feed_exploration":
+{ Args: { "p_job_id": string }; Returns: number
+                           },
+"feed_freshness":
+{ Args: { "p_published_at": string }; Returns: number
+                           },
+"get_feed":
+{ Args: { "p_cursor"?: string,"p_limit"?: number }; Returns: Json
                            },
 "has_my_application":
 { Args: { "p_job_id": string }; Returns: boolean
+                           },
+"join_company":
+{ Args: { "p_code": string }; Returns: {
+              "created_at": string,
+"created_by": string | null,
+"id": string,
+"is_seed": boolean,
+"logo_path": string | null,
+"name": string,
+"updated_at": string,
+"verified": boolean,
+"website": string | null
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "companies"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"match_band":
+{ Args: { "p_score": number }; Returns: string
+                           },
+"match_skills":
+{ Args: { "p_embedding": string,"p_k"?: number,"p_threshold"?: number }; Returns: {
+              "name": string,"similarity": number,"skill_id": string
+            }[]
                            },
 "my_company_id":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
 "my_owned_company_id":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"revoke_invite":
+{ Args: { "p_code": string }; Returns: undefined
+                           },
+"save_job_draft":
+{ Args: { "p_fields": Json,"p_job_id": string,"p_requirements": Json }; Returns: Json
+                           },
+"save_resume_draft":
+{ Args: { "p_education": Json,"p_extraction": Json,"p_file_hash": string,"p_llm_model": string,"p_llm_provider": string,"p_resume_id": string,"p_schema_version": number,"p_skills": Json,"p_total_years": number }; Returns: {
+              "profile_version_id": string,"version": number
+            }[]
+                           },
+"set_initial_role":
+{ Args: { "p_role": Database["public"]['Enums']["app_role"] }; Returns: undefined
+                           },
+"skills_centroid":
+{ Args: { "p_skill_ids": (string)[] }; Returns: string
+                           },
+"start_job_parse":
+{ Args: { "p_job_id": string }; Returns: boolean
                            }
           }
           Enums: {

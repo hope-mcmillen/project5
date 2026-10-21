@@ -277,3 +277,14 @@ state, job lifecycle or application status. These writes use the scheduled RPCs.
 `my_applications` also filters by caller ID, so recruiters cannot use the candidate
 pipeline view as an alternate board. Storage paths are bucket-relative; pass
 `resumes` separately to the Storage API. Business RPCs remain A3–A11 work.
+
+## 8. Account/company onboarding (A3–A4, October 21, 2026)
+
+Append-only migrations `20261021090000_account_roles.sql` and
+`20261021091000_company_onboarding.sql` implement the auth trigger, one-time
+initial role choice, company creation and invite lifecycle. Existing profiles
+are preserved during backfill. Initial-role/company membership requests lock
+the caller's profile; joining also locks the invite and checks expiry against
+the wall clock after waiting. All mutation RPCs are authenticated-only with
+explicit authorization and a fixed search path. New companies remain unverified
+until A10. Storage/logo upload remains A5.

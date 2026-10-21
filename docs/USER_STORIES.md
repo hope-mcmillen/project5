@@ -104,12 +104,12 @@
   - `go_router` reads the `?role=recruiter` query parameter (or the `/recruiter` path alias) to pre-select a card.
 - **Backend:**
   - The role travels in `auth.signUp(options.data: {'role': 'recruiter'})`.
-  - A `handle_new_user()` trigger on `auth.users` (`security definer`) inserts the `profiles` row. It reads `raw_user_meta_data->>'role'` and **rejects anything other than `candidate` or `recruiter`**, so nobody can self-assign `admin`.
+  - A `handle_new_user()` trigger on `auth.users` (`security definer`) inserts the `profiles` row. It reads `raw_user_meta_data->>'role'` and **accepts only `candidate` or `recruiter`**; missing/invalid metadata leaves `role` null, so nobody can self-assign `admin` and OAuth signup still succeeds.
 - **Data:**
   - `profiles(id uuid pk references auth.users, role text check (role in ('candidate','recruiter')), display_name, created_at)`.
 - **Tests:**
   - Widget test: selecting a card updates the provider.
-  - pgTAP: the trigger creates a profile with the correct role, and an invalid role raises an error.
+  - pgTAP: the trigger creates a profile with the correct role; invalid metadata leaves a null role without failing signup. Direct role changes are denied.
 
 **Refs:** PRD §4, A-1, A-2 · Tasks PL-04, PL-07, PL-10 · **Backend:** A · **Frontend:** D
 
@@ -132,7 +132,7 @@
   - Enable the Email and Google providers in Supabase Auth settings.
   - Add redirect URLs for web and the Android deep link (`io.resurhombus.app://login-callback`).
   - For Google first-time sign-in, the role is passed through the same metadata path as email sign-up.
-  - **Edge case:** If an OAuth user arrives without role metadata, the trigger creates no profile. The router sends them to the role-choice screen, which calls a `set_initial_role(role)` RPC. That RPC only works while `role` is null.
+  - **Edge case:** If an OAuth user arrives without role metadata, the trigger creates a profile with a null role. The router sends them to the role-choice screen, which calls a `set_initial_role(role)` RPC. That RPC only works while `role` is null.
 - **Tests:**
   - Repository unit test with a mocked client.
   - Manual test on the Android emulator and Chrome.

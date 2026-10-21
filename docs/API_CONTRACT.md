@@ -297,8 +297,10 @@ Feed Rank only orders the deck. **`match_score` never changes because of swipes 
 ## 7. Database and status RPCs (Person A, PL-27)
 
 **Draft for frontend review.** A2 supplies the schema and access policies; the
-business RPCs below are scheduled for A3–A11. A documented signature does not mean
-its implementation has landed. Do not replace B's parsing/scoring sections.
+identity/company RPCs in §7.1 are implemented and locally tested (A3–A4).
+The remaining business RPCs are scheduled for A5–A10; A11 notifications are
+excluded by the user. A documented signature does not mean its implementation
+has landed. Do not replace B's parsing/scoring sections.
 All UUID parameters use PostgreSQL `uuid`; timestamps use `timestamptz`; JSON is
 `jsonb`; enums are listed in SCHEMA.md §3. RPCs run atomically. Unauthorized calls
 return `P0001` and the documented message. Direct table writes can instead return
@@ -315,7 +317,7 @@ Postgres `42501` (permission denied/RLS); uniqueness violations use `23505`.
 | `has_my_application(p_job_id uuid) → boolean` | authenticated, policies; only tests caller's own applications | — | `true` |
 | `set_initial_role(p_role app_role) → void` | user with null role | `not_authenticated`, `role_already_set`, `invalid_role` | `null` |
 | `create_company(p_name text, p_website text default null) → companies` | recruiter with no company | `not_recruiter`, `already_in_company`, `invalid_company` | Company object below |
-| `create_invite(p_expires_in_days integer default 7) → text` | company owner | `not_owner`, `invalid_expiry` | `"ABCD2345"` |
+| `create_invite(p_expires_in_days integer default 7) → text` | company owner | `not_owner`, `invalid_expiry`, `internal` | `"ABCD2345"` |
 | `join_company(p_code text) → companies` | recruiter with no company | `not_recruiter`, `already_in_company`, `invalid_invite` | Company object below |
 | `revoke_invite(p_code text) → void` | owner of code's company | `not_owner`, `invalid_invite` | `null` |
 
@@ -332,6 +334,10 @@ Company result (create/join):
 ```
 Invite expiration is 1–30 days. Codes are 8 uppercase unambiguous characters;
 expired, revoked, exhausted and nonexistent codes all produce `invalid_invite`.
+Codes are trimmed and uppercased on join/revoke. Company names are trimmed and
+must be 1–120 characters; optional websites are trimmed HTTP(S) URLs (at most
+2048 characters). New companies remain `verified=false` until A10 verification.
+Only authenticated callers can execute these RPCs; anonymous calls fail `42501`.
 Role choice is immutable once set, including for Google accounts. An invalid
 non-null enum string is rejected as PostgreSQL `22P02` before the function runs.
 
@@ -457,7 +463,7 @@ separately from `resume-url`; evidence should not expose raw contact information
 `get_interview_list` returns an array of these advanced detail objects. The example's
 empty breakdown is valid for an empty fixture; real scored jobs return §4 entries.
 
-### 7.5 Secure links, deletion and notifications (A9–A11)
+### 7.5 Secure links and deletion (A9–A10); excluded notification design (A11)
 
 All Edge requests use `Content-Type: application/json`. User endpoints require
 `Authorization: Bearer <user JWT>` and verify it server-side. They never accept a
@@ -475,6 +481,10 @@ non-advanced applications must not yield URLs. Deletion removes owned Storage
 objects, anonymizes retained applications, deletes candidate-owned rows and the
 auth user; failures must be explicit and retries safe. It is not accepted until
 the no-remaining-data integration test passes.
+
+**A11 is out of scope per user direction (October 20); no Firebase/FCM setup or
+notification endpoints are being implemented.** The following describes only the
+original deferred design.
 
 The notify handler validates the webhook source and reloads the actual event
 from the database, rather than trusting recipient IDs or statuses in the body.

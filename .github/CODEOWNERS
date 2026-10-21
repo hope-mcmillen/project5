@@ -1,24 +1,26 @@
-# Replace these team aliases with real GitHub handles or org teams before
-# enabling required code-owner reviews. Actual assignments: docs/TEAM_PLAN.md.
-# /supabase/migrations/ @PERSON_A
-# /supabase/tests/ @PERSON_A
-# /supabase/seed.sql @PERSON_A
-# /supabase/config.toml @PERSON_A
-# /supabase/functions/resume-url/ @PERSON_A
-# /supabase/functions/delete-account/ @PERSON_A
-# /supabase/functions/notify/ @PERSON_A
-# /supabase/functions/_shared/ @PERSON_B
-# /supabase/functions/parse-resume/ @PERSON_B
-# /supabase/functions/parse-job/ @PERSON_B
-# /lib/ui/ @PERSON_C
-# /lib/core/models/ @PERSON_C
-# /lib/features/onboarding/ @PERSON_C
-# /lib/features/deck/ @PERSON_C
-# /lib/features/deep_dive/ @PERSON_C
-# /lib/features/pipeline/ @PERSON_C
-# /lib/features/profile/ @PERSON_C
-# /lib/app/ @PERSON_D
-# /lib/features/auth/ @PERSON_D
-# /lib/features/company/ @PERSON_D
-# /lib/features/jobs/ @PERSON_D
-# /lib/features/board/ @PERSON_D
+# Ownership from docs/TEAM_PLAN.md; handles supplied by the user October 20.
+# Request cross-boundary reviewers per TEAM_PLAN.md before merging.
+/supabase/migrations/ @MarcusReese1
+/supabase/tests/ @MarcusReese1
+/supabase/types/ @MarcusReese1
+/supabase/seed.sql @MarcusReese1
+/supabase/config.toml @MarcusReese1
+/supabase/functions/resume-url/ @MarcusReese1
+/supabase/functions/delete-account/ @MarcusReese1
+/supabase/functions/notify/ @MarcusReese1
+/.github/ @MarcusReese1
+/supabase/functions/_shared/ @kamarceneaux
+/supabase/functions/parse-resume/ @kamarceneaux
+/supabase/functions/parse-job/ @kamarceneaux
+/lib/ui/ @hope-mcmillen
+/lib/core/models/ @hope-mcmillen
+/lib/features/onboarding/ @hope-mcmillen
+/lib/features/deck/ @hope-mcmillen
+/lib/features/deep_dive/ @hope-mcmillen
+/lib/features/pipeline/ @hope-mcmillen
+/lib/features/profile/ @hope-mcmillen
+/lib/app/ @k6iith
+/lib/features/auth/ @k6iith
+/lib/features/company/ @k6iith
+/lib/features/jobs/ @k6iith
+/lib/features/board/ @k6iith

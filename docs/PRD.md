@@ -692,3 +692,15 @@ client updates cannot change roles, activate profile versions, mark resumes
 parsed, set company verification, publish jobs or transition applications. The
 pipeline view is caller-only; both views are security invoker. Resume object
 paths are relative to the private `resumes` bucket: `{uid}/{uuid}.pdf|docx`.
+
+### Account/company onboarding implementation (A3–A4, October 21, 2026)
+
+Auth signup always creates a profile. Candidate/recruiter metadata chooses the
+initial role; absent or invalid metadata leaves it null without failing signup.
+A candidate also gets a candidate row. `set_initial_role` locks the caller's
+profile and permits exactly one choice. Updating auth user metadata later does
+not alter the database role. The company RPCs in API_CONTRACT.md §7.1 create an
+owner workspace and generate, consume or revoke expiring invite codes. Profile
+and invite locks prevent multiple-company races and invite-cap overruns. Domain
+verification is deferred to A10; new companies are unverified. A11 push
+notifications are excluded from this user's delivery scope.
