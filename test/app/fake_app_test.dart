@@ -37,6 +37,6 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byType(MaterialApp), findsOneWidget);
-    expect(find.text('Welcome'), findsWidgets);
+    expect(find.text('Welcome to ResuRhombus'), findsOneWidget);
   });
 }
