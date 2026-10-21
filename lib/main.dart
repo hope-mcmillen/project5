@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app.dart';
 import 'app/env.dart';
+import 'core/errors/app_failure.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +20,7 @@ Future<void> main() async {
   }
 
   await Supabase.initialize(url: Env.supabaseUrl, publishableKey: Env.anonKey);
-  runApp(const ProviderScope(child: ResuRhombusApp()));
+  runApp(const ProviderScope(retry: noAutomaticRetry, child: ResuRhombusApp()));
 }
 
 /// Shown when the app was started without `--dart-define-from-file`.

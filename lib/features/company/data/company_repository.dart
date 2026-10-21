@@ -2,10 +2,10 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/supabase/supabase_providers.dart';
 import '../../auth/data/auth_repository.dart';
-import '../../auth/data/fake_auth_repository.dart';
 import '../domain/company.dart';
-import 'fake_company_repository.dart';
+import 'supabase_company_repository.dart';
 
 /// Company workspace calls (PL-15, API_CONTRACT §7.1).
 abstract interface class CompanyRepository {
@@ -36,8 +36,20 @@ abstract interface class CompanyRepository {
   String? logoUrl(String? logoPath);
 }
 
-/// TODO(PL-15): switch the default to `SupabaseCompanyRepository`.
-final companyRepositoryProvider = Provider<CompanyRepository>((ref) {
-  final auth = ref.watch(authRepositoryProvider);
-  return FakeCompanyRepository(auth: auth is FakeAuthRepository ? auth : null);
+final companyRepositoryProvider = Provider<CompanyRepository>(
+  (ref) => SupabaseCompanyRepository(ref.watch(supabaseClientProvider)),
+);
+
+/// The signed-in recruiter's company and role (null before onboarding).
+final myCompanyProvider = FutureProvider<CompanyMembership?>((ref) async {
+  final userId = await ref.watch(currentUserIdProvider.future);
+  if (userId == null) return null;
+  return ref.watch(companyRepositoryProvider).myCompany();
+});
+
+/// The company's invite codes, newest first. Owners only.
+final invitesProvider = FutureProvider<List<CompanyInvite>>((ref) async {
+  final membership = await ref.watch(myCompanyProvider.future);
+  if (membership == null || !membership.isOwner) return const [];
+  return ref.watch(companyRepositoryProvider).invites();
 });
