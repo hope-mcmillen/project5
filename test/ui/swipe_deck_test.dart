@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/windows_golden.dart';
+
 import 'package:project5/core/models/candidate_models.dart';
 import 'package:project5/core/testing/candidate_fixtures.dart';
 import 'package:project5/ui/components/swipe_deck.dart';
@@ -141,9 +144,9 @@ void main() {
       decisions.add(direction);
       return true;
     });
-    await expectLater(
+    await expectWindowsGolden(
       find.byType(Scaffold),
-      matchesGoldenFile('goldens/swipe_deck_400.png'),
+      'goldens/swipe_deck_400.png',
     );
     final action = key.currentState!.commit(SwipeDirection.left);
     await tester.pumpAndSettle();
