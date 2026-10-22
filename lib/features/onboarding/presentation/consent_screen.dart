@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/routes.dart';
 import '../../../ui/scaffold/placeholder_page.dart';
+import 'onboarding_sign_out.dart';
 
 /// Before we start: Consent to resume processing and data use (PRD §5.1, A-6).
 ///
@@ -17,6 +18,7 @@ class ConsentScreen extends StatelessWidget {
       tasks: const ['CA-03'],
       stories: const ['US-07'],
       links: [PageLink('Agree and continue', Routes.candidateUpload)],
+      actions: const [OnboardingSignOutAction()],
     );
   }
 }

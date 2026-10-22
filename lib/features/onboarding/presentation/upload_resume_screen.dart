@@ -7,6 +7,7 @@ import '../../../ui/components/branded_page.dart';
 import '../../../ui/components/error_banner.dart';
 import '../../../ui/theme/rr_tokens.dart';
 import '../data/resume_repository.dart';
+import 'onboarding_sign_out.dart';
 import 'upload_controller.dart';
 
 class UploadResumeScreen extends ConsumerWidget {
@@ -43,6 +44,7 @@ class UploadResumeScreen extends ConsumerWidget {
     return BrandedPage(
       title: 'Upload your resume',
       preferMenuButton: true,
+      actions: const [OnboardingSignOutAction()],
       description: 'Bring your experience into focus. Choose a PDF or Word resume, up to 5 MB.',
       child: Card(
         child: Padding(

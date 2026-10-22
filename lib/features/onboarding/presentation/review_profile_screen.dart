@@ -11,6 +11,7 @@ import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/components/skill_review_list.dart';
 import '../../../ui/theme/rr_tokens.dart';
 import '../data/resume_repository.dart';
+import 'onboarding_sign_out.dart';
 import 'review_controller.dart';
 import 'skill_search_sheet.dart';
 
@@ -100,6 +101,7 @@ class ReviewProfileScreen extends ConsumerWidget {
     final controller = ref.read(reviewControllerProvider.notifier);
     return BrandedPage(
       title: 'Review your skills',
+      actions: const [OnboardingSignOutAction()],
       description: 'Check the skills and experience found in your resume. Your changes are saved only when you confirm.',
       footer: value == null
           ? null

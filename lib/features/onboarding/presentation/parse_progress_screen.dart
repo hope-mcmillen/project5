@@ -12,6 +12,7 @@ import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/theme/rr_tokens.dart';
 import '../../profile/data/profile_repository.dart';
 import '../data/resume_repository.dart';
+import 'onboarding_sign_out.dart';
 import 'resume_status_provider.dart';
 
 class ParseProgressScreen extends ConsumerStatefulWidget {
@@ -211,6 +212,7 @@ class _ParseProgressScreenState extends ConsumerState<ParseProgressScreen> {
     }
     return BrandedPage(
       title: 'Reading your resume',
+      actions: const [OnboardingSignOutAction()],
       description: 'Follow each step as we prepare your experience for review.',
       child: Card(
         child: Padding(

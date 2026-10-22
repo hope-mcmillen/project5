@@ -290,6 +290,27 @@ void main() {
       expect(router.state.uri.path, Routes.welcome);
     });
 
+    testWidgets(
+      'a stored session stuck in onboarding can sign out back to Welcome',
+      (tester) async {
+        await auth.signUpWithEmail(
+          email: 'unfinished@example.test',
+          password: 'password1',
+          role: AppRole.candidate,
+        );
+        final router = await pumpApp(tester);
+        expect(router.state.uri.path, Routes.candidateConsent);
+        expect(find.text('Sign out'), findsOneWidget);
+
+        await tap(tester, 'Agree and continue');
+        expect(router.state.uri.path, Routes.candidateUpload);
+        await tap(tester, 'Sign out');
+        expect(router.state.uri.path, Routes.welcome);
+        expect(find.text("I'm looking for a job"), findsOneWidget);
+        expect(find.text("I'm hiring"), findsOneWidget);
+      },
+    );
+
     testWidgets('Google sign-in without a role goes to role choice', (
       tester,
     ) async {

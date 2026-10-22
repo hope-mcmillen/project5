@@ -84,6 +84,14 @@ supabase functions deploy parse-resume
 
 The new function calls `save_parsed_profile`. If it's deployed before the migration, every parse fails with `internal`.
 
+**As of 2026-10-22, neither `parse-resume` nor `parse-job` is deployed on the remote project.** Both return HTTP 404 ("Requested function was not found"); only `resume-url` exists. The app logs this as `FunctionsHttpException(status: 404, … NOT_FOUND)`. Deploy `parse-job` too, so recruiters can parse job descriptions. It needs no new migration, only the same Gemini secrets:
+
+```sh
+supabase functions deploy parse-job
+```
+
+To check what's deployed without logging in: `curl -s -o /dev/null -w "%{http_code}\n" -X OPTIONS https://ehgogfdaxmwnqfogjvmk.supabase.co/functions/v1/parse-resume`. 404 means not deployed; 200 means it's there.
+
 **Agent rule:** both commands change the shared remote project. Get an explicit yes from the owner right before running each one.
 
 ### 4. End-to-end check

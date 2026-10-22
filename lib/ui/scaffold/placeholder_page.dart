@@ -51,6 +51,7 @@ class PlaceholderPage extends StatelessWidget {
     this.params = const {},
     this.showAppBar = true,
     this.preferMenuButton = false,
+    this.actions = const [],
   });
 
   final String title;
@@ -61,6 +62,9 @@ class PlaceholderPage extends StatelessWidget {
   final Map<String, String> params;
   final bool showAppBar;
   final bool preferMenuButton;
+
+  /// Extra app bar actions, after the menu button.
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +172,10 @@ class PlaceholderPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         leading: showBackButton ? null : menuButton,
-        actions: [if (showBackButton && menuButton != null) menuButton],
+        actions: [
+          if (showBackButton && menuButton != null) menuButton,
+          ...actions,
+        ],
       ),
       body: body,
     );
