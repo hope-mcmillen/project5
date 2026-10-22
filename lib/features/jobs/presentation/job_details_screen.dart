@@ -145,10 +145,12 @@ class _DetailsFormState extends ConsumerState<_DetailsForm> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Row(
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
                 children: [
                   JobStatusChip(status: job.status),
-                  const Spacer(),
                   if (job.status != JobStatus.closed)
                     TextButton.icon(
                       onPressed: () =>
@@ -196,6 +198,7 @@ class _DetailsFormState extends ConsumerState<_DetailsForm> {
               const SizedBox(height: 16),
               DropdownButtonFormField<JobType>(
                 initialValue: _jobType,
+                isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Job type'),
                 items: [
                   for (final type in JobType.values)

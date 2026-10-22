@@ -1,0 +1,3 @@
+# Netlify (and compatible hosts): serve the Flutter app for every path so
+# deep links like /r/jobs/<id>/board work after a refresh (RC-21).
+/*    /index.html   200

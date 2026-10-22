@@ -266,13 +266,15 @@ class _EditorState extends ConsumerState<_Editor> {
         : SafeArea(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Row(
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                runSpacing: 8,
                 children: [
-                  Expanded(
-                    child: Text(
-                      state.dirty ? 'Unsaved changes' : '',
-                      style: theme.textTheme.bodySmall,
-                    ),
+                  Text(
+                    state.dirty ? 'Unsaved changes' : '',
+                    style: theme.textTheme.bodySmall,
                   ),
                   FilledButton(
                     onPressed:
@@ -387,6 +389,34 @@ class _RequiredToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final blocked = state.requiredToggleBlocked(index);
+    final required = state.items[index].required;
+    final onChanged = readOnly || blocked != null
+        ? null
+        : () => controller.toggleRequired(index);
+    // A segmented button can't wrap; at large text sizes use chips.
+    if (MediaQuery.textScalerOf(context).scale(14) > 20) {
+      final chips = Wrap(
+        spacing: 8,
+        runSpacing: 4,
+        children: [
+          ChoiceChip(
+            label: const Text('Required'),
+            selected: required,
+            onSelected: onChanged == null || required
+                ? null
+                : (_) => onChanged(),
+          ),
+          ChoiceChip(
+            label: const Text('Preferred'),
+            selected: !required,
+            onSelected: onChanged == null || !required
+                ? null
+                : (_) => onChanged(),
+          ),
+        ],
+      );
+      return blocked == null ? chips : Tooltip(message: blocked, child: chips);
+    }
     final toggle = SegmentedButton<bool>(
       showSelectedIcon: false,
       segments: const [
@@ -469,7 +499,7 @@ class _WeightPips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.primary;
+    final colors = Theme.of(context).colorScheme;
     return Semantics(
       label: 'Weight ${item.weight} of 3 for ${item.skill.name}',
       child: Row(
@@ -477,12 +507,11 @@ class _WeightPips extends StatelessWidget {
         children: [
           for (var w = 1; w <= 3; w++)
             IconButton(
-              visualDensity: VisualDensity.compact,
               tooltip: 'Weight $w',
               onPressed: readOnly ? null : () => controller.setWeight(index, w),
               icon: Icon(
                 w <= item.weight ? Icons.diamond : Icons.diamond_outlined,
-                color: color,
+                color: w <= item.weight ? colors.primary : colors.outline,
                 size: 20,
               ),
             ),
@@ -545,9 +574,11 @@ class _RequirementTable extends StatelessWidget {
           for (var i = 0; i < state.items.length; i++)
             DataRow(
               selected: state.selected == i,
-              onSelectChanged: (_) => controller.select(i),
               cells: [
-                DataCell(_SkillLabel(item: state.items[i])),
+                DataCell(
+                  _SkillLabel(item: state.items[i]),
+                  onTap: () => controller.select(i),
+                ),
                 DataCell(
                   _RequiredToggle(
                     index: i,

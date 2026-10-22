@@ -263,9 +263,11 @@ class _Table extends StatelessWidget {
             rows: [
               for (final entry in entries)
                 DataRow(
-                  onSelectChanged: (_) => _open(context, entry),
                   cells: [
-                    DataCell(Text(_name(entry))),
+                    DataCell(
+                      Text(_name(entry)),
+                      onTap: () => _open(context, entry),
+                    ),
                     DataCell(Text(entry.jobTitle)),
                     DataCell(
                       BoardScoreBadge(

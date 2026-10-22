@@ -21,10 +21,12 @@ class CompanyBadge extends StatelessWidget {
           color: verified ? colors.primary : colors.outline,
         ),
         const SizedBox(width: 4),
-        Text(
-          verified ? 'Verified' : 'Unverified',
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: verified ? colors.primary : colors.onSurfaceVariant,
+        Flexible(
+          child: Text(
+            verified ? 'Verified' : 'Unverified',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: verified ? colors.primary : colors.onSurfaceVariant,
+            ),
           ),
         ),
       ],

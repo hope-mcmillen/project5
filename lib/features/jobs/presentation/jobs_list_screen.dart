@@ -180,9 +180,11 @@ class _JobsTable extends StatelessWidget {
             rows: [
               for (final job in jobs)
                 DataRow(
-                  onSelectChanged: (_) => _open(context, job),
                   cells: [
-                    DataCell(Text(_title(job))),
+                    DataCell(
+                      Text(_title(job)),
+                      onTap: () => _open(context, job),
+                    ),
                     DataCell(JobStatusChip(status: job.status)),
                     DataCell(
                       CountBadge(

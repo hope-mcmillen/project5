@@ -9,7 +9,7 @@ class MosaicGrid extends StatefulWidget {
     super.key,
     required this.tiles,
     required this.itemBuilder,
-    this.tileHeight = 216,
+    this.tileHeight = 184,
   });
 
   static const maxTileWidth = 320.0;

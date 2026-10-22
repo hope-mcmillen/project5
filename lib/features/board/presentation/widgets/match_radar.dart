@@ -64,6 +64,7 @@ class MatchRadar extends StatelessWidget {
                 gridBorderData: BorderSide(color: colors.outlineVariant),
                 radarBorderData: BorderSide(color: colors.outline),
                 titleTextStyle: theme.textTheme.labelSmall,
+                titlePositionPercentageOffset: 0.12,
                 getTitle: (index, angle) =>
                     RadarChartTitle(text: breakdown[index].name),
                 radarTouchData: RadarTouchData(enabled: false),
@@ -91,6 +92,7 @@ class MatchRadar extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

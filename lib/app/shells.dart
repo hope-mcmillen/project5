@@ -110,6 +110,8 @@ class RecruiterShell extends StatelessWidget {
                       icon: Icon(tab.icon),
                       selectedIcon: Icon(tab.selected),
                       label: Text(tab.label),
+                      // Extended M3 rows are 44 px tall; keep 48 px targets.
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                     ),
                 ],
               ),
