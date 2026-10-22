@@ -36,7 +36,7 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       retry: noAutomaticRetry,
-      overrides: candidateRepositoryOverrides(),
+      overrides: candidateRepositoryOverrides(includeApplications: false),
       child: const ResuRhombusApp(),
     ),
   );

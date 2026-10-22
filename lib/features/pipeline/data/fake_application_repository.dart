@@ -5,6 +5,7 @@ import '../../../core/models/candidate_models.dart';
 import '../../../core/testing/candidate_fixtures.dart';
 import '../../../core/testing/fake_repository.dart';
 import 'application_repository.dart';
+import '../domain/interview_contact.dart';
 
 class FakeApplicationRepository extends FakeRepository
     implements ApplicationRepository {
@@ -14,6 +15,47 @@ class FakeApplicationRepository extends FakeRepository
   final List<StatusEvent> _events = [];
   final _updates = StreamController<List<Application>>.broadcast(sync: true);
   int _sequence = 0;
+  @override
+  bool get isDemo => true;
+  void setStatus(String id, ApplicationStatus status) {
+    final index = _applications.indexWhere((a) => a.id == id);
+    if (index < 0) throw const AppFailure('not_found');
+    final old = _applications[index];
+    final now = DateTime.now().toUtc();
+    _applications[index] = Application.fromJson({
+      ...old.toJson(),
+      'status': status.db,
+      'updated_at': now.toIso8601String(),
+    });
+    _events.add(
+      StatusEvent(
+        id: _events.length + 1,
+        applicationId: id,
+        fromStatus: old.status,
+        toStatus: status,
+        createdAt: now,
+      ),
+    );
+    _updates.add(_snapshot);
+  }
+
+  @override
+  Future<InterviewContact> contact(String id) async {
+    final application = await get(id);
+    if (application.status != ApplicationStatus.interviewRequested ||
+        DateTime.now().toUtc().isBefore(application.committedAt)) {
+      throw const AppFailure(
+        'contact_not_available',
+        'Contact details are only available for interview invitations.',
+      );
+    }
+    return const InterviewContact(
+      name: 'Demo Recruiter',
+      email: 'recruiter@rhombus.example.test',
+      note: 'Please email a few times that work for an interview.',
+    );
+  }
+
   void undoApplication(String jobId) {
     final ids = _applications
         .where((a) => a.jobId == jobId)

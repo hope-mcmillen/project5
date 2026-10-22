@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/misc.dart';
 
+import '../core/errors/app_failure.dart';
+
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/data/fake_auth_repository.dart';
 import '../features/company/data/company_repository.dart';
@@ -52,6 +54,7 @@ List<Override> fakeRepositoryOverrides({
 List<Override> candidateRepositoryOverrides({
   Duration latency = const Duration(milliseconds: 300),
   bool simulateParsing = true,
+  bool includeApplications = true,
 }) => [
   profileRepositoryProvider.overrideWith(
     (ref) => FakeProfileRepository(latency: latency),
@@ -70,6 +73,12 @@ List<Override> candidateRepositoryOverrides({
             .read(profileRepositoryProvider)
             .latestVersion();
         final applications = ref.read(applicationRepositoryProvider);
+        if (!applications.isDemo) {
+          throw const AppFailure(
+            'demo_job',
+            'These are demo jobs. Use the fake-data preview to try applying; live job applications are not connected yet.',
+          );
+        }
         if (version != null && applications is FakeApplicationRepository) {
           if (applications.recordApplication(job, version.id)) {
             createdApplications.add(job.jobId);
@@ -94,9 +103,10 @@ List<Override> candidateRepositoryOverrides({
     return repository;
   }),
   resumeSimulationProvider.overrideWithValue(true),
-  applicationRepositoryProvider.overrideWith((ref) {
-    final repository = FakeApplicationRepository(latency: latency);
-    ref.onDispose(repository.dispose);
-    return repository;
-  }),
+  if (includeApplications)
+    applicationRepositoryProvider.overrideWith((ref) {
+      final repository = FakeApplicationRepository(latency: latency);
+      ref.onDispose(repository.dispose);
+      return repository;
+    }),
 ];
