@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/windows_golden.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:project5/app/app.dart';
 import 'package:project5/app/dev_session.dart';
@@ -40,9 +43,9 @@ void main() {
           router.go(route);
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
-          await expectLater(
+          await expectWindowsGolden(
             find.byType(MaterialApp),
-            matchesGoldenFile('goldens/${name}_${width.toInt()}.png'),
+            'goldens/${name}_${width.toInt()}.png',
           );
         }
       },
@@ -149,9 +152,9 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Not selected'), findsOneWidget);
-      await expectLater(
+      await expectWindowsGolden(
         find.byKey(const Key('components')),
-        matchesGoldenFile('goldens/score_and_status.png'),
+        'goldens/score_and_status.png',
       );
     },
   );
@@ -174,9 +177,9 @@ void main() {
       expect(find.byTooltip('Open navigation menu'), findsOneWidget);
       expect(find.textContaining('Tasks:'), findsNothing);
       expect(tester.takeException(), isNull);
-      await expectLater(
+      await expectWindowsGolden(
         find.byType(MaterialApp),
-        matchesGoldenFile('goldens/resume_${width.toInt()}.png'),
+        'goldens/resume_${width.toInt()}.png',
       );
       tester.platformDispatcher.textScaleFactorTestValue = 2;
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

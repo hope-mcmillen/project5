@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/windows_golden.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:project5/app/app.dart';
 import 'package:project5/app/dev_session.dart';
@@ -56,9 +59,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Step 3 of 5'), findsOneWidget);
       expect(tester.takeException(), isNull);
-      await expectLater(
+      await expectWindowsGolden(
         find.byType(MaterialApp),
-        matchesGoldenFile('goldens/progress_${width.toInt()}.png'),
+        'goldens/progress_${width.toInt()}.png',
       );
       tester.platformDispatcher.textScaleFactorTestValue = 2;
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
