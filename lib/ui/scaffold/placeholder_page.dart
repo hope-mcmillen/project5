@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/candidate_menu.dart';
+
 /// How a scaffold link navigates.
 enum LinkMode {
   /// `context.go`: replaces the location (switching sections/tabs).
@@ -42,6 +44,7 @@ class PlaceholderPage extends StatelessWidget {
     this.links = const [],
     this.params = const {},
     this.showAppBar = true,
+    this.preferMenuButton = false,
   });
 
   final String title;
@@ -51,6 +54,7 @@ class PlaceholderPage extends StatelessWidget {
   final List<PageLink> links;
   final Map<String, String> params;
   final bool showAppBar;
+  final bool preferMenuButton;
 
   @override
   Widget build(BuildContext context) {
@@ -106,8 +110,22 @@ class PlaceholderPage extends StatelessWidget {
     );
 
     if (!showAppBar) return body;
+    final menu = CandidateMenuScope.maybeOf(context);
+    final canPop = Navigator.of(context).canPop();
+    final showBackButton = canPop && !(preferMenuButton && menu != null);
+    final menuButton = menu == null
+        ? null
+        : IconButton(
+            tooltip: 'Open navigation menu',
+            icon: const Icon(Icons.menu),
+            onPressed: menu.openMenu,
+          );
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(
+        title: Text(title),
+        leading: showBackButton ? null : menuButton,
+        actions: [if (showBackButton && menuButton != null) menuButton],
+      ),
       body: body,
     );
   }

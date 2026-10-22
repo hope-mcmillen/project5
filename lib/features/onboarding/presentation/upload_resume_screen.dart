@@ -13,6 +13,7 @@ class UploadResumeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Upload your resume',
+      preferMenuButton: true,
       description: 'Pick a PDF/DOCX (≤ 5 MB), upload to Storage, invoke parse-resume. Also used for re-upload from Profile.',
       tasks: const ['CA-03', 'CA-07'],
       stories: const ['US-07', 'US-13'],

@@ -377,6 +377,14 @@ Folders: `lib/ui/`, `lib/core/models/`, `lib/features/{onboarding,deck,deep_dive
 #### C1 · As a developer, I want shared Dart models and fake repositories, so I can build candidate screens before the backend exists.
 **Covers:** CA-01, CA-02 · **Size:** ≈ 2 days · **Needs:** A2 (contract draft) · **Stories:** US-55
 
+**Implementation:** Shared models, enums, JSON conversion, candidate repository
+interfaces, and four in-memory fakes are present. `main_fake.dart` registers
+all candidate overrides with Riverpod and uses the existing navigation scaffold.
+Tests cover model round trips, score boundaries, nullable data, fake wiring,
+profile confirmation, feed pagination, resume progress, and application updates.
+See README for fake-mode usage and controls. Real repositories and candidate
+screen UI remain in their later task blocks.
+
 **Build**
 - **CA-01 Models:** In `lib/core/models/`, immutable classes with `fromJson` / `toJson` mapping the snake_case columns from [SCHEMA.md](SCHEMA.md): `Profile`, `Skill`, `CandidateSkill`, `ProfileVersion`, `Preferences`, `JobCard`, `BreakdownItem`, `Application`, `StatusEvent`, `CandidateTile`. Enums mirroring the Postgres enums (`ApplicationStatus`, `JobStatus`, `ResumeStatus`, `PassReason`, …) with `fromDb` / `toDb`. `ScoreBand.fromScore(int)`. Unit tests that round-trip the contract examples.
 - **CA-02 Fake repositories:** In `lib/features/*/data/`, abstract `ProfileRepository`, `ResumeRepository`, `FeedRepository`, and `ApplicationRepository`. `Fake…` implementations backed by in-memory lists seeded from the contract JSON, with a 300 ms delay and an error toggle. Riverpod providers plus a `lib/main_fake.dart` that overrides them all.

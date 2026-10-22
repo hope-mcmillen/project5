@@ -167,7 +167,7 @@ void main() {
     await tap('Looks right, continue');
     await tap('Start swiping');
     expect(find.text('Your deck'), findsWidgets);
-    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byTooltip('Open navigation menu'), findsOneWidget);
 
     final router = GoRouter.of(
       tester.element(find.byType(PlaceholderPage).first),
