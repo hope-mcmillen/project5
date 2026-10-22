@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/errors/app_failure.dart';
 import '../domain/board_change.dart';
+import '../domain/candidate_detail.dart';
 import '../domain/board_tile.dart';
 import 'board_repository.dart';
 
@@ -65,6 +66,47 @@ class SupabaseBoardRepository implements BoardRepository {
       params: {'p_application_id': applicationId},
     ),
   );
+
+  @override
+  Future<void> openApplication(String applicationId) => _guard(
+    () => _client.rpc<void>(
+      'open_application',
+      params: {'p_application_id': applicationId},
+    ),
+  );
+
+  @override
+  Future<CandidateDetail> candidateDetail(String applicationId) =>
+      _guard(() async {
+        final row = await _client.rpc<Map<String, dynamic>>(
+          'get_candidate_detail',
+          params: {'p_application_id': applicationId},
+        );
+        return CandidateDetail.fromJson(row);
+      });
+
+  @override
+  Future<List<CandidateDetail>> interviewList(String jobId) => _guard(() async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_interview_list',
+      params: {'p_job_id': jobId},
+    );
+    return [
+      for (final row in rows)
+        CandidateDetail.fromJson(Map<String, dynamic>.from(row as Map)),
+    ];
+  });
+
+  @override
+  Future<Uri> resumeUrl(String applicationId) => _guard(() async {
+    final response = await _client.functions.invoke(
+      'resume-url',
+      body: {'application_id': applicationId},
+    );
+    final url = (response.data as Map?)?['url'];
+    if (url is! String) throw const AppFailure('resume_not_available');
+    return Uri.parse(url);
+  });
 
   @override
   Stream<BoardChange> watchApplications(String jobId) {

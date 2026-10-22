@@ -3,6 +3,7 @@ import 'dart:async';
 import '../../../core/errors/app_failure.dart';
 import '../../../core/models/application_status.dart';
 import '../domain/board_change.dart';
+import '../domain/candidate_detail.dart';
 import '../domain/board_tile.dart';
 import 'board_repository.dart';
 
@@ -71,6 +72,81 @@ class FakeBoardRepository implements BoardRepository {
 
   @override
   Stream<BoardChange> watchApplications(String jobId) => _channel(jobId).stream;
+
+  /// Applications whose candidate only has a manual profile (no resume).
+  final manualProfiles = <String>{};
+
+  @override
+  Future<void> openApplication(String applicationId) async {
+    await _call();
+    final status = _status(applicationId);
+    if (status == ApplicationStatus.applied) {
+      _set(applicationId, ApplicationStatus.underReview);
+    } else if (status != ApplicationStatus.underReview) {
+      throw const AppFailure('invalid_transition');
+    }
+  }
+
+  @override
+  Future<CandidateDetail> candidateDetail(String applicationId) async {
+    await _call();
+    final found = _find(applicationId);
+    return _detail(found.board[found.index]);
+  }
+
+  CandidateDetail _detail(BoardTile tile) => CandidateDetail(
+    tile: tile,
+    breakdown: [
+      for (final skill in tile.topSkills)
+        BreakdownEntry(
+          name: skill,
+          required: true,
+          weight: 2,
+          minYears: 2,
+          candidateYears: tile.totalYears,
+          matchedVia: 'exact',
+          score: (tile.totalYears / 2).clamp(0.6, 1.0),
+        ),
+      for (final gap in tile.gaps)
+        BreakdownEntry(name: gap, required: false, score: 0),
+    ],
+    skills: [
+      for (final skill in tile.topSkills)
+        SkillEvidence(
+          name: skill,
+          years: tile.totalYears,
+          evidence: 'Built production features with $skill.',
+        ),
+    ],
+    identity: tile.status == ApplicationStatus.interviewRequested
+        ? CandidateIdentity(
+            displayName: 'Candidate ${tile.handle.substring(2)}',
+            email:
+                'candidate.${tile.handle.substring(2).toLowerCase()}@example.test',
+          )
+        : null,
+  );
+
+  @override
+  Future<List<CandidateDetail>> interviewList(String jobId) async {
+    await _call();
+    return [
+      for (final tile in _boards[jobId] ?? const <BoardTile>[])
+        if (tile.status == ApplicationStatus.interviewRequested) _detail(tile),
+    ];
+  }
+
+  @override
+  Future<Uri> resumeUrl(String applicationId) async {
+    await _call();
+    if (_status(applicationId) != ApplicationStatus.interviewRequested) {
+      throw const AppFailure('not_owner');
+    }
+    if (manualProfiles.contains(applicationId)) {
+      throw const AppFailure('resume_not_available');
+    }
+    return Uri.parse('https://example.test/resumes/$applicationId.pdf');
+  }
 
   /// Simulates a candidate's right swipe arriving for [jobId]. With
   /// [notify], a Realtime insert is also emitted (recruiters usually don't
