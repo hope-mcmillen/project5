@@ -16,14 +16,21 @@ import '../features/jobs/data/job_repository.dart';
 List<Override> fakeRepositoryOverrides({
   FakeAuthRepository? auth,
   FakeCompanyRepository? companies,
+  FakeJobRepository? jobs,
+  FakeBoardRepository? board,
 }) {
   final fakeAuth = auth ?? FakeAuthRepository();
   return [
     authRepositoryProvider.overrideWithValue(fakeAuth),
     companyRepositoryProvider.overrideWithValue(
-      companies ?? FakeCompanyRepository(auth: fakeAuth),
+      companies ??
+          FakeCompanyRepository(auth: fakeAuth, latency: fakeAuth.latency),
     ),
-    jobRepositoryProvider.overrideWithValue(FakeJobRepository()),
-    boardRepositoryProvider.overrideWithValue(FakeBoardRepository()),
+    jobRepositoryProvider.overrideWithValue(
+      jobs ?? FakeJobRepository(latency: fakeAuth.latency),
+    ),
+    boardRepositoryProvider.overrideWithValue(
+      board ?? FakeBoardRepository(latency: fakeAuth.latency),
+    ),
   ];
 }
