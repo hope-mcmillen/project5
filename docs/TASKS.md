@@ -182,7 +182,9 @@ Folders: `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, non-AI 
 **Done when:** `supabase db reset` gives working demo logins and real skills, and a new teammate can run everything from the README alone.
 
 #### A7 · As a candidate, I want to apply or pass on a job in one gesture and undo within 5 seconds, so I can move fast without fear of mistakes.
-**Covers:** PL-18 · **Size:** ≈ 1 day · **Needs:** A2, B8 (use a stub `compute_match` returning 50 until it lands) · **Stories:** US-15, US-16, US-17, US-21
+**Covers:** PL-18 · **Size:** ≈ 1 day · **Needs:** A2, B8 · **Stories:** US-15, US-16, US-17, US-21
+
+**Person A progress (October 22):** Swipe/pass/undo and the UTC cap are implemented and locally tested with B's real v2 scorer, including concurrent final-slot and duplicate requests.
 
 **Build**
 - `swipe(p_job_id, p_direction, p_reason)`:
@@ -198,6 +200,8 @@ Folders: `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, non-AI 
 
 #### A8 · As a recruiter, I want to see applicants ranked by score without identities and advance or reject them, so I can triage on skills alone and move fast.
 **Covers:** PL-19, AI-16 · **Size:** ≈ 2 days · **Needs:** A2, B8 · **Stories:** US-28, US-29, US-40, US-41, US-42, US-43, US-44, US-47
+
+**Person A progress (October 22):** All status/contact and blind board/detail/interview RPCs implemented and locally tested. Job lifecycle and requirement validation/rescoring support the same loop. Frontend live-board integration remains C/D work.
 
 **Build**
 - **PL-19 Status RPCs:** `open_application`, `advance(p_note)`, `reject(p_reason)`, `undo_reject`, `withdraw`, and `get_application_contact`. Each locks the row, checks the caller (recruiter of the job's company, or the owning candidate), validates the transition against the table in [SCHEMA.md §3](SCHEMA.md#3-enum-types), sets `previous_status`, `rejected_at`, or `advanced_by` as needed, and inserts a `status_events` row. `reject` writes its reason to `application_reject_reasons`. `get_application_contact` returns recruiter info only at INTERVIEW_REQUESTED.

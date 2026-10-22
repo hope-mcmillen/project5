@@ -26,9 +26,10 @@ untested or externally blocked acceptance criteria as complete.
   Hosted project URL is known; authenticated project access, Google OAuth activation and GitHub admin setup remain unverified.
 - A2: three schema/RLS migrations and the Person A API contract draft implemented;
   local reset, lint and 42 access tests pass. Team contract approval remains pending.
-- A3–A4: backend implemented, locally verified and passing GitHub CI; teammate review pending.
-- A5–A6: backend/storage, demo login setup and README implemented and locally verified; CI/review pending.
-- A7–A10: scheduled; not yet implemented.
+- A3–A4: implemented, verified and merged into shared master (PR #3).
+- A5–A6: implemented, verified and merged into shared master (PR #2).
+- A7–A8: implemented and locally verified; publishing/CI/review pending.
+- A9–A10: final scheduled batch remains.
 - A11: out of scope per user, not completed.
 - Keep personal work on feature branches; do not merge master without required review.
 - Person B's work was merged into `origin/master` as `db084f3` (PR #1).
@@ -144,3 +145,56 @@ and remaining dependencies explicitly.
   refreshed. Hosted project writes were not performed.
 - Frontend main.dart still does not initialize Supabase; the README explicitly
   identifies this C/D integration dependency rather than claiming a full UI demo.
+
+- Published afternoon commit `b64242e` on
+  `origin/feat/A5-profile-storage-demo` (Wednesday's second implementation commit).
+- GitHub Backend checks PASSED for that exact commit:
+  https://github.com/hope-mcmillen/project5/actions/runs/39652623535
+- This final CI evidence is saved locally after publishing; include the progress
+  log update in Thursday's first work commit. Continue from the A5 feature branch.
+
+### User-requested update and app launch (October 21)
+
+- Pulled/fast-forwarded local `master` to `origin/master` `973fc16`, preserving
+  the uncommitted CI evidence in this log. A3/A4 and A5/A6 are now merged into
+  shared master (PRs #3/#2); D1–D4 are also merged (PRs #4–#7).
+- D's main.dart now initializes Supabase; the earlier frontend initialization
+  blocker in this historical log is superseded. New auth/routing/company screens
+  are present. Continue Thursday's A7 work from this latest shared code.
+- Created ignored `env/dev.json` using the running local backend's public anon
+  key; no service-role/Gemini secrets are included in the Flutter configuration.
+- App running at http://127.0.0.1:5210 via Flutter web-server; verified the new
+  ResuRhombus welcome screen visibly in the in-app browser. No extra commit made.
+
+### Thursday, October 22 — applications/recruiter run
+
+- Branch: `feat/A7-applications-board`, based on merged master `b9a54d4`
+  (includes the team's latest app logging update). Local CI evidence from
+  Wednesday and the app-launch notes are preserved.
+- A7: swipe/pass/reasons, five-second undo, UTC daily cap, real B v2 scorer and
+  immutable application profile/score snapshots. No 50-point matching stub.
+- A8: state changes, private rejection reasons, ten-second reject undo, candidate
+  withdrawal/contacts, exact-key blind board/detail and interview listing.
+- A-owned job requirements/lifecycle RPCs validate caps, build B centroids,
+  re-score live nonterminal applicants with B's formula and cascade closure.
+- Local clean reset/lint pass. `supabase test db`: 402 assertions across eight
+  files pass, including the full transition matrix, 26th apply, UTC cap rollover,
+  long-transaction undo expiry, privacy/ownership and job lifecycle/rescoring.
+- Four independent-session application races pass: final cap slot, duplicates,
+  competing reject/withdraw and closing a job during apply.
+- Real local Auth/PostgREST loop passes: publish→confirm→apply→pending privacy→
+  blind board→review/advance→identity/contact→reject/undo→withdraw.
+- Existing onboarding/profile/storage/seed checks are included in final validation.
+- Early test harness used a nonexistent pgTAP `unlike` helper; changed those
+  assertions to `ok(... not like ...)`. Product checks all pass.
+- User confirmed Supabase dashboard access on October 21. Deployment-tool
+  authentication and final hosted-write approval remain separate; no remote
+  Supabase writes were made. C/D live board integration and admin-only GitHub
+  settings remain external acceptance gates.
+- A9/A10 implementation note: account deletion must detach `applications.swipe_id`
+  before removing candidate swipes; otherwise the existing FK cascade would
+  remove applications that should be retained anonymized.
+
+- Final clean-reset validation passes all prior onboarding/storage checks plus
+  the new loop/race tests. Flutter analyze is clean and all 61 Flutter tests pass.
+  No Dart or B-owned AI implementation files were edited by this batch.
