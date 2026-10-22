@@ -3,6 +3,8 @@
 /// Candidate routes live under `/c`, recruiter routes under `/r` (PRD §4, A-5).
 /// Paths with `:params` have a helper that fills them in.
 abstract final class Routes {
+  static const componentGallery = '/dev/gallery';
+
   /// Shown while the session loads; `?from=` holds the requested location.
   static const splash = '/splash';
 

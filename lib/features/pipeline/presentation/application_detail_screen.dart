@@ -15,7 +15,7 @@ class ApplicationDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Application',
-      description: 'PipelineTimeline from status_events, Withdraw action, recruiter contact when Interview Requested.',
+      description: 'Review this application and follow its progress.',
       tasks: const ['CA-17', 'CA-18'],
       stories: const ['US-28', 'US-29'],
       params: {'applicationId': applicationId},

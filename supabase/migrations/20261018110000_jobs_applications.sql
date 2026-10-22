@@ -215,4 +215,3 @@ where a.candidate_id = (select auth.uid());
 revoke all on public.company_jobs_overview, public.my_applications from anon, authenticated;
 grant select on public.company_jobs_overview, public.my_applications to authenticated, service_role;
 alter publication supabase_realtime add table public.resumes, public.applications, public.jobs;
-

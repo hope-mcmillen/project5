@@ -140,4 +140,3 @@ grant select on public.candidates, public.resumes, public.profile_versions, publ
 -- Preferences are validated by save_preferences; active_version_id only by confirm_profile.
 grant update (discoverable) on public.candidates to authenticated;
 grant insert (id, candidate_id, storage_path, file_hash, mime_type) on public.resumes to authenticated;
-

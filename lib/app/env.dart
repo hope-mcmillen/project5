@@ -5,7 +5,10 @@
 /// (PRD §9.7).
 abstract final class Env {
   static const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  static const anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  static const anonKey = String.fromEnvironment(
+    'SUPABASE_PUBLISHABLE_KEY',
+    defaultValue: String.fromEnvironment('SUPABASE_ANON_KEY'),
+  );
 
   /// Google OAuth *web* client id, used as `serverClientId` for native
   /// Google sign-in on Android. Optional: without it, Android falls back to

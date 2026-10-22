@@ -9,8 +9,13 @@ import 'package:project5/app/router.dart';
 import 'package:project5/app/routes.dart';
 import 'package:project5/app/shells.dart';
 import 'package:project5/core/models/app_role.dart';
+
+import 'dart:typed_data';
+
+import 'package:project5/core/errors/app_failure.dart';
+import 'package:project5/features/onboarding/data/resume_picker.dart';
+import 'package:project5/features/onboarding/domain/resume_file.dart';
 import 'package:project5/features/auth/data/fake_auth_repository.dart';
-import 'package:project5/ui/scaffold/placeholder_page.dart';
 
 void main() {
   group('resolveRedirect', () {
@@ -146,6 +151,7 @@ void main() {
         ProviderScope(
           // A fresh container per page, so fakes don't carry over.
           key: UniqueKey(),
+          retry: noAutomaticRetry,
           overrides: fakeRepositoryOverrides(
             auth: FakeAuthRepository(latency: Duration.zero),
           ),
@@ -205,7 +211,16 @@ void main() {
     Future<GoRouter> pumpApp(WidgetTester tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          overrides: fakeRepositoryOverrides(auth: auth),
+          retry: noAutomaticRetry,
+          overrides: [
+            ...fakeRepositoryOverrides(auth: auth, latency: Duration.zero),
+            resumePickerProvider.overrideWithValue(
+              () async => ResumeFile.fromBytes(
+                name: 'resume.pdf',
+                bytes: Uint8List.fromList('%PDF-1.7'.codeUnits),
+              ),
+            ),
+          ],
           child: const ResuRhombusApp(),
         ),
       );
@@ -238,16 +253,14 @@ void main() {
       await tap(tester, 'Create account');
       expect(find.text('Before we start'), findsWidgets); // onboarding
       await tap(tester, 'Agree and continue');
-      await tap(tester, '[Fake] Upload resume');
-      await tap(tester, '[Fake] Parsing finished');
-      await tap(tester, 'Looks right, continue');
+      await tap(tester, 'Choose file');
+      await tap(tester, 'Upload resume');
+      await tap(tester, 'Confirm skills');
       await tap(tester, 'Start swiping');
       expect(find.text('Your deck'), findsWidgets);
-      expect(find.byType(NavigationBar), findsOneWidget);
+      expect(find.byTooltip('Open navigation menu'), findsOneWidget);
 
-      final router = GoRouter.of(
-        tester.element(find.byType(PlaceholderPage).first),
-      );
+      final router = GoRouter.of(tester.element(find.byType(Scaffold).first));
       expect(router.state.uri.path, Routes.deck);
     });
 

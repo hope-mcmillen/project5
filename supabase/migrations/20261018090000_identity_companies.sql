@@ -137,4 +137,3 @@ grant select on public.profiles, public.recruiters, public.company_invites to au
 grant update (display_name, terms_accepted_at) on public.profiles to authenticated;
 grant select on public.companies, public.app_config to anon, authenticated;
 grant update (name, website, logo_path) on public.companies to authenticated;
-

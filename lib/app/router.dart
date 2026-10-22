@@ -35,6 +35,7 @@ import 'route_session.dart';
 import 'routes.dart';
 import 'shells.dart';
 import 'splash_screen.dart';
+import '../ui/components/component_gallery.dart';
 
 /// Where a signed-in user belongs right now.
 String homeFor(RouteSession session) => switch (session.role) {
@@ -50,6 +51,7 @@ String homeFor(RouteSession session) => switch (session.role) {
 /// RLS remains the real enforcement; this guard is for UX only.
 String? resolveRedirect(RouteSession session, Uri uri) {
   final path = uri.path;
+  if (kDebugMode && path == Routes.componentGallery) return null;
 
   // Hold every location on the splash until the session is known, then
   // continue to where the user was going.
@@ -147,6 +149,11 @@ GoRouter buildRouter({
     redirect: (context, state) => resolveRedirect(session(), state.uri),
     errorBuilder: (context, state) => NotFoundScreen(uri: state.uri),
     routes: [
+      if (kDebugMode)
+        GoRoute(
+          path: Routes.componentGallery,
+          builder: (_, _) => const ComponentGallery(),
+        ),
       GoRoute(
         path: Routes.splash,
         builder: (context, state) => const SplashScreen(),

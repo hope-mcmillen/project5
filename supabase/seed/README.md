@@ -35,4 +35,3 @@ All people, companies, emails, and phone numbers here are invented.
 `demo_manifest.json` lists every id (companies, recruiters, jobs, candidates, profile versions) and each candidate's expected score against every job.
 
 Verified on Postgres 17 + pgvector: loads in under a second, re-runs cleanly, SQL `compute_match` equals the generator's TypeScript scores on all 180 candidate × job pairs, and every application's history starts at `APPLIED` and ends on its status.
-

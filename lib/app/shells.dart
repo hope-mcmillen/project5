@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/company/presentation/widgets/company_header.dart';
+import 'candidate_menu.dart';
 
 /// Bottom navigation for the candidate tabs: Deck · Applications · Profile.
 ///
@@ -14,27 +15,12 @@ class CandidateShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
+      drawer: CandidateDrawer(location: GoRouterState.of(context).uri.path),
+      body: Builder(
+        builder: (context) => CandidateMenuScope(
+          openMenu: () => Scaffold.of(context).openDrawer(),
+          child: navigationShell,
         ),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.style_outlined),
-            label: 'Deck',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.timeline_outlined),
-            label: 'Applications',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }

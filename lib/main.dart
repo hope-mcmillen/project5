@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app.dart';
 import 'app/env.dart';
+import 'app/fake_overrides.dart';
 import 'core/errors/app_failure.dart';
 import 'core/logging/app_log.dart';
 
@@ -32,7 +33,13 @@ Future<void> main() async {
   }
 
   await Supabase.initialize(url: Env.supabaseUrl, publishableKey: Env.anonKey);
-  runApp(const ProviderScope(retry: noAutomaticRetry, child: ResuRhombusApp()));
+  runApp(
+    ProviderScope(
+      retry: noAutomaticRetry,
+      overrides: candidateRepositoryOverrides(),
+      child: const ResuRhombusApp(),
+    ),
+  );
 }
 
 /// Sends framework and async errors that nothing caught to the log too.
