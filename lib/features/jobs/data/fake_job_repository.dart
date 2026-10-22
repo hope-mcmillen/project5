@@ -22,7 +22,7 @@ class FakeJobRepository implements JobRepository {
         RequirementDraft(
           skill: skillByName('Flutter'),
           minYears: 2,
-          evidence: '2+ years building production apps with Flutter.',
+          evidence: 'We need 2+ years building production apps with Flutter.',
         ),
         RequirementDraft(skill: skillByName('Dart'), minYears: 2),
         RequirementDraft(
@@ -44,7 +44,7 @@ class FakeJobRepository implements JobRepository {
       title: 'Flutter Developer',
       rawDescription:
           'Flutter Developer\nWe need 2+ years building production apps '
-          'with Flutter and Dart. Firebase is a plus.',
+          'with Flutter. Dart is required too. Firebase is a plus.',
       parseStatus: ParseStatus.ready,
       status: JobStatus.open,
       location: 'Baton Rouge, LA',
@@ -260,24 +260,23 @@ class FakeJobRepository implements JobRepository {
 
     final text = job.rawDescription;
     final lower = text.toLowerCase();
-    final preferredFrom = RegExp(r'nice to have|preferred|a plus|bonus')
-        .firstMatch(lower)
-        ?.start;
-    final sentences = text.split(RegExp(r'(?<=[.!?\n])\s+'));
+    final sentences = text.split(RegExp(r'(?<=[.!?\n])\s*'));
+    final preferred = RegExp(r'nice to have|preferred|a plus|bonus');
     final found = <RequirementDraft>[];
     for (final skill in taxonomy) {
-      final at = lower.indexOf(skill.name.toLowerCase());
-      if (at == -1) continue;
-      final required = preferredFrom == null || at < preferredFrom;
+      final name = skill.name.toLowerCase();
+      final sentence = sentences.firstWhere(
+        (s) => s.toLowerCase().contains(name),
+        orElse: () => '',
+      );
+      if (sentence.isEmpty) continue;
+      final required = !preferred.hasMatch(sentence.toLowerCase());
       found.add(
         RequirementDraft(
           skill: skill,
           required: required,
           weight: required ? 2 : 1,
-          evidence: sentences.firstWhere(
-            (s) => s.toLowerCase().contains(skill.name.toLowerCase()),
-            orElse: () => '',
-          ),
+          evidence: sentence.trim(),
         ),
       );
     }

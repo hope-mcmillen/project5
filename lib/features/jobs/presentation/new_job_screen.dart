@@ -1,27 +1,271 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
-import '../../../ui/scaffold/placeholder_page.dart';
+import '../../../app/widgets/state_views.dart';
+import '../data/job_repository.dart';
+import '../domain/job.dart';
+import 'requirements_controller.dart';
 
-/// New job: Paste the raw job description; creates a DRAFT job and invokes parse-job.
-///
-/// SCAFFOLD: placeholder body only. Replace it when implementing RC-08.
-class NewJobScreen extends StatelessWidget {
+/// New job: paste a description (≤ 20k chars). Creating it inserts a DRAFT
+/// job, invokes `parse-job` and watches `jobs.parse_status` over Realtime,
+/// then opens the requirement editor (RC-08, US-34).
+class NewJobScreen extends ConsumerStatefulWidget {
   const NewJobScreen({super.key});
+
+  static const maxLength = 20000;
+  static const minLength = 50;
+
+  @override
+  ConsumerState<NewJobScreen> createState() => _NewJobScreenState();
+}
+
+enum _Stage { editing, saving, reading, failed }
+
+class _NewJobScreenState extends ConsumerState<NewJobScreen> {
+  final _text = TextEditingController();
+  _Stage _stage = _Stage.editing;
+  String? _error;
+  String? _jobId;
+  StreamSubscription<Job>? _watch;
+  bool _done = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _text.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _watch?.cancel();
+    _text.dispose();
+    super.dispose();
+  }
+
+  String? get _validation {
+    final length = _text.text.trim().length;
+    if (length == 0) return null;
+    if (length < NewJobScreen.minLength) {
+      return 'Paste the full description (at least '
+          '${NewJobScreen.minLength} characters).';
+    }
+    return null;
+  }
+
+  bool get _canSubmit =>
+      _text.text.trim().length >= NewJobScreen.minLength &&
+      _text.text.length <= NewJobScreen.maxLength;
+
+  Future<void> _submit() async {
+    final repo = ref.read(jobRepositoryProvider);
+    setState(() {
+      _stage = _Stage.saving;
+      _error = null;
+    });
+    try {
+      _jobId ??= await repo.createDraft(_text.text.trim());
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _stage = _Stage.editing;
+        _error = messageOf(error);
+      });
+      return;
+    }
+    await _read();
+  }
+
+  /// Runs parse-job on the draft and also listens for its status, so a
+  /// dropped connection still finishes once the job turns READY.
+  Future<void> _read() async {
+    final jobId = _jobId!;
+    final repo = ref.read(jobRepositoryProvider);
+    // Read before awaiting: this screen may be gone when parse returns.
+    final results = ref.read(parseResultsProvider.notifier);
+    setState(() {
+      _stage = _Stage.reading;
+      _error = null;
+    });
+    _watch ??= repo.watch(jobId).listen((job) {
+      if (job.parseStatus == ParseStatus.ready) _finish();
+    }, onError: (_) {});
+    try {
+      final result = await repo.parse(jobId);
+      results.put(jobId, result);
+      if (result.ready) {
+        _finish();
+      } else if (mounted) {
+        setState(() {
+          _stage = _Stage.failed;
+          _error = switch (result.failureReason) {
+            'timeout' => 'Reading the description took too long.',
+            'budget_exceeded' =>
+              'Today\'s AI budget is used up. Try again tomorrow, or add '
+                  'the requirements by hand.',
+            _ => 'We couldn\'t read that description.',
+          };
+        });
+      }
+    } catch (error) {
+      if (!mounted || _done) return;
+      setState(() {
+        _stage = _Stage.failed;
+        _error = messageOf(error);
+      });
+    }
+  }
+
+  void _finish() {
+    if (_done || !mounted) return;
+    _done = true;
+    ref.invalidate(jobsProvider);
+    context.pushReplacement(Routes.jobRequirementsFor(_jobId!));
+  }
 
   @override
   Widget build(BuildContext context) {
-    return PlaceholderPage(
-      title: 'New job',
-      description: 'Paste the raw job description; creates a DRAFT job and invokes parse-job.',
-      tasks: const ['RC-08'],
-      stories: const ['US-34'],
-      links: [
-        PageLink(
-          '[Fake] Requirements extracted → review',
-          Routes.jobRequirementsFor(DemoIds.job),
+    final theme = Theme.of(context);
+    final busy = _stage == _Stage.saving || _stage == _Stage.reading;
+    final length = _text.text.length;
+    return Scaffold(
+      appBar: AppBar(title: const Text('New job')),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 860),
+          child: switch (_stage) {
+            _Stage.reading => _Reading(onLeave: () => context.go(Routes.jobs)),
+            _ => ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text(
+                  'Paste the job description',
+                  style: theme.textTheme.titleLarge,
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'We\'ll pull out the title, details and skills. You\'ll '
+                  'review everything before it goes live.',
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _text,
+                  enabled: !busy,
+                  minLines: 12,
+                  maxLines: 24,
+                  maxLength: NewJobScreen.maxLength,
+                  keyboardType: TextInputType.multiline,
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                    labelText: 'Job description',
+                    errorText: _validation,
+                  ),
+                  buildCounter:
+                      (
+                        context, {
+                        required currentLength,
+                        required isFocused,
+                        maxLength,
+                      }) => Text(
+                        '${_thousands(length)} / '
+                        '${_thousands(NewJobScreen.maxLength)}',
+                        semanticsLabel:
+                            '$length of ${NewJobScreen.maxLength} characters',
+                      ),
+                ),
+                const SizedBox(height: 12),
+                if (_error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      _error!,
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
+                  ),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.end,
+                  children: [
+                    if (_stage == _Stage.failed && _jobId != null)
+                      OutlinedButton(
+                        onPressed: () => context.pushReplacement(
+                          Routes.jobRequirementsFor(_jobId!),
+                        ),
+                        child: const Text('Add skills by hand'),
+                      ),
+                    FilledButton.icon(
+                      onPressed: busy || !_canSubmit
+                          ? null
+                          : (_stage == _Stage.failed ? _read : _submit),
+                      icon: _stage == _Stage.saving
+                          ? const SizedBox.square(
+                              dimension: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.auto_awesome),
+                      label: Text(
+                        _stage == _Stage.failed
+                            ? 'Try again'
+                            : 'Read description',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          },
         ),
-      ],
+      ),
+    );
+  }
+}
+
+String _thousands(int n) => n.toString().replaceAllMapped(
+  RegExp(r'(\d)(?=(\d{3})+$)'),
+  (m) => '${m[1]},',
+);
+
+class _Reading extends StatelessWidget {
+  const _Reading({required this.onLeave});
+
+  final VoidCallback onLeave;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 220,
+              child: LinearProgressIndicator(
+                semanticsLabel: 'Reading the job description',
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Reading the description…',
+              style: theme.textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'This takes up to 20 seconds. You can leave; the draft is saved '
+              'in your jobs list.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            TextButton(onPressed: onLeave, child: const Text('Back to jobs')),
+          ],
+        ),
+      ),
     );
   }
 }
