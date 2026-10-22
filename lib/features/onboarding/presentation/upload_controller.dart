@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_failure.dart';
+import '../../../core/logging/app_log.dart';
 import '../data/resume_picker.dart';
 import '../data/resume_repository.dart';
 import '../domain/resume_file.dart';
@@ -35,9 +36,21 @@ class UploadController extends Notifier<UploadState> {
     state = UploadState(file: previous, phase: UploadPhase.choosing);
     try {
       final selected = await ref.read(resumePickerProvider)();
+      AppLog.event(
+        'resume',
+        selected == null ? 'file picker cancelled' : 'file chosen',
+        selected == null
+            ? null
+            : {
+                'name': selected.name,
+                'type': selected.extension,
+                'kb': (selected.bytes.length / 1024).round(),
+              },
+      );
       if (!ref.mounted) return;
       state = UploadState(file: selected ?? previous);
     } catch (error) {
+      AppLog.warn('resume', 'file rejected', error);
       if (!ref.mounted) return;
       state = UploadState(
         error: error is AppFailure

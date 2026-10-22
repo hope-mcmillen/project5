@@ -56,6 +56,16 @@ class RouteSession {
 
   bool get isSignedIn => status == SessionStatus.signedIn;
 
+  /// For route logs: `signedIn candidate onboarded=false`.
+  @override
+  String toString() => [
+    status.name,
+    if (role != null) role!.name,
+    if (role == AppRole.candidate) 'onboarded=$candidateOnboarded',
+    if (role == AppRole.recruiter) 'hasCompany=$recruiterHasCompany',
+    if (passwordRecovery) 'passwordRecovery',
+  ].join(' ');
+
   /// Builds the snapshot from the current provider values.
   static RouteSession read(Ref ref) {
     final auth = ref.read(authStateProvider);

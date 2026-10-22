@@ -37,6 +37,21 @@ void main() {
     );
   });
 
+  test('deletes drafts only', () async {
+    final jobs = FakeJobRepository(latency: Duration.zero);
+    final open = FakeJobRepository.demoJobs.first.id;
+    final draft = FakeJobRepository.demoJobs.last.id;
+    Matcher fails(String code) =>
+        throwsA(isA<AppFailure>().having((f) => f.code, 'code', code));
+
+    await expectLater(jobs.deleteDraft(open), fails('job_not_draft'));
+    await jobs.deleteDraft(draft);
+    expect((await jobs.list()).map((j) => j.id), [open]);
+    await expectLater(jobs.get(draft), fails('job_not_found'));
+    await expectLater(jobs.requirements(draft), fails('job_not_found'));
+    await expectLater(jobs.deleteDraft(draft), fails('job_not_found'));
+  });
+
   test('enums round-trip their Postgres values', () {
     for (final status in JobStatus.values) {
       expect(JobStatus.fromDb(status.toDb()), status);

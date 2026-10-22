@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,11 +127,94 @@ class _NewJobScreenState extends ConsumerState<NewJobScreen> {
     context.pushReplacement(Routes.jobRequirementsFor(_jobId!));
   }
 
+  /// The description box takes this share of the space above the buttons,
+  /// so on short screens (a phone with the keyboard up, or large text) there
+  /// is always page left over to scroll, and it never overflows.
+  static const _fieldShare = 0.8;
+  static const _fieldMinHeight = 160.0;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final busy = _stage == _Stage.saving || _stage == _Stage.reading;
     final length = _text.text.length;
+    final header = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Paste the job description', style: theme.textTheme.titleLarge),
+        const SizedBox(height: 4),
+        const Text(
+          'We\'ll pull out the title, details and skills. You\'ll '
+          'review everything before it goes live.',
+        ),
+      ],
+    );
+    // Fills the space it's given and scrolls its own text, so a long paste
+    // never pushes the buttons off screen.
+    final field = TextField(
+      controller: _text,
+      enabled: !busy,
+      expands: true,
+      minLines: null,
+      maxLines: null,
+      textAlignVertical: TextAlignVertical.top,
+      maxLength: NewJobScreen.maxLength,
+      keyboardType: TextInputType.multiline,
+      decoration: InputDecoration(
+        border: const OutlineInputBorder(),
+        alignLabelWithHint: true,
+        labelText: 'Job description',
+        errorText: _validation,
+      ),
+      buildCounter:
+          (context, {required currentLength, required isFocused, maxLength}) =>
+              Text(
+                '${_thousands(length)} / '
+                '${_thousands(NewJobScreen.maxLength)}',
+                semanticsLabel:
+                    '$length of ${NewJobScreen.maxLength} characters',
+              ),
+    );
+    final actions = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (_error != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(
+              _error!,
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+          ),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          alignment: WrapAlignment.end,
+          children: [
+            if (_stage == _Stage.failed && _jobId != null)
+              OutlinedButton(
+                onPressed: () =>
+                    context.pushReplacement(Routes.jobRequirementsFor(_jobId!)),
+                child: const Text('Add skills by hand'),
+              ),
+            FilledButton.icon(
+              onPressed: busy || !_canSubmit
+                  ? null
+                  : (_stage == _Stage.failed ? _read : _submit),
+              icon: _stage == _Stage.saving
+                  ? const SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.auto_awesome),
+              label: Text(
+                _stage == _Stage.failed ? 'Try again' : 'Read description',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
     return Scaffold(
       appBar: AppBar(title: const Text('New job')),
       body: Center(
@@ -138,83 +222,32 @@ class _NewJobScreenState extends ConsumerState<NewJobScreen> {
           constraints: const BoxConstraints(maxWidth: 860),
           child: switch (_stage) {
             _Stage.reading => _Reading(onLeave: () => context.go(Routes.jobs)),
-            _ => ListView(
-              padding: const EdgeInsets.all(16),
+            // The buttons sit below the scrolling area, so they stay visible
+            // (and above the keyboard) however long the description is.
+            _ => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  'Paste the job description',
-                  style: theme.textTheme.titleLarge,
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'We\'ll pull out the title, details and skills. You\'ll '
-                  'review everything before it goes live.',
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _text,
-                  enabled: !busy,
-                  minLines: 12,
-                  maxLines: 24,
-                  maxLength: NewJobScreen.maxLength,
-                  keyboardType: TextInputType.multiline,
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    alignLabelWithHint: true,
-                    labelText: 'Job description',
-                    errorText: _validation,
-                  ),
-                  buildCounter:
-                      (
-                        context, {
-                        required currentLength,
-                        required isFocused,
-                        maxLength,
-                      }) => Text(
-                        '${_thousands(length)} / '
-                        '${_thousands(NewJobScreen.maxLength)}',
-                        semanticsLabel:
-                            '$length of ${NewJobScreen.maxLength} characters',
-                      ),
-                ),
-                const SizedBox(height: 12),
-                if (_error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      _error!,
-                      style: TextStyle(color: theme.colorScheme.error),
-                    ),
-                  ),
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.end,
-                  children: [
-                    if (_stage == _Stage.failed && _jobId != null)
-                      OutlinedButton(
-                        onPressed: () => context.pushReplacement(
-                          Routes.jobRequirementsFor(_jobId!),
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                      children: [
+                        header,
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: math.max(
+                            _fieldMinHeight,
+                            constraints.maxHeight * _fieldShare,
+                          ),
+                          child: field,
                         ),
-                        child: const Text('Add skills by hand'),
-                      ),
-                    FilledButton.icon(
-                      onPressed: busy || !_canSubmit
-                          ? null
-                          : (_stage == _Stage.failed ? _read : _submit),
-                      icon: _stage == _Stage.saving
-                          ? const SizedBox.square(
-                              dimension: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.auto_awesome),
-                      label: Text(
-                        _stage == _Stage.failed
-                            ? 'Try again'
-                            : 'Read description',
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: actions,
                 ),
               ],
             ),

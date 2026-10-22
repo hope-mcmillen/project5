@@ -81,7 +81,7 @@ class AppFailure implements Exception {
     'invalid_requirements':
         'Check the requirements: up to 15 skills, 8 of them required.',
     'job_not_found': 'That job no longer exists.',
-    'job_not_draft': 'Only draft jobs can be re-read.',
+    'job_not_draft': 'That job is no longer a draft. Refresh and try again.',
     'not_company_recruiter': 'Only recruiters in this company can do that.',
     // Board (API_CONTRACT §7.4, §7.5)
     'application_not_committed': 'That application isn\'t ready yet.',

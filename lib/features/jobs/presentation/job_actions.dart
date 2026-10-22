@@ -69,3 +69,49 @@ Future<bool> changeJobStatus(
   }
   return true;
 }
+
+/// Deletes a DRAFT job after confirmation, from the list or an abandoned
+/// requirements screen. Only drafts can go: they never reached the deck, so
+/// no candidate data is lost. Returns true on success.
+Future<bool> deleteDraftJob(
+  BuildContext context,
+  WidgetRef ref, {
+  required String jobId,
+  required String title,
+}) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Delete "$title"?'),
+      content: const Text(
+        'This draft and its requirements will be removed. This can\'t be '
+        'undone.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+            foregroundColor: Theme.of(context).colorScheme.onError,
+          ),
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Delete draft'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true) return false;
+  try {
+    await ref.read(jobRepositoryProvider).deleteDraft(jobId);
+  } catch (error) {
+    if (context.mounted) showMessage(context, messageOf(error));
+    ref.invalidate(jobsProvider);
+    return false;
+  }
+  ref.invalidate(jobsProvider);
+  if (context.mounted) showMessage(context, '"$title" deleted.');
+  return true;
+}

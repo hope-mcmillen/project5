@@ -37,6 +37,10 @@ abstract interface class JobRepository {
   /// `requirements_not_ready`.
   Future<void> setStatus(String id, JobStatus status);
 
+  /// `rpc('delete_draft_job')`: deletes a DRAFT job and its requirements.
+  /// Throws `job_not_draft`, `job_not_found` or `not_company_recruiter`.
+  Future<void> deleteDraft(String jobId);
+
   /// Taxonomy search by name or alias, for "Add skill".
   Future<List<SkillRef>> searchSkills(String query);
 }

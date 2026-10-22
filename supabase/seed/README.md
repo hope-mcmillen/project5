@@ -4,7 +4,7 @@ All people, companies, emails, and phone numbers here are invented.
 
 | Path | What | Regenerate / check |
 |---|---|---|
-| `skills.csv` | Canonical taxonomy: `name, category, aliases` (aliases lowercase, `\|`-separated) | `python3 scripts/validate_taxonomy.py` |
+| `skills.csv` | Canonical taxonomy: `name, category, aliases` (aliases lowercase, `\|`-separated) | `python3 scripts/validate_taxonomy.py`; then `python3 scripts/make_fake_taxonomy.py` (fake-mode list in `lib/core/testing/seed_taxonomy.dart`) |
 | `skill_relations.csv` | Partial credit: a candidate with `skill` earns `credit` toward a requirement for `related` (PRD §8.4 `relation(c, r.skill)`). Directional, so symmetric pairs are listed twice. | same |
 | `jobs/*.txt` | 6 fake job descriptions (mobile, Python backend, data, DevOps, frontend, ML) | hand-written |
 | `resumes/*` | 10 fake resumes: single-column, two-column, table, DOCX, scanned image (no text layer), hidden white/1pt text injection, visible injection + "Age: 52" | `scripts/make_fake_resumes.py` |
@@ -16,8 +16,8 @@ All people, companies, emails, and phone numbers here are invented.
 
 | File | What | Regenerate |
 |---|---|---|
-| `skills.sql` | 343 skills + 132 relations from the CSVs | `deno task embed:taxonomy --no-embed` (from `supabase/functions`) |
-| `skills_embeddings.sql` | One `gemini-embedding-001@1536` vector per skill, so seeding never calls the AI | `deno task embed:taxonomy` (about 4 Gemini calls) |
+| `skills.sql` | 933 skills + 579 relations from the CSVs | `deno task embed:taxonomy --no-embed` (from `supabase/functions`) |
+| `skills_embeddings.sql` | One `gemini-embedding-001@1536` vector per skill, so seeding never calls the AI | `deno task embed:taxonomy` (about 10 Gemini calls) |
 | `demo_data.sql` | The demo world (PRD §9.8), below | `deno task generate:seed` (no AI, deterministic) |
 
 `demo_data.sql` needs the B-side migrations (`compute_match`, `skills_centroid`) and the two files above. It runs in one transaction and is safe to re-run. Scores, breakdowns, and vectors are computed in SQL at load time, so they always match the live functions.

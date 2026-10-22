@@ -465,6 +465,7 @@ Expired jobs are rejected even before the scheduled expiry sweep closes them.
 |---|---|---|---|
 | `save_requirements(p_job_id uuid, p_requirements jsonb) → void` | recruiter in job's company | `not_recruiter`, `not_owner`, `invalid_requirements`, `invalid_transition` | `null` |
 | `set_job_status(p_job_id uuid, p_status job_status) → void` | recruiter in job's company | `not_recruiter`, `not_owner`, `invalid_transition`, `requirements_not_ready` | `null` |
+| `delete_draft_job(p_job_id uuid) → void` | recruiter (owner or member) in job's company | `not_company_recruiter`, `job_not_found`, `job_not_draft` | `null` |
 | `get_board(p_job_id uuid, p_filters jsonb default '{}', p_limit integer default 50, p_offset integer default 0) → jsonb` | recruiter in job's company | `not_recruiter`, `not_owner`, `invalid_filters`, `invalid_pagination` | Array of tiles below |
 | `get_candidate_detail(p_application_id uuid) → jsonb` | recruiter in job's company | `not_recruiter`, `not_owner`, `application_not_committed` | Detail object below |
 | `open_application(p_application_id uuid) → void` | recruiter in job's company | `not_recruiter`, `not_owner`, `application_not_committed`, `invalid_transition` | `null` |
@@ -491,6 +492,17 @@ status events in the same transaction. Candidate transitions follow SCHEMA.md §
 opening an UNDER_REVIEW application is idempotent. Reject undo lasts 10 seconds and cannot revive an application on a CLOSED/expired
 job. Advance notes and internal reject reasons are limited to 2000 characters.
 Internal reject reasons never appear in any candidate-visible response.
+
+`delete_draft_job` permanently deletes a DRAFT job and its `job_requirements`.
+Candidates, recruiters without a company and other companies' recruiters get
+`not_company_recruiter`; an unknown ID gets `job_not_found`; OPEN, PAUSED and
+CLOSED jobs (and, defensively, any job with swipes or applications) get
+`job_not_draft`, so no candidate data is ever cascaded away. Anonymous callers
+have no EXECUTE grant. This RPC is the only way to delete a job: clients have no
+DELETE privilege on `jobs`. To retire a published job, close it instead.
+```json
+{"p_job_id":"40000000-0000-0000-0000-000000000002"}
+```
 
 Board filters are optional `statuses: application_status[]` and
 `min_score: integer 0..100`. Unknown keys/types are rejected. Limit is 1–100;

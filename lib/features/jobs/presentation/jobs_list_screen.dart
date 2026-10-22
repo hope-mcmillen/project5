@@ -13,8 +13,8 @@ import 'job_actions.dart';
 import 'widgets/job_status_chip.dart';
 
 /// Jobs: every job in the company with new/total applicant counts, and
-/// publish / pause / close actions (RC-06, US-37, US-38). A list on phones,
-/// a table from 900 px.
+/// publish / pause / close actions, plus delete for drafts (RC-06, US-37,
+/// US-38). A list on phones, a table from 900 px.
 class JobsListScreen extends ConsumerWidget {
   const JobsListScreen({super.key});
 
@@ -213,7 +213,7 @@ class _JobsTable extends StatelessWidget {
   }
 }
 
-enum _MenuAction { board, requirements, details, status }
+enum _MenuAction { board, requirements, details, status, delete }
 
 class _JobMenu extends ConsumerWidget {
   const _JobMenu({required this.job});
@@ -244,6 +244,13 @@ class _JobMenu extends ConsumerWidget {
             );
           case (_MenuAction.status, null):
             break;
+          case (_MenuAction.delete, _):
+            await deleteDraftJob(
+              context,
+              ref,
+              jobId: job.id,
+              title: _title(job),
+            );
         }
       },
       itemBuilder: (context) => [
@@ -268,6 +275,16 @@ class _JobMenu extends ConsumerWidget {
             value: (_MenuAction.status, status),
             child: Text(actionLabel(status)),
           ),
+        if (job.status == JobStatus.draft) ...[
+          const PopupMenuDivider(),
+          PopupMenuItem(
+            value: (_MenuAction.delete, null),
+            child: Text(
+              'Delete draft',
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
+        ],
       ],
     );
   }

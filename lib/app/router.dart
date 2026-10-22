@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/logging/app_log.dart';
+
 import '../core/models/app_role.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/presentation/forgot_password_screen.dart';
@@ -143,10 +145,27 @@ GoRouter buildRouter({
   Listenable? refreshListenable,
   String initialLocation = Routes.splash,
 }) {
-  return GoRouter(
+  // GoRouter often checks the same redirect twice in a row; log it once.
+  String? lastRedirect;
+  var lastRedirectAt = DateTime(0);
+  final router = GoRouter(
     initialLocation: initialLocation,
     refreshListenable: refreshListenable,
-    redirect: (context, state) => resolveRedirect(session(), state.uri),
+    redirect: (context, state) {
+      final current = session();
+      final target = resolveRedirect(current, state.uri);
+      if (target != null) {
+        final line = 'redirect ${state.uri} → $target ($current)';
+        final now = DateTime.now();
+        if (line != lastRedirect ||
+            now.difference(lastRedirectAt) > const Duration(seconds: 1)) {
+          AppLog.info('route', line);
+        }
+        lastRedirect = line;
+        lastRedirectAt = now;
+      }
+      return target;
+    },
     errorBuilder: (context, state) => NotFoundScreen(uri: state.uri),
     routes: [
       if (kDebugMode)
@@ -350,4 +369,30 @@ GoRouter buildRouter({
       ),
     ],
   );
+  _logPages(router);
+  return router;
+}
+
+/// Logs each page the user lands on, tagged `page`, and keeps
+/// [AppLog.page] current for tap logs. Pages with parameters also show
+/// their route pattern, e.g. `/r/jobs/42/board (/r/jobs/:jobId/board)`.
+void _logPages(GoRouter router) {
+  String? last;
+  void log() {
+    final config = router.routerDelegate.currentConfiguration;
+    if (config.isEmpty) return;
+    final location = config.uri.toString();
+    if (location == last) return;
+    last = location;
+    AppLog.page = location;
+    final pattern = config.fullPath;
+    AppLog.info(
+      'page',
+      pattern.isEmpty || pattern == config.uri.path
+          ? location
+          : '$location ($pattern)',
+    );
+  }
+
+  router.routerDelegate.addListener(log);
 }

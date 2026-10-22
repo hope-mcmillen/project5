@@ -157,7 +157,7 @@ Helper: `public.current_app_role()` is a `security definer` function that return
 | `candidates` | select/update own | **none** | Recruiters never read candidate rows directly |
 | `resumes` | select/insert own | **none** | Status is updated by Edge Functions (service role) |
 | `profile_versions`, `candidate_skills`, `candidate_experiences` | select own. Edit via `confirm_profile`. | **none** | Blind board data comes only from `get_board` / `get_candidate_detail` |
-| `jobs` | select where `status = 'OPEN'` **or** they have an application to it | full CRUD on own company | The second candidate rule keeps closed jobs visible in their pipeline |
+| `jobs` | select where `status = 'OPEN'` **or** they have an application to it | select/insert/update own company; delete only DRAFT via `delete_draft_job` | The second candidate rule keeps closed jobs visible in their pipeline |
 | `job_requirements` | select for jobs they can see | CRUD on own company's jobs (via `save_requirements`) | |
 | `swipes` | select own. Insert via `swipe`. | none | |
 | `applications` | select own (through `my_applications`) | select own company's jobs where `committed_at <= now()` | All status changes go through RPCs |
@@ -203,6 +203,7 @@ All are `security definer` with `set search_path = public`, and each checks the 
 | `get_application_contact(p_application_id) → {name, email, note}` | candidate | A | Only when the status is INTERVIEW_REQUESTED |
 | `save_requirements(p_job_id, p_requirements jsonb)` | recruiter | A | Enforces 15 total / 8 required, recomputes the job embedding, and re-scores if the job is live (AI-18) |
 | `set_job_status(p_job_id, p_status)` | recruiter | A | Validates the lifecycle and cascades JOB_CLOSED |
+| `delete_draft_job(p_job_id)` | recruiter | A | Deletes a DRAFT job and its requirements. Errors: `not_company_recruiter`, `job_not_found`, `job_not_draft` |
 | `get_board(p_job_id, p_filters jsonb = '{}', p_limit = 50, p_offset = 0) → jsonb[]` | recruiter | A | Returns **blind** tiles, sorted by score |
 | `get_candidate_detail(p_application_id) → jsonb` | recruiter | A | Blind until INTERVIEW_REQUESTED |
 | `open_application(p_application_id)` | recruiter | A | APPLIED → UNDER_REVIEW (idempotent) |

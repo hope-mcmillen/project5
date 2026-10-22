@@ -1,4 +1,5 @@
 import '../models/candidate_models.dart';
+import 'seed_taxonomy.dart';
 
 /// Synthetic contract-shaped records shared by candidate fakes and tests.
 abstract final class CandidateFixtures {
@@ -6,18 +7,36 @@ abstract final class CandidateFixtures {
   static const versionId = '30000000-0000-0000-0000-000000000001';
   static const jobId = '40000000-0000-0000-0000-000000000001';
   static final date = DateTime.utc(2026, 10, 22, 14);
-  static List<Skill> get taxonomy => [
-    skill,
-    for (final (id, name, category, aliases) in [
-      ('dart', 'Dart', 'Languages', <String>[]),
-      ('python', 'Python', 'Languages', ['py']),
-      ('sql', 'SQL', 'Data', ['structured query language']),
-      ('riverpod', 'Riverpod', 'Frameworks', <String>[]),
-      ('git', 'Git', 'Tools', <String>[]),
-      ('react', 'React', 'Frameworks', ['reactjs']),
-    ])
-      Skill(id: id, name: name, category: category, aliases: aliases),
-  ];
+
+  /// The fixed test skills first, then the rest of the seeded taxonomy.
+  /// Ids are lowercase names.
+  static List<Skill> get taxonomy {
+    final fixed = [
+      skill,
+      for (final (id, name, category, aliases) in [
+        ('dart', 'Dart', 'Languages', <String>[]),
+        ('python', 'Python', 'Languages', ['py']),
+        ('sql', 'SQL', 'Data', ['structured query language']),
+        ('riverpod', 'Riverpod', 'Frameworks', <String>[]),
+        ('git', 'Git', 'Tools', <String>[]),
+        ('react', 'React', 'Frameworks', ['reactjs']),
+      ])
+        Skill(id: id, name: name, category: category, aliases: aliases),
+    ];
+    final names = {for (final s in fixed) s.name};
+    return [
+      ...fixed,
+      for (final (name, category, aliases) in seedTaxonomy)
+        if (!names.contains(name))
+          Skill(
+            id: name.toLowerCase(),
+            name: name,
+            category: category,
+            aliases: aliases,
+          ),
+    ];
+  }
+
   static List<JobCard> get deck => [
     for (final (i, title, remote, location, type, salary, sponsor, score) in [
       (

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/errors/app_failure.dart';
+import '../../../core/logging/app_log.dart';
 import '../../../core/models/candidate_models.dart';
 import 'resume_repository.dart';
 
@@ -120,6 +121,10 @@ class SupabaseResumeRepository implements ResumeRepository {
       profileVersionId: profileVersionId,
     );
     _resumes[id] = resume;
+    AppLog.event('resume', 'parse $id → ${status.toDb()}', {
+      'failure_reason': ?resume.failureReason,
+      'profile_version_id': ?profileVersionId,
+    });
     _updates.add(resume);
   }
 

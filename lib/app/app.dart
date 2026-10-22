@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/logging/tap_logger.dart';
 import '../ui/theme/rr_theme.dart';
 import 'dev_session.dart';
 import 'route_session.dart';
@@ -53,6 +54,7 @@ class _ResuRhombusAppState extends ConsumerState<ResuRhombusApp> {
       debugShowCheckedModeBanner: false,
       theme: buildRRTheme(),
       routerConfig: _previewRouter ?? ref.watch(routerProvider),
+      builder: (context, child) => TapLogger(child: child!),
     );
     return widget.session == null
         ? app
