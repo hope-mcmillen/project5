@@ -58,6 +58,23 @@ when the app restarts. No application is sent to an employer. Supabase onboardin
 and live feed/application persistence remain C5 and C8 respectively. Device
 performance profiling is still required to establish the 60 fps target.
 
+## Deck controls and recovery (C7)
+
+The labeled Pass, Details, and Apply controls share the swipe animations. Each
+successful action offers a five-second Undo countdown based on its repository
+receipt and clock offset. Undo restores the card with a reverse animation and
+removes the application created by that demo swipe. Expired or failed undo
+requests leave the existing decision intact.
+
+After passing, optional Location, Salary, Tech stack, Seniority, and Company chips
+appear for three seconds. Choosing a reason saves it against that swipe; the next
+card stays interactive. Empty decks offer preferences, Resume, and a Show stretch
+roles toggle that preserves the other filters. A failed page load offers Load more
+jobs instead of incorrectly claiming there are no remaining jobs.
+
+These actions currently use the local fake repositories. The live Supabase RPCs
+and persistence are still part of C8.
+
 ## Resume upload and reading preview (C3)
 
 Both `flutter run` and `flutter run -t lib/main_fake.dart` currently use local

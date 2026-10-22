@@ -13,6 +13,10 @@ import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/components/swipe_deck.dart';
 import '../../../ui/theme/rr_tokens.dart';
 import 'feed_controller.dart';
+import 'swipe_feedback.dart';
+import '../domain/swipe_receipt.dart';
+import '../../../ui/components/deck_action_bar.dart';
+import '../../onboarding/presentation/preferences_controller.dart';
 
 class DeckScreen extends ConsumerStatefulWidget {
   const DeckScreen({super.key});
@@ -23,6 +27,8 @@ class DeckScreen extends ConsumerStatefulWidget {
 class _DeckScreenState extends ConsumerState<DeckScreen> {
   final _deck = GlobalKey<SwipeDeckState>();
   bool _swiping = false;
+  String? _restoreToken;
+  SwipeDirection? _restoreDirection;
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(feedControllerProvider);
@@ -35,43 +41,56 @@ class _DeckScreenState extends ConsumerState<DeckScreen> {
     return BrandedPage(
       title: 'Your deck',
       description: 'Swipe right to apply or left to pass. Every gesture also has a button.',
-      footer: !active
-          ? null
-          : Wrap(
-              alignment: WrapAlignment.center,
-              spacing: RRSpace.md,
-              runSpacing: RRSpace.sm,
-              children: [
-                OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: RRColors.pass,
-                    minimumSize: const Size(72, 56),
+      footer: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * .45,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (value?.lastSwipe case final SwipeReceipt receipt) ...[
+                if (receipt.direction == SwipeDirection.left &&
+                    !value!.reasonSaved)
+                  PassReasonChips(
+                    key: ValueKey('reason-${receipt.swipeId}'),
+                    receipt: receipt,
+                    busy: value.busy || value.reasonSaving,
+                    onReason: (reason) => ref
+                        .read(feedControllerProvider.notifier)
+                        .setReason(receipt.swipeId, reason),
                   ),
-                  onPressed: _swiping || value.busy
-                      ? null
-                      : () => _deck.currentState?.commit(SwipeDirection.left),
-                  icon: const Icon(Icons.close),
-                  label: const Text('Pass'),
-                ),
-                OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(72, 56),
-                  ),
-                  onPressed: _swiping || value.busy ? null : details,
-                  child: const Text('Details'),
-                ),
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size(72, 56),
-                  ),
-                  onPressed: _swiping || value.busy
-                      ? null
-                      : () => _deck.currentState?.commit(SwipeDirection.right),
-                  icon: const Icon(Icons.check),
-                  label: const Text('Apply'),
+                UndoToast(
+                  key: ValueKey('undo-${receipt.swipeId}'),
+                  receipt: receipt,
+                  busy: value!.busy || value.reasonSaving || _swiping,
+                  onUndo: () async {
+                    final ok = await ref
+                        .read(feedControllerProvider.notifier)
+                        .undo(receipt.swipeId);
+                    if (ok && mounted) {
+                      setState(() {
+                        _restoreToken = receipt.swipeId;
+                        _restoreDirection = receipt.direction;
+                      });
+                    }
+                  },
                 ),
               ],
-            ),
+              if (active)
+                DeckActionBar(
+                  onPass: _swiping || value.busy
+                      ? null
+                      : () => _deck.currentState?.commit(SwipeDirection.left),
+                  onDetails: _swiping || value.busy ? null : details,
+                  onApply: _swiping || value.busy
+                      ? null
+                      : () => _deck.currentState?.commit(SwipeDirection.right),
+                ),
+            ],
+          ),
+        ),
+      ),
       child: state.when(
         loading: () => const ShimmerShape(height: RRSpace.badgeLarge * 4),
         error: (_, _) => Column(
@@ -94,7 +113,16 @@ class _DeckScreenState extends ConsumerState<DeckScreen> {
               ),
               const SizedBox(height: RRSpace.lg),
             ],
-            if (value.cards.isEmpty) ...[
+            if (value.cards.isEmpty && value.cursor != null) ...[
+              TextButton(
+                onPressed: value.busy
+                    ? null
+                    : () =>
+                          ref.read(feedControllerProvider.notifier).loadMore(),
+                child: Text(value.busy ? 'Loading jobs…' : 'Load more jobs'),
+              ),
+            ] else if (value.cards.isEmpty) ...[
+              const _StretchRoles(),
               EmptyState(
                 title: 'Your deck is all squared away',
                 message: 'No more roles match your current preferences.',
@@ -120,6 +148,8 @@ class _DeckScreenState extends ConsumerState<DeckScreen> {
                     ),
                     child: SwipeDeck(
                       key: _deck,
+                      restoreToken: _restoreToken,
+                      restoreDirection: _restoreDirection,
                       cards: value.cards,
                       onBusyChanged: (busy) {
                         if (mounted) setState(() => _swiping = busy);
@@ -127,21 +157,10 @@ class _DeckScreenState extends ConsumerState<DeckScreen> {
                       onDetails: (job) =>
                           context.push(Routes.deepDiveFor(job.jobId)),
                       onCommit: (direction) async {
-                        final title = value.cards.first.title;
+                        setState(() => _restoreToken = null);
                         final ok = await ref
                             .read(feedControllerProvider.notifier)
                             .commit(direction);
-                        if (ok && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                direction == SwipeDirection.right
-                                    ? 'Demo application saved for $title'
-                                    : 'Passed on $title',
-                              ),
-                            ),
-                          );
-                        }
                         return ok;
                       },
                     ),
@@ -157,6 +176,38 @@ class _DeckScreenState extends ConsumerState<DeckScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _StretchRoles extends ConsumerWidget {
+  const _StretchRoles();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(preferencesControllerProvider);
+    return state.when(
+      loading: () => const ShimmerShape(height: 56),
+      error: (_, _) => TextButton(
+        onPressed: () => ref.invalidate(preferencesControllerProvider),
+        child: const Text('Retry preferences'),
+      ),
+      data: (value) => Column(
+        children: [
+          if (value.error != null) ErrorBanner(message: value.error!),
+          SwitchListTile(
+            title: const Text('Show stretch roles'),
+            subtitle: const Text(
+              'Include roles below a 50% match. Your other preferences still apply.',
+            ),
+            value: value.preferences.includeStretch ?? false,
+            onChanged: value.saving
+                ? null
+                : (include) => ref
+                      .read(preferencesControllerProvider.notifier)
+                      .setStretch(include),
+          ),
+        ],
       ),
     );
   }
