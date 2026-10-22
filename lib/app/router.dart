@@ -96,9 +96,8 @@ String? resolveRedirect(RouteSession session, Uri uri) {
 
   if (session.role == AppRole.candidate) {
     if (isRecruiterArea) return home;
-    if (!session.candidateOnboarded && !path.startsWith('/c/onboarding')) {
-      return home;
-    }
+    // Resume setup is optional for browsing. Applying still requires a
+    // confirmed profile in the feed repository and backend.
   }
   if (session.role == AppRole.recruiter) {
     if (isCandidateArea) return home;
@@ -188,26 +187,32 @@ GoRouter buildRouter({
       ),
 
       // ---------- Candidate onboarding ----------
-      GoRoute(
-        path: Routes.candidateConsent,
-        builder: (context, state) => const ConsentScreen(),
-      ),
-      GoRoute(
-        path: Routes.candidateUpload,
-        builder: (context, state) => const UploadResumeScreen(),
-      ),
-      GoRoute(
-        path: Routes.candidateParseProgress,
-        builder: (context, state) =>
-            ParseProgressScreen(resumeId: state.pathParameters['resumeId']!),
-      ),
-      GoRoute(
-        path: Routes.candidateReview,
-        builder: (context, state) => const ReviewProfileScreen(),
-      ),
-      GoRoute(
-        path: Routes.candidatePreferences,
-        builder: (context, state) => const PreferencesScreen(),
+      ShellRoute(
+        builder: (context, state, child) => CandidateNavigation(child: child),
+        routes: [
+          GoRoute(
+            path: Routes.candidateConsent,
+            builder: (context, state) => const ConsentScreen(),
+          ),
+          GoRoute(
+            path: Routes.candidateUpload,
+            builder: (context, state) => const UploadResumeScreen(),
+          ),
+          GoRoute(
+            path: Routes.candidateParseProgress,
+            builder: (context, state) => ParseProgressScreen(
+              resumeId: state.pathParameters['resumeId']!,
+            ),
+          ),
+          GoRoute(
+            path: Routes.candidateReview,
+            builder: (context, state) => const ReviewProfileScreen(),
+          ),
+          GoRoute(
+            path: Routes.candidatePreferences,
+            builder: (context, state) => const PreferencesScreen(),
+          ),
+        ],
       ),
 
       // ---------- Candidate tabs ----------

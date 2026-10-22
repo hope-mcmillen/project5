@@ -4,9 +4,25 @@ import 'package:go_router/go_router.dart';
 import '../features/company/presentation/widgets/company_header.dart';
 import 'candidate_menu.dart';
 
-/// Bottom navigation for the candidate tabs: Deck · Applications · Profile.
-///
-/// SCAFFOLD: basic NavigationBar. Styling comes later (resurhombus-ui skill).
+/// Shared navigation for candidate pages, including resume onboarding.
+class CandidateNavigation extends StatelessWidget {
+  const CandidateNavigation({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    drawer: CandidateDrawer(location: GoRouterState.of(context).uri.path),
+    body: Builder(
+      builder: (context) => CandidateMenuScope(
+        openMenu: () => Scaffold.of(context).openDrawer(),
+        child: child,
+      ),
+    ),
+  );
+}
+
+/// Keeps each candidate tab's navigation state while sharing the sidebar.
 class CandidateShell extends StatelessWidget {
   const CandidateShell({super.key, required this.navigationShell});
 
@@ -14,15 +30,7 @@ class CandidateShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: CandidateDrawer(location: GoRouterState.of(context).uri.path),
-      body: Builder(
-        builder: (context) => CandidateMenuScope(
-          openMenu: () => Scaffold.of(context).openDrawer(),
-          child: navigationShell,
-        ),
-      ),
-    );
+    return CandidateNavigation(child: navigationShell);
   }
 }
 
