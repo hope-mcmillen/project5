@@ -1,9 +1,14 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Senior Site Reliability Engineer",
+      "organization": null,
       "start": "2021-02",
       "end": "present",
+      "highlights": [
+        "Senior Site Reliability Engineer, Red River Cloudworks — Feb 2021 – Present"
+      ],
       "skills_used": [
         "Amazon EKS",
         "Helm",
@@ -17,9 +22,14 @@
       "evidence": "Senior Site Reliability Engineer, Red River Cloudworks — Feb 2021 – Present"
     },
     {
+      "kind": "job",
       "title": "DevOps Engineer",
+      "organization": null,
       "start": "2018-01",
       "end": "2021-01",
+      "highlights": [
+        "DevOps Engineer, Caddo Data Systems — Jan 2018 – Jan 2021"
+      ],
       "skills_used": [
         "Docker",
         "Linux",

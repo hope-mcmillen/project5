@@ -65,6 +65,9 @@ class _ParseProgressScreenState extends ConsumerState<ParseProgressScreen> {
     'unreadable_scan' => 'We could not read the text in this resume. Try a clearer file or add your skills manually.',
     'too_long' => 'This resume is too long to read. Try a shorter version or add your skills manually.',
     'budget_exceeded' => 'Resume reading is temporarily unavailable. You can add your skills manually.',
+    'network' => 'We could not reach the server to read your resume. Check your connection and try again.',
+    'invalid_file' => 'This file is not a PDF or DOCX we can read. Try another file or add your skills manually.',
+    'not_candidate' => 'Only candidate accounts can read a resume.',
     _ => 'We could not read this resume. Try another file or add your skills manually.',
   };
 

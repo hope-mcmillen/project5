@@ -1,9 +1,14 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Full-Stack Developer",
+      "organization": null,
       "start": "2021-07",
       "end": "present",
+      "highlights": [
+        "Full-Stack Developer, Northshore Software — Jul 2021 – Present\nBuilt Node.js and Express APIs backed by MongoDB with Mongoose.\nDeveloped React dashboards for scheduling and invoicing.\nDeployed services to Heroku and later to Docker containers."
+      ],
       "skills_used": [
         "Node.js",
         "Express",
@@ -16,9 +21,14 @@
       "evidence": "Full-Stack Developer, Northshore Software — Jul 2021 – Present\nBuilt Node.js and Express APIs backed by MongoDB with Mongoose.\nDeveloped React dashboards for scheduling and invoicing.\nDeployed services to Heroku and later to Docker containers."
     },
     {
+      "kind": "job",
       "title": "Web Development Intern",
+      "organization": null,
       "start": "2020-05",
       "end": "2020-08",
+      "highlights": [
+        "Web Development Intern, Tangipahoa Parish IT — May 2020 – Aug 2020\nWrote Jest tests for a JavaScript permit-tracking site."
+      ],
       "skills_used": [
         "Jest",
         "JavaScript"

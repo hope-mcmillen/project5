@@ -98,7 +98,9 @@ export class GeminiProvider implements LlmProvider {
     const res = await this.call((c) =>
       c.models.generateContent({
         model: this.extractModel,
-        contents: opts.untrustedText,
+        contents: opts.feedback
+          ? [{ role: "user", parts: [{ text: opts.untrustedText }, { text: opts.feedback }] }]
+          : opts.untrustedText,
         config: {
           systemInstruction: opts.system,
           temperature: 0,
@@ -116,7 +118,7 @@ export class GeminiProvider implements LlmProvider {
     }
     return {
       data,
-      usage: usageOf(res, opts.system + opts.untrustedText, text),
+      usage: usageOf(res, opts.system + opts.untrustedText + (opts.feedback ?? ""), text),
       provider: this.name,
       model: this.extractModel,
     };

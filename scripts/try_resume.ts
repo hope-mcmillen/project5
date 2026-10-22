@@ -144,11 +144,12 @@ for (const r of extraction.roles) {
     ? Math.max(...r.skills_used.map((s) => years.get(skillKey(s)) ?? 0))
     : 0;
   console.log(
-    `• ${r.title}  ${r.start ?? "?"} → ${
+    `• [${r.kind}] ${r.title}${r.organization ? ` · ${r.organization}` : ""}  ${r.start ?? "?"} → ${
       r.end ?? "?"
     }  (up to ${y} yrs per skill)`,
   );
   console.log(`    uses: ${cut(r.skills_used.join(", "), width - 12)}`);
+  for (const h of r.highlights) console.log(`    - ${cut(h, width - 6)}`);
 }
 
 // 5. Normalize onto the taxonomy (B5) ----------------------------------------

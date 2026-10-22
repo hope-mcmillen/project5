@@ -56,6 +56,23 @@ List<Override> candidateRepositoryOverrides({
   profileRepositoryProvider.overrideWith(
     (ref) => FakeProfileRepository(latency: latency),
   ),
+  resumeRepositoryProvider.overrideWith((ref) {
+    final repository = FakeResumeRepository(
+      latency: latency,
+      simulateParsing: simulateParsing,
+    );
+    ref.onDispose(repository.dispose);
+    return repository;
+  }),
+  resumeSimulationProvider.overrideWithValue(true),
+  ...feedAndApplicationOverrides(latency: latency),
+];
+
+/// The deck and pipeline still run on fakes in the Supabase build: they have
+/// no Supabase repositories yet. Resume parsing and profiles are real there.
+List<Override> feedAndApplicationOverrides({
+  Duration latency = const Duration(milliseconds: 300),
+}) => [
   feedRepositoryProvider.overrideWith((ref) {
     final createdApplications = <String>{};
     return FakeFeedRepository(
@@ -85,15 +102,6 @@ List<Override> candidateRepositoryOverrides({
       },
     );
   }),
-  resumeRepositoryProvider.overrideWith((ref) {
-    final repository = FakeResumeRepository(
-      latency: latency,
-      simulateParsing: simulateParsing,
-    );
-    ref.onDispose(repository.dispose);
-    return repository;
-  }),
-  resumeSimulationProvider.overrideWithValue(true),
   applicationRepositoryProvider.overrideWith((ref) {
     final repository = FakeApplicationRepository(latency: latency);
     ref.onDispose(repository.dispose);

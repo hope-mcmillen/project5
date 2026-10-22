@@ -35,61 +35,75 @@ This is the handoff between backend and frontend (PL-27). Frontend fakes return 
 
 ## 2. `parse-resume` (Edge Function)
 
-Turns an uploaded resume into a **draft** profile version. The candidate reviews it and then calls `confirm_profile` (A).
+Reads a resume **in memory** and saves what it verified as a **draft** profile version: experiences, skills, and education. The file itself is never stored (no Storage upload, no `resumes` row). The candidate reviews the draft and then calls `confirm_profile` (A), which sets `candidates.active_version_id` and finishes onboarding.
 
-**Caller:** candidate who owns the resume.
-**Call:** `supabase.functions.invoke('parse-resume', body: {'resume_id': '…'})`
-**Flow:** The app uploads the file to the `resumes` bucket, inserts the `resumes` row (status `UPLOADED`), then invokes this function. While it runs, the app watches `resumes.status` through Realtime to drive the progress screen:
+**Caller:** a signed-in candidate. The draft always belongs to the caller (id from the verified JWT).
+**Call:** `supabase.functions.invoke('parse-resume', headers: {'Accept': 'text/event-stream'}, files: [MultipartFile.fromBytes('file', bytes, filename: name)])`
+**Request:** `multipart/form-data` with one field, `file`: a PDF or DOCX up to 5 MB. The type is checked from the bytes, not the name.
+
+**How it works (an agent loop, PRD §8.1):**
 
 ```
-UPLOADED → PARSING_LAYOUT → EXTRACTING → NORMALIZING → READY
-                                     ↘ FAILED (failure_reason set)
+PARSING_LAYOUT  text extraction + hidden-text sanitizing (Gemini OCR only for image-only PDFs)
+EXTRACTING      Gemini structured output (schema v3) → code verifier → if it found problems,
+                one repair call with the previous answer + findings → verifier; best verified answer wins
+NORMALIZING     evidence check, years math, taxonomy mapping, experience cleanup
+READY           save_parsed_profile() writes the version, skills, and experiences in one transaction
+                ↘ FAILED (failure_reason)
 ```
 
-The function returns when the row reaches `READY` or `FAILED` (60 s hard limit). It never leaves a row in a parsing state.
+The repair call is skipped when `RESUME_REPAIR_ROUNDS=0`, when under 25 s of the 75 s deadline is left, or after a round that didn't improve the result. Whatever still fails verification is dropped, never saved.
 
-**Request**
-```json
-{ "resume_id": "…" }
+**Response with `Accept: text/event-stream`** (the app's default): `200`, one event per step as it starts, then the final body below as the last event.
 ```
+data: {"status":"PARSING_LAYOUT"}
 
-**Response `200` (ready)**
+data: {"status":"EXTRACTING"}
+
+data: {"status":"NORMALIZING"}
+
+data: {"status":"READY","profile_version_id":"…","version":2,"skill_count":15,"unmapped_count":2,"experience_count":3,"repair_rounds":0}
+```
+Without that header the function answers once, with the final body as JSON.
+
+**Final body (ready)**
 ```json
 {
-  "resume_id": "…",
   "status": "READY",
-  "cached": false,
   "profile_version_id": "…",
-  "version": 1,
+  "version": 2,
   "skill_count": 15,
-  "unmapped_count": 2
+  "unmapped_count": 2,
+  "experience_count": 3,
+  "repair_rounds": 0
 }
 ```
-`cached` is `true` when the same file (SHA-256 computed by the server from the stored bytes, never the client's `file_hash`) with the same `EXTRACTION_SCHEMA_VERSION` was parsed before, so no AI call was made. Calling `parse-resume` again on a `READY` resume returns its latest draft with `cached: true` and doesn't re-parse.
+Every upload creates a new draft version; there is no cache (nothing about the file is kept to key one on).
 
-**Response `200` (failed)**: parsing failures are a normal outcome, not an HTTP error. The app shows the manual fallback (`create_manual_profile`).
+**Final body (failed)**: parsing failures are a normal outcome, not an HTTP error. The app shows the manual fallback (`create_manual_profile`). Nothing is saved.
 ```json
-{ "resume_id": "…", "status": "FAILED", "failure_reason": "unreadable_scan" }
+{ "status": "FAILED", "failure_reason": "unreadable_scan" }
 ```
 
 | `failure_reason` | Meaning | Suggested UI |
 |---|---|---|
 | `unreadable_scan` | No readable text, even after Gemini transcribed the image-only PDF (e.g., a blurry photo) | "We couldn't read this file. Try a text PDF or add skills manually." |
-| `too_long` | Over the input cap even after truncation | Same, mention length |
-| `timeout` | Took longer than 60 s | Offer retry |
+| `too_long` | More than 10 pages | Same, mention length |
+| `timeout` | Took longer than 75 s | Offer retry |
 | `budget_exceeded` | Daily AI budget used up | "Try again tomorrow, or add skills manually." |
-| `internal` | Anything else | Offer retry |
+| `internal` | Anything else, including model output that still breaks the schema after a repair | Offer retry |
 
-**Errors**
+The app also uses `network` (request failed or the stream dropped) and the HTTP error codes below as `failure_reason` on its progress screen.
+
+**Errors** (before any parsing starts)
 
 | HTTP | `code` | When |
 |---|---|---|
-| 400 | `invalid_request` | Body isn't JSON or `resume_id` isn't a UUID |
+| 400 | `invalid_request` | Not multipart, no `file` field, or the body is over the size limit |
+| 400 | `invalid_file` | Empty, over 5 MB, or not a PDF/DOCX by its bytes |
 | 401 | `unauthorized` | Missing or invalid JWT |
-| 403 | `not_owner` | Resume (or its storage folder) belongs to someone else |
-| 404 | `resume_not_found` | No such `resume_id` |
-| 409 | `already_parsing` | Row is already in a parsing state (a run stuck for over 2 minutes can be retried) |
-| 500 | `config_error` / `internal` | Server misconfiguration or an unexpected error. The row is still left `FAILED`, never mid-parse. |
+| 403 | `not_candidate` | Caller isn't a candidate |
+| 500 | `config_error` / `internal` | Server misconfiguration or an unexpected error |
 
 **Reading the draft:** after `READY`, read the draft skills with a normal select on `candidate_skills` for `profile_version_id` (RLS: own rows only). Each row:
 ```json
@@ -103,6 +117,22 @@ The function returns when the row reaches `READY` or `FAILED` (60 s hard limit).
 - `skill_id = null` means **unmapped**: show it, but it isn't scored.
 - `years = null` means **listed, not evidenced** (shown as "listed").
 - `evidence` is always a verbatim quote from the resume. Skills without one are dropped before saving (C-ON-3).
+
+**Experiences:** the same version's `candidate_experiences` rows (RLS: own rows only), most recent first by `sort_order`. Select them with the version, e.g. `profile_versions?select=*,candidate_skills(*),candidate_experiences(*)`.
+```json
+{
+  "id": "…", "profile_version_id": "…", "sort_order": 0,
+  "kind": "job", "title": "Mobile Developer", "organization": "Bayou Apps",
+  "start_month": "2022-03", "end_month": "present",
+  "highlights": ["Built a field-inspection app in Flutter and Dart used by 1,200 inspectors."],
+  "skills_used": ["Flutter", "Dart"],
+  "evidence": "Mobile Developer, Bayou Apps"
+}
+```
+- `kind` is `job`, `internship`, `research`, `project`, `volunteer`, or `other`. Only `job`, `internship`, and `research` dates count toward years.
+- `start_month` is `YYYY-MM` or `YYYY`; `end_month` can also be `present`. Either is `null` when not stated.
+- `organization` and every highlight are verbatim from the resume, or left out. `skills_used` only names skills saved on the version.
+- Editing a confirmed profile: `create_review_draft()` copies the active version's skills and experiences into a new draft.
 
 ---
 

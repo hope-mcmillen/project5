@@ -102,6 +102,15 @@ Deno.test("JSON schema enums match the Zod enums", () => {
   const props = jobJsonSchema.properties;
   assertEquals(props.remote.enum.filter((v) => v !== null), ["onsite", "hybrid", "remote"]);
   assertEquals(props.job_type.enum.filter((v) => v !== null), ["full_time", "part_time", "contract", "internship"]);
+  // public.experience_kind
+  assertEquals(resumeJsonSchema.properties.roles.items.properties.kind.enum, [
+    "job",
+    "internship",
+    "research",
+    "project",
+    "volunteer",
+    "other",
+  ]);
 });
 
 Deno.test("job fixture evidence is a verbatim quote from its JD", async () => {

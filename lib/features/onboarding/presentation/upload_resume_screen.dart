@@ -64,6 +64,12 @@ class UploadResumeScreen extends ConsumerWidget {
               const Text(
                 'We will read your resume so you can review your skills next.',
               ),
+              const SizedBox(height: RRSpace.sm),
+              Text(
+                'Your file is not stored. Only the experience and skills we '
+                'find are saved to your profile, after you review them.',
+                style: text.bodySmall?.copyWith(color: RRColors.inkMuted),
+              ),
               const SizedBox(height: RRSpace.xl),
               if (file != null) ...[
                 Container(

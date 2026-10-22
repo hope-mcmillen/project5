@@ -1,9 +1,14 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Backend Developer",
+      "organization": null,
       "start": "2020-03",
       "end": "present",
+      "highlights": [
+        "Backend Developer, Calcasieu Energy Software — Mar 2020 – Present • Built Spring Boot microservices in Java with Hibernate over MySQL. • Maintained Maven builds and JUnit test suites. • Led code review in Git for a team of six."
+      ],
       "skills_used": [
         "Spring Boot",
         "Java",

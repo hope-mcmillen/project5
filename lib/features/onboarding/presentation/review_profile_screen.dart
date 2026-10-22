@@ -6,9 +6,11 @@ import '../../../app/routes.dart';
 import '../../../core/models/candidate_models.dart';
 import '../../../ui/components/branded_page.dart';
 import '../../../ui/components/error_banner.dart';
+import '../../../ui/components/experience_list.dart';
 import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/components/skill_review_list.dart';
 import '../../../ui/theme/rr_tokens.dart';
+import '../data/resume_repository.dart';
 import 'review_controller.dart';
 import 'skill_search_sheet.dart';
 
@@ -160,10 +162,21 @@ class ReviewProfileScreen extends ConsumerWidget {
               icon: const Icon(Icons.add),
               label: const Text('Add skill'),
             ),
-            const SizedBox(height: RRSpace.lg),
-            const Text(
-              'Demo profile · Skills are synthetic until live resume parsing is connected.',
-            ),
+            if (value.version.experiences.isNotEmpty) ...[
+              const SizedBox(height: RRSpace.xl),
+              Text(
+                'Experience from your resume',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: RRSpace.md),
+              ExperienceList(experiences: value.version.experiences),
+            ],
+            if (ref.watch(resumeSimulationProvider)) ...[
+              const SizedBox(height: RRSpace.lg),
+              const Text(
+                'Demo profile · Skills are synthetic until live resume parsing is connected.',
+              ),
+            ],
           ],
         ),
       ),

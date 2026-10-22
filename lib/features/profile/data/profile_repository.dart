@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/candidate_models.dart';
+import '../../../core/supabase/supabase_providers.dart';
+import 'supabase_profile_repository.dart';
 
 abstract interface class ProfileRepository {
   Future<ProfileVersion?> latestVersion();
@@ -12,11 +14,9 @@ abstract interface class ProfileRepository {
   Future<List<Skill>> searchSkills(String query);
 }
 
-/// Real implementation will be supplied by C5. Fake mode overrides this.
+/// Fake mode overrides this.
 final profileRepositoryProvider = Provider<ProfileRepository>(
-  (ref) => throw UnimplementedError(
-    'ProfileRepository: use main_fake.dart until C5.',
-  ),
+  (ref) => SupabaseProfileRepository(ref.watch(supabaseClientProvider)),
 );
 
 final candidateProfileProvider = FutureProvider.autoDispose<ProfileVersion?>(

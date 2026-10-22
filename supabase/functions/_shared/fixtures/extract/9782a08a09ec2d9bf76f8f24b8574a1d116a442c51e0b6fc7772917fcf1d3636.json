@@ -1,9 +1,14 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Mobile Developer",
+      "organization": null,
       "start": "2022-03",
       "end": "present",
+      "highlights": [
+        "Mobile Developer, Levee Labs — Mar 2022 – Present"
+      ],
       "skills_used": [
         "Flutter",
         "Dart",
@@ -16,9 +21,14 @@
       "evidence": "Mobile Developer, Levee Labs — Mar 2022 – Present"
     },
     {
+      "kind": "job",
       "title": "Junior Flutter Developer",
+      "organization": null,
       "start": "2020-06",
       "end": "2022-02",
+      "highlights": [
+        "Junior Flutter Developer, Spanish Moss Studio — Jun 2020 – Feb 2022"
+      ],
       "skills_used": [
         "Figma",
         "Bloc",

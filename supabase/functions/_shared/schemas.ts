@@ -15,9 +15,14 @@
 // extractions are keyed by (file_hash, schema version).
 import { z } from "npm:zod@3.25.76";
 
-export const EXTRACTION_SCHEMA_VERSION = 2; // v2: one skill per entry (split grouped skills)
+export const EXTRACTION_SCHEMA_VERSION = 3; // v3: roles carry kind, organization, and highlights
 
 const nullableString = (description: string) => ({ type: ["string", "null"], description });
+
+/** public.experience_kind. Projects and research count as experience for students. */
+export const EXPERIENCE_KINDS = ["job", "internship", "research", "project", "volunteer", "other"] as const;
+/** Bullets kept per experience. */
+export const MAX_HIGHLIGHTS = 6;
 
 // ---------------------------------------------------------------------------
 // Resume
@@ -30,22 +35,32 @@ export const resumeJsonSchema = {
   properties: {
     roles: {
       type: "array",
-      description: "Work history, most recent first.",
+      description: "Every experience entry (jobs, internships, research, projects, volunteering), most recent first.",
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["title", "start", "end", "skills_used", "evidence"],
+        required: ["kind", "title", "organization", "start", "end", "highlights", "skills_used", "evidence"],
         properties: {
-          title: { type: "string" },
+          kind: { type: "string", enum: [...EXPERIENCE_KINDS] },
+          title: { type: "string", description: "Role or project title as written." },
+          organization: nullableString("Employer, lab, or organization as written. null if not stated."),
           start: nullableString('Start as "YYYY-MM" or "YYYY". null if not stated.'),
           end: nullableString('End as "YYYY-MM", "YYYY", or "present". null if not stated.'),
+          highlights: {
+            type: "array",
+            items: { type: "string" },
+            description: `Up to ${MAX_HIGHLIGHTS} accomplishment bullets from this entry, each copied verbatim.`,
+          },
           skills_used: {
             type: "array",
             items: { type: "string" },
             description:
               "Individual technical skills this role's text shows being used, one name per item, as written.",
           },
-          evidence: { type: "string", description: "Verbatim quote from this role's text." },
+          evidence: {
+            type: "string",
+            description: "Verbatim quote from this entry's text that shows the title or what was done.",
+          },
         },
       },
     },
@@ -89,9 +104,12 @@ export const resumeJsonSchema = {
 export const ResumeExtraction = z.object({
   roles: z.array(
     z.object({
+      kind: z.enum(EXPERIENCE_KINDS),
       title: z.string(),
+      organization: z.string().nullable(),
       start: z.string().nullable(),
       end: z.string().nullable(),
+      highlights: z.array(z.string()),
       skills_used: z.array(z.string()),
       evidence: z.string(),
     }).strict(),
