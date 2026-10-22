@@ -34,8 +34,8 @@ class FakeBoardRepository implements BoardRepository {
       'match_score': 74,
       'band': 'Good',
       'total_years': 2,
-      'top_skills': ['Dart', 'REST APIs', 'Git'],
-      'gaps': ['Firebase', 'CI/CD'],
+      'top_skills': ['Dart', 'Flutter'],
+      'gaps': ['Firebase', 'Kubernetes'],
       'status': 'UNDER_REVIEW',
       'committed_at': '2026-10-22T15:10:00Z',
     }),
@@ -45,8 +45,8 @@ class FakeBoardRepository implements BoardRepository {
       'match_score': 58,
       'band': 'Stretch',
       'total_years': 1,
-      'top_skills': ['JavaScript', 'React'],
-      'gaps': ['Flutter', 'Dart'],
+      'top_skills': ['Dart'],
+      'gaps': ['Firebase', 'Flutter', 'Kubernetes'],
       'status': 'APPLIED',
       'committed_at': '2026-10-22T16:30:00Z',
     }),
@@ -185,11 +185,13 @@ class FakeBoardRepository implements BoardRepository {
     String jobId, {
     int limit = 50,
     int offset = 0,
+    int? minScore,
   }) async {
     await _call();
     final tiles =
         (_boards[jobId] ?? const <BoardTile>[])
             .where((t) => !_hidden.contains(t.status))
+            .where((t) => minScore == null || t.matchScore >= minScore)
             .toList()
           ..sort((a, b) {
             final byScore = b.matchScore.compareTo(a.matchScore);

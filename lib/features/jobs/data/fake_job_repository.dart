@@ -30,6 +30,11 @@ class FakeJobRepository implements JobRepository {
           required: false,
           weight: 1,
         ),
+        RequirementDraft(
+          skill: skillByName('Kubernetes'),
+          required: false,
+          weight: 1,
+        ),
       ];
       _counts[demoJobs.first.id] = (3, 5);
     }

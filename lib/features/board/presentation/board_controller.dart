@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/application_status.dart';
 import '../data/board_repository.dart';
 import '../domain/board_change.dart';
+import '../domain/board_filters.dart';
 import '../domain/board_tile.dart';
 
 /// One job's board: tiles in score order, plus pagination state.
@@ -39,6 +40,9 @@ class BoardController extends AsyncNotifier<BoardState> {
 
   BoardRepository get _repo => ref.read(boardRepositoryProvider);
 
+  /// The server-side filter; changing it reloads the board.
+  int? get _minScore => ref.read(boardFiltersProvider(jobId)).minScore;
+
   /// Decisions in flight; background refreshes wait for them so an
   /// optimistic change isn't briefly undone by stale data.
   int _inFlight = 0;
@@ -66,7 +70,14 @@ class BoardController extends AsyncNotifier<BoardState> {
         timer.cancel();
       }
     });
-    final tiles = await repo.getBoard(jobId, limit: pageSize);
+    final minScore = ref.watch(
+      boardFiltersProvider(jobId).select((f) => f.minScore),
+    );
+    final tiles = await repo.getBoard(
+      jobId,
+      limit: pageSize,
+      minScore: minScore,
+    );
     return BoardState(tiles: tiles, hasMore: tiles.length == pageSize);
   }
 
@@ -115,7 +126,11 @@ class BoardController extends AsyncNotifier<BoardState> {
   Future<void> refresh() async {
     final count = _current.tiles.length;
     final limit = count <= pageSize ? pageSize : count.clamp(1, 100);
-    final tiles = await _repo.getBoard(jobId, limit: limit);
+    final tiles = await _repo.getBoard(
+      jobId,
+      limit: limit,
+      minScore: _minScore,
+    );
     // Keep tiles rejected in this session out while their Undo is open.
     tiles.removeWhere((t) => _rejected.containsKey(t.applicationId));
     state = AsyncData(BoardState(tiles: tiles, hasMore: tiles.length == limit));
@@ -128,6 +143,7 @@ class BoardController extends AsyncNotifier<BoardState> {
       jobId,
       limit: pageSize,
       offset: current.tiles.length,
+      minScore: _minScore,
     );
     final known = {for (final t in current.tiles) t.applicationId};
     state = AsyncData(
@@ -214,4 +230,23 @@ class SelectedTile extends Notifier<String?> {
       state = state == applicationId ? null : applicationId;
 
   void clear() => state = null;
+}
+
+/// The board's filters, mirrored in the URL by the board screen (RC-17).
+final boardFiltersProvider =
+    NotifierProvider.family<BoardFiltersNotifier, BoardFilters, String>(
+      BoardFiltersNotifier.new,
+    );
+
+class BoardFiltersNotifier extends Notifier<BoardFilters> {
+  BoardFiltersNotifier(this.jobId);
+
+  final String jobId;
+
+  @override
+  BoardFilters build() => BoardFilters.empty;
+
+  void set(BoardFilters filters) {
+    if (filters != state) state = filters;
+  }
 }

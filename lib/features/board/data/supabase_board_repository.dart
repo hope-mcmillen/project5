@@ -27,12 +27,13 @@ class SupabaseBoardRepository implements BoardRepository {
     String jobId, {
     int limit = 50,
     int offset = 0,
+    int? minScore,
   }) => _guard(() async {
     final rows = await _client.rpc<List<dynamic>>(
       'get_board',
       params: {
         'p_job_id': jobId,
-        'p_filters': <String, dynamic>{},
+        'p_filters': <String, dynamic>{'min_score': ?minScore},
         'p_limit': limit,
         'p_offset': offset,
       },
