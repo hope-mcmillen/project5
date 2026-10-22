@@ -5,11 +5,15 @@ import '../logging/app_log.dart';
 /// The one error type repositories throw. Screens show [message]; tests and
 /// controllers switch on [code] (the RPC error code from API_CONTRACT §1).
 class AppFailure implements Exception {
-  const AppFailure(this.code, [String? message])
-    : message = message ?? 'Something went wrong. Please try again.';
+  const AppFailure(this.code, [String? message]) : _message = message;
 
   final String code;
-  final String message;
+  final String? _message;
+
+  /// The given message, else the known message for [code], else a generic
+  /// one.
+  String get message =>
+      _message ?? _messages[code] ?? 'Something went wrong. Please try again.';
 
   /// Maps Supabase exceptions (and anything else) to a friendly failure,
   /// logging the raw error first since the mapping drops its details.
@@ -70,6 +74,22 @@ class AppFailure implements Exception {
     'invalid_invite': 'That invite code is invalid, expired, or used up.',
     'not_owner': 'Only the company owner can do that.',
     'invalid_expiry': 'Invites can last 1 to 30 days.',
+    // Jobs (API_CONTRACT §3, §7.4)
+    'invalid_transition': 'That status change isn\'t allowed right now.',
+    'requirements_not_ready':
+        'Add a title and at least one saved requirement before publishing.',
+    'invalid_requirements':
+        'Check the requirements: up to 15 skills, 8 of them required.',
+    'job_not_found': 'That job no longer exists.',
+    'job_not_draft': 'Only draft jobs can be re-read.',
+    'not_company_recruiter': 'Only recruiters in this company can do that.',
+    // Board (API_CONTRACT §7.4, §7.5)
+    'application_not_committed': 'That application isn\'t ready yet.',
+    'undo_window_expired': 'Too late to undo that decision.',
+    'invalid_note': 'Keep the note under 2,000 characters.',
+    'invalid_reason': 'Keep the reason under 2,000 characters.',
+    'invalid_filters': 'Those filters aren\'t valid.',
+    'resume_not_available': 'No resume is available for this candidate.',
     // Network / access
     '42501': 'You don\'t have access to that.',
   };
