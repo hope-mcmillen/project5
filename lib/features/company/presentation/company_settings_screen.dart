@@ -213,11 +213,13 @@ class _InviteSectionState extends ConsumerState<_InviteSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 8,
           children: [
-            Expanded(
-              child: Text('Invite codes', style: theme.textTheme.titleMedium),
-            ),
+            Text('Invite codes', style: theme.textTheme.titleMedium),
             FilledButton.icon(
               onPressed: _generating ? null : _generate,
               icon: _generating

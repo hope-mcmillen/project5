@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,6 +16,9 @@ Future<void> main() async {
   // On web, keep the address bar in sync with push() too, so recruiters can
   // bookmark / share board and candidate URLs.
   GoRouter.optionURLReflectsImperativeAPIs = true;
+  // Clean /r/jobs/... URLs on web instead of /#/r/jobs/... (RC-21). Static
+  // hosts need an SPA fallback to index.html: see docs/HOSTING.md.
+  usePathUrlStrategy();
 
   AppLog.info(
     'startup',

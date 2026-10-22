@@ -111,7 +111,12 @@ class _Header extends StatelessWidget {
                 color: theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 4),
-              Text('Sorted by Match', style: theme.textTheme.bodySmall),
+              Flexible(
+                child: Text(
+                  'Sorted by Match',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ),
             ],
           ),
         ],
