@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/supabase/supabase_providers.dart';
+import '../domain/board_change.dart';
 import '../domain/board_tile.dart';
-import 'fake_board_repository.dart';
+import 'supabase_board_repository.dart';
 
 /// The blind applicant board for one job (RC-14, API_CONTRACT §7.4).
 abstract interface class BoardRepository {
@@ -18,9 +20,19 @@ abstract interface class BoardRepository {
 
   /// Only works within 10 s of [reject].
   Future<void> undoReject(String applicationId);
+
+  /// Realtime changes to [jobId]'s applications. Also emits a
+  /// non-insert change after a reconnect, so the board can catch up.
+  Stream<BoardChange> watchApplications(String jobId);
 }
 
-/// TODO(RC-14): switch the default to `SupabaseBoardRepository`.
 final boardRepositoryProvider = Provider<BoardRepository>(
-  (ref) => FakeBoardRepository(),
+  (ref) => SupabaseBoardRepository(ref.watch(supabaseClientProvider)),
+);
+
+/// How often an open board refetches as a fallback. Pending applications
+/// are hidden from recruiters by RLS, so their insert never reaches the
+/// recruiter's Realtime socket (API_CONTRACT §7.5).
+final boardPollIntervalProvider = Provider<Duration>(
+  (ref) => const Duration(seconds: 20),
 );
