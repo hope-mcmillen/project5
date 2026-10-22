@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import '../../../core/errors/app_failure.dart';
 import '../../../core/models/application_status.dart';
+import '../domain/board_change.dart';
 import '../domain/board_tile.dart';
 import 'board_repository.dart';
 
@@ -61,6 +64,35 @@ class FakeBoardRepository implements BoardRepository {
   AppFailure? failNext;
 
   final Map<String, List<BoardTile>> _boards;
+  final _changes = <String, StreamController<BoardChange>>{};
+
+  StreamController<BoardChange> _channel(String jobId) =>
+      _changes.putIfAbsent(jobId, StreamController<BoardChange>.broadcast);
+
+  @override
+  Stream<BoardChange> watchApplications(String jobId) => _channel(jobId).stream;
+
+  /// Simulates a candidate's right swipe arriving for [jobId]. With
+  /// [notify], a Realtime insert is also emitted (recruiters usually don't
+  /// get one, because the row is pending when inserted).
+  void addApplicant(String jobId, BoardTile tile, {bool notify = true}) {
+    (_boards[jobId] ??= []).add(tile);
+    if (notify) {
+      _channel(jobId)
+          .add(BoardChange(isInsert: true, committedAt: tile.committedAt));
+    }
+  }
+
+  /// Simulates a status change by someone else (e.g. a withdrawal).
+  void changeStatus(String applicationId, ApplicationStatus status) {
+    _set(applicationId, status);
+    for (final entry in _boards.entries) {
+      if (entry.value.any((t) => t.applicationId == applicationId)) {
+        _channel(entry.key).add(const BoardChange(isInsert: false));
+      }
+    }
+  }
+
   final _rejectedAt = <String, (ApplicationStatus previous, DateTime at)>{};
 
   Future<void> _call() async {

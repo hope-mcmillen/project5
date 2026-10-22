@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/application_status.dart';
 import '../data/board_repository.dart';
+import '../domain/board_change.dart';
 import '../domain/board_tile.dart';
 
 /// One job's board: tiles in score order, plus pagination state.
@@ -36,12 +39,71 @@ class BoardController extends AsyncNotifier<BoardState> {
 
   BoardRepository get _repo => ref.read(boardRepositoryProvider);
 
+  /// Decisions in flight; background refreshes wait for them so an
+  /// optimistic change isn't briefly undone by stale data.
+  int _inFlight = 0;
+  Timer? _debounce;
+  final _commitTimers = <Timer>{};
+
   @override
   Future<BoardState> build() async {
-    final tiles = await ref
-        .watch(boardRepositoryProvider)
-        .getBoard(jobId, limit: pageSize);
+    final repo = ref.watch(boardRepositoryProvider);
+    // RC-14: Realtime for status changes (and any inserts that do reach a
+    // recruiter), plus a periodic refetch for new applicants, whose
+    // pending inserts RLS hides from recruiters.
+    final changes = repo
+        .watchApplications(jobId)
+        .listen(_onChange, onError: (Object _) {});
+    final poll = Timer.periodic(
+      ref.watch(boardPollIntervalProvider),
+      (_) => _quietRefresh(),
+    );
+    ref.onDispose(() {
+      changes.cancel();
+      poll.cancel();
+      _debounce?.cancel();
+      for (final timer in _commitTimers) {
+        timer.cancel();
+      }
+    });
+    final tiles = await repo.getBoard(jobId, limit: pageSize);
     return BoardState(tiles: tiles, hasMore: tiles.length == pageSize);
+  }
+
+  void _onChange(BoardChange change) {
+    final committedAt = change.committedAt;
+    final wait = committedAt?.difference(DateTime.now());
+    if (change.isInsert && wait != null && wait > Duration.zero) {
+      // Visible to recruiters only once the candidate's undo window ends.
+      late final Timer timer;
+      timer = Timer(wait + const Duration(milliseconds: 300), () {
+        _commitTimers.remove(timer);
+        _quietRefresh();
+      });
+      _commitTimers.add(timer);
+      return;
+    }
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), _quietRefresh);
+  }
+
+  /// Refetches in the background; failures keep the current tiles.
+  Future<void> _quietRefresh() async {
+    if (_inFlight > 0 || !state.hasValue) return;
+    try {
+      await refresh();
+    } catch (_) {
+      // Offline or similar: the next change or poll tries again.
+    }
+  }
+
+  Future<T> _decide<T>(Future<T> Function() body) async {
+    _inFlight++;
+    try {
+      return await body();
+    } finally {
+      _inFlight--;
+    }
   }
 
   BoardState get _current => state.value ?? const BoardState();
@@ -54,6 +116,8 @@ class BoardController extends AsyncNotifier<BoardState> {
     final count = _current.tiles.length;
     final limit = count <= pageSize ? pageSize : count.clamp(1, 100);
     final tiles = await _repo.getBoard(jobId, limit: limit);
+    // Keep tiles rejected in this session out while their Undo is open.
+    tiles.removeWhere((t) => _rejected.containsKey(t.applicationId));
     state = AsyncData(BoardState(tiles: tiles, hasMore: tiles.length == limit));
   }
 
@@ -88,7 +152,7 @@ class BoardController extends AsyncNotifier<BoardState> {
             : t,
     ]);
     try {
-      await _repo.advance(applicationId, note: note);
+      await _decide(() => _repo.advance(applicationId, note: note));
     } catch (_) {
       _set(before);
       rethrow;
@@ -104,7 +168,7 @@ class BoardController extends AsyncNotifier<BoardState> {
     _rejected[applicationId] = (before[index], index);
     _set([...before]..removeAt(index));
     try {
-      await _repo.reject(applicationId);
+      await _decide(() => _repo.reject(applicationId));
     } catch (_) {
       _rejected.remove(applicationId);
       _set(before);
@@ -121,7 +185,7 @@ class BoardController extends AsyncNotifier<BoardState> {
     final before = _current.tiles;
     _set([...before]..insert(index.clamp(0, before.length), tile));
     try {
-      await _repo.undoReject(applicationId);
+      await _decide(() => _repo.undoReject(applicationId));
     } catch (_) {
       _set(before);
       rethrow;
