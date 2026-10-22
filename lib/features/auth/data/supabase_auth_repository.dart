@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthUser;
 
 import '../../../app/env.dart';
 import '../../../core/errors/app_failure.dart';
+import '../../../core/logging/app_log.dart';
 import '../../../core/models/app_role.dart';
 import '../domain/auth_models.dart';
 import 'auth_repository.dart';
@@ -28,11 +29,17 @@ class SupabaseAuthRepository implements AuthRepository {
   static AuthUser? _user(User? user) =>
       user == null ? null : AuthUser(id: user.id, email: user.email);
 
-  Future<T> _guard<T>(Future<T> Function() body) async {
+  /// Runs one auth call, logging it as `[auth] <op>` with how it ended.
+  Future<T> _guard<T>(String op, Future<T> Function() body) async {
+    AppLog.info('auth', '$op started');
     try {
-      return await body();
+      final result = await body();
+      AppLog.info('auth', '$op ok');
+      return result;
     } catch (error) {
-      throw AppFailure.from(error);
+      final failure = AppFailure.from(error);
+      AppLog.warn('auth', '$op failed: ${failure.code}');
+      throw failure;
     }
   }
 
@@ -46,15 +53,18 @@ class SupabaseAuthRepository implements AuthRepository {
     controller = StreamController<AuthEvent>(
       onListen: () {
         controller.add(AuthEvent(currentUser));
-        changes = _auth.onAuthStateChange.listen(
-          (state) => controller.add(
+        changes = _auth.onAuthStateChange.listen((state) {
+          AppLog.info(
+            'auth',
+            'state ${state.event.name} user=${state.session?.user.id}',
+          );
+          controller.add(
             AuthEvent(
               _user(state.session?.user),
               passwordRecovery: state.event == AuthChangeEvent.passwordRecovery,
             ),
-          ),
-          onError: controller.addError,
-        );
+          );
+        }, onError: controller.addError);
       },
       onCancel: () => changes?.cancel(),
     );
@@ -66,7 +76,11 @@ class SupabaseAuthRepository implements AuthRepository {
     required String email,
     required String password,
     required AppRole role,
-  }) => _guard(() async {
+  }) => _guard('signUp', () async {
+    AppLog.info(
+      'auth',
+      'signUp email=${AppLog.maskEmail(email.trim())} role=${role.name}',
+    );
     final response = await _auth.signUp(
       email: email.trim(),
       password: password,
@@ -75,7 +89,10 @@ class SupabaseAuthRepository implements AuthRepository {
       emailRedirectTo: _redirect,
     );
     // Null session: email confirmation is on and a link was sent.
-    if (response.session == null) return false;
+    if (response.session == null) {
+      AppLog.info('auth', 'signUp needs email confirmation');
+      return false;
+    }
     await _stampTerms(response.user!.id);
     return true;
   });
@@ -90,15 +107,17 @@ class SupabaseAuthRepository implements AuthRepository {
     required String email,
     required String password,
   }) => _guard(
+    'signInWithEmail',
     () => _auth.signInWithPassword(email: email.trim(), password: password),
   );
 
   @override
-  Future<void> signInWithGoogle() => _guard(() async {
+  Future<void> signInWithGoogle() => _guard('signInWithGoogle', () async {
     final native =
         !kIsWeb &&
         defaultTargetPlatform == TargetPlatform.android &&
         Env.googleWebClientId.isNotEmpty;
+    AppLog.info('auth', 'google flow=${native ? 'native' : 'browser'}');
     if (!native) {
       // Web, or Android without a configured client id: browser OAuth.
       await _auth.signInWithOAuth(
@@ -131,7 +150,7 @@ class SupabaseAuthRepository implements AuthRepository {
   });
 
   @override
-  Future<void> signOut() => _guard(() async {
+  Future<void> signOut() => _guard('signOut', () async {
     if (_usedNativeGoogle) {
       await GoogleSignIn.instance.signOut();
       _usedNativeGoogle = false;
@@ -141,20 +160,24 @@ class SupabaseAuthRepository implements AuthRepository {
 
   @override
   Future<void> resetPassword(String email) => _guard(
+    'resetPassword',
     () => _auth.resetPasswordForEmail(email.trim(), redirectTo: _redirect),
   );
 
   @override
-  Future<void> updatePassword(String newPassword) =>
-      _guard(() => _auth.updateUser(UserAttributes(password: newPassword)));
+  Future<void> updatePassword(String newPassword) => _guard(
+    'updatePassword',
+    () => _auth.updateUser(UserAttributes(password: newPassword)),
+  );
 
   @override
   Future<void> setInitialRole(AppRole role) => _guard(
+    'setInitialRole',
     () => _client.rpc<void>('set_initial_role', params: {'p_role': role.name}),
   );
 
   @override
-  Future<AccountProfile?> fetchProfile() => _guard(() async {
+  Future<AccountProfile?> fetchProfile() => _guard('fetchProfile', () async {
     final user = _auth.currentUser;
     if (user == null) return null;
 

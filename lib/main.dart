@@ -6,21 +6,42 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app/app.dart';
 import 'app/env.dart';
 import 'core/errors/app_failure.dart';
+import 'core/logging/app_log.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _logUncaughtErrors();
 
   // On web, keep the address bar in sync with push() too, so recruiters can
   // bookmark / share board and candidate URLs.
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
+  AppLog.info(
+    'startup',
+    'supabase url=${Env.supabaseUrl.isEmpty ? '(missing)' : Env.supabaseUrl} '
+        'key=${Env.anonKey.isEmpty ? '(missing)' : 'set'}',
+  );
   if (!Env.isConfigured) {
+    AppLog.warn('startup', 'not configured; pass --dart-define-from-file');
     runApp(const MissingConfigApp());
     return;
   }
 
   await Supabase.initialize(url: Env.supabaseUrl, publishableKey: Env.anonKey);
   runApp(const ProviderScope(retry: noAutomaticRetry, child: ResuRhombusApp()));
+}
+
+/// Sends framework and async errors that nothing caught to the log too.
+void _logUncaughtErrors() {
+  final presentError = FlutterError.onError;
+  FlutterError.onError = (details) {
+    AppLog.error('flutter', 'uncaught', details.exception, details.stack);
+    presentError?.call(details);
+  };
+  WidgetsBinding.instance.platformDispatcher.onError = (error, stack) {
+    AppLog.error('async', 'uncaught', error, stack);
+    return false;
+  };
 }
 
 /// Shown when the app was started without `--dart-define-from-file`.

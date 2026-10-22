@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../logging/app_log.dart';
+
 /// The one error type repositories throw. Screens show [message]; tests and
 /// controllers switch on [code] (the RPC error code from API_CONTRACT §1).
 class AppFailure implements Exception {
@@ -9,9 +11,16 @@ class AppFailure implements Exception {
   final String code;
   final String message;
 
-  /// Maps Supabase exceptions (and anything else) to a friendly failure.
+  /// Maps Supabase exceptions (and anything else) to a friendly failure,
+  /// logging the raw error first since the mapping drops its details.
   factory AppFailure.from(Object error) {
     if (error is AppFailure) return error;
+    final failure = _map(error);
+    AppLog.error('failure', '→ AppFailure(${failure.code})', error);
+    return failure;
+  }
+
+  static AppFailure _map(Object error) {
     if (error is PostgrestException) {
       // P0001 carries the contract code as its message.
       final code = error.code == 'P0001' ? error.message : (error.code ?? '');
@@ -44,6 +53,10 @@ class AppFailure implements Exception {
     'email_exists': 'An account with that email already exists.',
     'weak_password': 'Choose a stronger password (at least 8 characters).',
     'email_not_confirmed': 'Confirm your email first, then sign in.',
+    'email_address_invalid':
+        'That email address can\'t be used. Try a different one.',
+    'email_address_not_authorized':
+        'Sign-up emails can\'t be sent to that address yet.',
     'over_email_send_rate_limit':
         'Too many emails sent. Wait a minute and try again.',
     'google_not_configured': 'Google sign-in isn\'t set up for this build.',
