@@ -214,6 +214,8 @@ Folders: `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, non-AI 
 **Done when:** Recruiters see ranked, nameless tiles and can advance or reject (with undo). Candidates can withdraw. Invalid status jumps are impossible.
 
 #### A9 · As a teammate, I want live updates, secure resume links, and automated tests of the loop's rules, so the core flow is fast, private, and doesn't regress.
+**Person A progress (October 22):** Secure resume Edge links, real multi-client Realtime privacy checks and complete loop regressions implemented. Local checks pass; hosted deployment and C/D live screen wiring remain acceptance gates.
+
 **Covers:** PL-20, PL-21, PL-23 · **Size:** ≈ 2 days · **Needs:** A5, A7, A8 · **Stories:** US-06, US-08, US-21, US-26, US-47, US-49
 
 **Build**
@@ -226,6 +228,8 @@ Folders: `supabase/migrations/`, `supabase/tests/`, `supabase/seed.sql`, non-AI 
 ### Later
 
 #### A10 · As a candidate, I want verified companies marked and a way to delete my account, so I can trust postings and control my data.
+**Person A progress (October 22):** Confirmed email/website soft verification and retryable account deletion implemented. Real Edge/Auth/Storage tests verify complete private-data removal, blocked late uploads and retained anonymized applications. Hosted deployment and frontend deletion UI remain acceptance gates.
+
 **Covers:** PL-26, PL-24 · **Size:** ≈ 1.5 days · **Needs:** A4, A8 · **Stories:** US-33, US-50
 
 **Build**
