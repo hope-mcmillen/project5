@@ -556,11 +556,17 @@ isOneToOne: false
 "blind_evidence":
 { Args: { "p_candidate": string,"p_text": string }; Returns: string
                            },
+"candidate_upload_allowed":
+{ Args: Record<PropertyKey, never>; Returns: boolean
+                           },
 "change_application":
 { Args: { "p_action": string,"p_id": string,"p_text"?: string }; Returns: undefined
                            },
 "claim_resume_parse":
 { Args: { "p_resume_id": string,"p_stale_seconds"?: number }; Returns: boolean
+                           },
+"company_domain_verified":
+{ Args: { "p_owner": string,"p_website": string }; Returns: boolean
                            },
 "compute_match":
 { Args: { "p_job_id": string,"p_profile_version_id": string }; Returns: Json
@@ -644,6 +650,9 @@ isOneToOne: false
 "get_interview_list":
 { Args: { "p_job_id"?: string }; Returns: Json
                            },
+"get_resume_access":
+{ Args: { "p_application_id": string }; Returns: string
+                           },
 "has_my_application":
 { Args: { "p_job_id": string }; Returns: boolean
                            },
@@ -681,6 +690,9 @@ isOneToOne: false
                            },
 "open_application":
 { Args: { "p_application_id": string }; Returns: undefined
+                           },
+"prepare_account_deletion":
+{ Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "reject":
 { Args: { "p_application_id": string,"p_reason"?: string }; Returns: undefined

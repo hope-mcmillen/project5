@@ -14,7 +14,7 @@ scaffolds or fake repositories awaiting frontend integration. See
 - Supabase CLI **2.121.0** and Docker Desktop, running.
 - Python 3 for backend integration tests.
 - For Android: a configured Android SDK and Java 17 or newer (`flutter doctor`).
-- Optional Deno 2 for the AI function tests. A Gemini key is not needed for the
+- Deno **2.5.4** for Edge unit and live-service integration tests. A Gemini key is not needed for the
   local demo, seed or mock tests.
 
 ## Local development
@@ -147,3 +147,36 @@ D owns auth/recruiter UI. Work on feature branches, request the cross-boundary
 review described in [TEAM_PLAN.md](docs/TEAM_PLAN.md), and require green checks
 before merging. No automatic merges or remote database pushes are performed by
 the scheduled Person A work. Push notifications are excluded from this delivery.
+
+### Secure resume links and account deletion (A9/A10)
+
+Copy `supabase/functions/.env.example` to the ignored `.env` only if you do not
+already have one. Set `PUBLIC_SUPABASE_URL` to the API address the app can reach
+(`http://127.0.0.1:54321` for desktop/web, `http://10.0.2.2:54321` for an Android
+emulator, or your HTTPS hosted project URL). Start functions locally:
+
+```sh
+supabase functions serve --env-file supabase/functions/.env
+```
+
+`resume-url` accepts `{ "application_id": "<UUID>" }` with a recruiter JWT and
+returns a ten-minute signed link only for an advanced application in that
+recruiter's company. `delete-account` accepts a candidate JWT and removes its
+private data and files before deleting Auth; applications are retained anonymized.
+Deletion failures may leave partial cleanup and can be retried while Auth exists.
+Company badges require a confirmed, non-free-mail email with an exact website
+host match. See the API contract for authorization and error details.
+
+With the local stack and functions running:
+
+```sh
+(cd supabase/functions && deno test --allow-read=..,. --allow-env _shared/ parse-resume/ parse-job/ resume-url/ delete-account/)
+python3 supabase/tests/deletion_concurrency.py
+deno test --allow-env --allow-net --allow-run supabase/tests/privacy_integration.ts
+```
+
+The last test refuses remote endpoints and uses temporary synthetic accounts. It
+checks actual signed downloads, live events for two candidates and two companies,
+and deletion across more than one Storage page. Backend CI runs it automatically.
+Live Gemini tests remain opt-in. The backend is ready for C/D integration; this
+does not imply that all candidate/recruiter frontend screens are wired yet.

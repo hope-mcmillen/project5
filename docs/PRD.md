@@ -702,7 +702,7 @@ profile and permits exactly one choice. Updating auth user metadata later does
 not alter the database role. The company RPCs in API_CONTRACT.md §7.1 create an
 owner workspace and generate, consume or revoke expiring invite codes. Profile
 and invite locks prevent multiple-company races and invite-cap overruns. Domain
-verification is deferred to A10; new companies are unverified. A11 push
+verification was deferred until A10 (implemented October 22; see final notes). A11 push
 notifications are excluded from this user's delivery scope.
 
 ### Profile/storage and local demo implementation (A5–A6, October 21, 2026)
@@ -740,3 +740,23 @@ use B's scorer for transactional live applicant rescoring. Closing a job records
 JOB_CLOSED events for nonterminal applications. Scheduled expiry, resume links
 and deletion are the A9/A10 batch. Frontend fake board/job repositories still
 require C/D integration with these live APIs. Push notifications remain excluded.
+
+
+### A9/A10 backend implementation (October 22, 2026)
+
+Private resume links now use the applied profile snapshot, caller-scoped
+`get_resume_access(uuid)` authorization and service-only Storage signing for
+600 seconds. `PUBLIC_SUPABASE_URL` supplies the external origin in local
+containers. Account deletion uses candidate-only, retryable
+`prepare_account_deletion()` before Edge Storage/Auth cleanup; it detaches swipe
+references, clears private application data, retains anonymized totals, deletes
+candidate-owned rows and blocks uploads through a candidate row lock. Auth is
+removed last. Cross-service failures can leave partial cleanup and return an
+explicit error. Exact confirmed email/website host matching (excluding common
+free-mail domains) supplies the soft company badge; website edits recompute it.
+Trusted local seed fixtures explicitly retain one synthetic verified company.
+See API_CONTRACT §7.5 for the endpoints, lifecycle and remaining frontend gates.
+Real local socket tests cover application, resume parse and job event delivery
+and cross-user/company isolation; they replace a manual Studio-only check with
+repeatable CI evidence. Hosted delivery and C/D screen integration still require
+separate acceptance. A11 notifications remain excluded.

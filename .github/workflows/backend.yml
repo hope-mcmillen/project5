@@ -18,6 +18,12 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 2.121.0
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.5.4
+      - name: Edge function unit tests
+        working-directory: supabase/functions
+        run: deno test --allow-read=..,. --allow-env _shared/ parse-resume/ parse-job/ resume-url/ delete-account/
       - run: supabase start
       - run: supabase db reset --local
       - run: supabase db lint --local --level error
@@ -32,5 +38,17 @@ jobs:
         run: python3 supabase/tests/application_concurrency.py
       - name: Verify candidate-to-recruiter API loop
         run: python3 supabase/tests/application_api_smoke.py
+      - name: Check upload and deletion serialization
+        run: python3 supabase/tests/deletion_concurrency.py
+      - name: Verify secure resume links, Realtime isolation and account deletion
+        run: |
+          echo 'PUBLIC_SUPABASE_URL=http://127.0.0.1:54321' > /tmp/project5-edge-public.env
+          supabase functions serve --env-file /tmp/project5-edge-public.env > /tmp/project5-edge.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            curl -fsS -X OPTIONS http://127.0.0.1:54321/functions/v1/resume-url > /dev/null && break
+            sleep 1
+          done
+          curl -fsS -X OPTIONS http://127.0.0.1:54321/functions/v1/resume-url > /dev/null
+          deno test --allow-env --allow-net --allow-run supabase/tests/privacy_integration.ts
       - if: always()
         run: supabase stop --no-backup

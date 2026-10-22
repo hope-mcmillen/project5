@@ -336,7 +336,11 @@ Invite expiration is 1–30 days. Codes are 8 uppercase unambiguous characters;
 expired, revoked, exhausted and nonexistent codes all produce `invalid_invite`.
 Codes are trimmed and uppercased on join/revoke. Company names are trimmed and
 must be 1–120 characters; optional websites are trimmed HTTP(S) URLs (at most
-2048 characters). New companies remain `verified=false` until A10 verification.
+2048 characters). New companies are softly verified only when their creator has a confirmed email
+whose exact domain matches the lowercased website host (with `www.` removed).
+Common free-mail domains are denied. Missing/mismatched/unconfirmed domains yield
+`verified=false`; unverified companies can still post. Website edits recompute
+the badge from the creator's confirmed email. This is not legal company verification.
 Only authenticated callers can execute these RPCs; anonymous calls fail `42501`.
 Role choice is immutable once set, including for Google accounts. An invalid
 non-null enum string is rejected as PostgreSQL `22P02` before the function runs.
@@ -502,8 +506,8 @@ client-supplied user ID as authority. Errors use the §1 Edge error envelope.
 
 | Endpoint / signature | Caller / payload | Success example | Error codes |
 |---|---|---|---|
-| `resume-url` Edge | own-company recruiter after advance; `{"application_id":"50000000-0000-0000-0000-000000000001"}` | `{"url":"http://127.0.0.1:54321/storage/v1/object/sign/resumes/10000000-0000-0000-0000-000000000001/resume.pdf?token=example"}` | `unauthorized`, `not_recruiter`, `not_owner`, `resume_not_available`, `internal` |
-| `delete-account` Edge | candidate; `{}` | `{"deleted":true}` | `unauthorized`, `not_candidate`, `internal` |
+| `resume-url` Edge | own-company recruiter after advance; `{"application_id":"50000000-0000-0000-0000-000000000001"}` | `{"url":"http://127.0.0.1:54321/storage/v1/object/sign/resumes/10000000-0000-0000-0000-000000000001/resume.pdf?token=example"}` | `unauthorized`, `not_recruiter`, `not_owner`, `resume_not_available`, `invalid_request`, `method_not_allowed`, `internal` |
+| `delete-account` Edge | candidate; `{}` | `{"deleted":true}` | `unauthorized`, `not_candidate`, `method_not_allowed`, `internal` |
 | `register_device(p_token text, p_platform text) → void` | authenticated; platform `android`, `web` | `null` | `not_authenticated`, `invalid_device` |
 | `notify` Edge webhook | trusted system secret; payload below | `{"delivered":1}` | `unauthorized`, `invalid_event`, `delivery_failed`, `internal` |
 
@@ -512,6 +516,40 @@ non-advanced applications must not yield URLs. Deletion removes owned Storage
 objects, anonymizes retained applications, deletes candidate-owned rows and the
 auth user; failures must be explicit and retries safe. It is not accepted until
 the no-remaining-data integration test passes.
+
+**Implemented/locally verified October 22 (A9/A10).** `resume-url` calls
+`get_resume_access(p_application_id uuid) → text` with the caller's JWT. It checks
+role, company, committed deadline, non-anonymized INTERVIEW_REQUESTED status, and
+the applied profile snapshot's own resume. Only signing uses the service client.
+Missing/manual-only resumes return `resume_not_available`. `{url}` is a bearer
+link valid for 600 seconds: already issued links remain usable until expiry or
+file deletion even if the application status changes. New links are denied after
+rejection/withdrawal. Set `PUBLIC_SUPABASE_URL` to the externally reachable API
+origin for local containers; hosted deployments default to `SUPABASE_URL`.
+
+`delete-account` takes no required body and ignores caller-supplied user IDs.
+It invokes `prepare_account_deletion() → void` with the caller's JWT; this
+candidate-only RPC locks the candidate and applications, detaches swipe FKs,
+anonymizes retained applications (clearing breakdown, profile references, notes
+and private rejection text), removes candidate/version/skill/resume/swipe data,
+usage and device rows, clears identifiable status-event actors, and scrubs the
+profile display name. It can be retried while Auth still exists. Storage upload
+permission holds a candidate key-share lock, so preparation waits for active
+uploads and later uploads are refused. The Edge Function drains all owned Storage
+pages (including files without resume metadata), then hard-deletes the Auth user,
+which cascades the remaining profile. Failures return `internal`; Auth is removed
+last so callers can retry cleanup. There is no cross-service transaction: a failed
+call may already have irreversibly removed some owned data. The test exercises a
+retry after preparation and verifies no private rows or files remain.
+
+Realtime publishes `resumes`, `applications` and `jobs` with their existing RLS.
+Actual signed-in socket clients verify own application/parse updates, own-company
+job updates, and absence of those events for another candidate/company. A pending
+insert does not emit another insert when its five-second deadline elapses;
+recruiter clients should refetch the board after that deadline. Channel join may
+precede the PostgreSQL subscription acknowledgement; wait for the database
+`system` success event before relying on changes, and refetch on reconnect. These live tests
+cover backend delivery; frontend subscription wiring remains C/D ownership.
 
 **A11 is out of scope per user direction (October 20); no Firebase/FCM setup or
 notification endpoints are being implemented.** The following describes only the
