@@ -302,3 +302,15 @@ Local seeds load `seed/skills.sql`, `seed/skills_embeddings.sql`,
 A's seed marks trigger-created candidate rows as synthetic and configures two
 working local Auth identities. Only the README's local-dev section documents
 demo credentials.
+
+## 10. Application and recruiter RPCs (A7–A8, October 22, 2026)
+
+Four append-only `20261022{090000,091000,092000,093000}` migrations implement
+swipe/undo/reasons, status transitions/contacts, blind board reads, and validated
+job requirement/lifecycle writes. All public mutations require authenticated
+callers and explicitly enforce role/ownership. Internal dispatcher, tile and
+redaction functions have no anon/authenticated EXECUTE grants. Public signatures
+and errors are documented in API_CONTRACT.md §§7.3–7.4. No table shape or B
+scoring formula is changed. Relevant tests include the 26th apply, UTC rollover,
+long-transaction undo expiry, status transition matrix, exact tile key set,
+identity gating, company isolation and independent-session race checks.

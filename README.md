@@ -1,12 +1,12 @@
 # ResuRhombus (project5)
 
-A Flutter candidate/recruiter prototype with a Supabase backend. The backend has
-real account/company onboarding, private resume storage, profile review,
-preferences, parsing, scoring and a ranked feed. The Flutter screens are currently
-navigation scaffolds: `lib/main.dart` still has the frontend team's Supabase
-initialization TODO. Running Flutter opens that prototype; it does not yet make
-the backend calls automatically. Application/status RPCs are the next Person A
-batch. See [delivery status](docs/PERSON_A_PROGRESS.md) and [API contract](docs/API_CONTRACT.md).
+A Flutter candidate/recruiter app with a Supabase backend. Authentication, routing
+and company onboarding are connected to Supabase. The backend also supplies
+private resume storage, confirmed profiles/preferences, parsing, matching,
+ranked feed, application/undo, blind recruiter triage, status changes and job
+lifecycle APIs. Candidate screens and recruiter board/jobs still contain some
+scaffolds or fake repositories awaiting frontend integration. See
+[delivery status](docs/PERSON_A_PROGRESS.md) and [API contract](docs/API_CONTRACT.md).
 
 ## Prerequisites
 
@@ -48,9 +48,9 @@ flutter build apk --debug --dart-define-from-file=env/dev.json
 ```
 
 The define names are `SUPABASE_URL` and `SUPABASE_ANON_KEY` (see
-`env/example.json`). These are ready for the frontend integration; the current
-scaffold does not initialize Supabase yet. Backend accounts can already be used
-through Supabase Auth/Studio and the documented APIs.
+`env/example.json`). The current app initializes Supabase from these defines. Backend accounts can
+be used through the app's sign-in/company screens and the documented APIs; some
+candidate/board/job screens still use frontend fakes.
 
 ### Running the app on Supabase
 
@@ -118,6 +118,8 @@ supabase test db
 python3 supabase/tests/company_concurrency.py
 python3 supabase/tests/auth_smoke.py
 python3 supabase/tests/profile_storage_smoke.py
+python3 supabase/tests/application_concurrency.py
+python3 supabase/tests/application_api_smoke.py
 flutter analyze
 flutter test
 ```

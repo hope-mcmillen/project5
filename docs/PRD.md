@@ -720,3 +720,23 @@ through config.toml before seed.sql configures usable local Auth identities.
 Demo credentials live only in seed.sql and the README's local-dev section. The
 README explains the current frontend scaffold and its pending Supabase wiring;
 the verified backend APIs do not imply a completed frontend user flow.
+
+### Application/recruiter loop implementation (A7–A8, October 22, 2026)
+
+The SQL RPCs now implement swipe/pass/reason/undo, real B v2 matching snapshots,
+the UTC daily apply cap, blind board/detail/interview reads, interview contacts
+and all candidate/recruiter status transitions. Candidate locks serialize applies
+and undo; job SHARE/UPDATE locks coordinate scoring, lifecycle and decisions;
+application locks serialize transitions. Every state change is audited. Five-
+second apply/pass undo and ten-second reject undo use clock time after waiting
+for locks. Withdrawal does not refund an apply slot. Pending applications are
+hidden from all recruiter reads/actions until committed. Board JSON exposes
+only the contract's allowlisted keys; candidate identity is added to detail only
+at INTERVIEW_REQUESTED, with known identity/contact strings redacted beforehand.
+
+A's save_requirements/set_job_status RPCs enforce validated requirements, preserve
+publication freshness across pause/resume, build centroids with B's helper and
+use B's scorer for transactional live applicant rescoring. Closing a job records
+JOB_CLOSED events for nonterminal applications. Scheduled expiry, resume links
+and deletion are the A9/A10 batch. Frontend fake board/job repositories still
+require C/D integration with these live APIs. Push notifications remain excluded.

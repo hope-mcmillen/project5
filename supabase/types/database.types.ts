@@ -70,9 +70,9 @@ isOneToOne: false
                   ]
                 },"applications": {
                   Row: {
-                    "advanced_by": string | null,"anonymized": boolean,"breakdown": NonNullable<Json>,"candidate_id": string | null,"committed_at": string,"created_at": string,"id": string,"interview_note": string | null,"is_seed": boolean,"job_id": string,"match_score": number,"previous_status": Database["public"]['Enums']["application_status"] | null,"profile_version_id": string | null,"rejected_at": string | null,"scoring_version": string,"status": Database["public"]['Enums']["application_status"],"swipe_id": string | null,"updated_at": string
+                    "advanced_by": string | null,"anonymized": boolean,"breakdown": NonNullable<Json>,"candidate_id": string | null,"committed_at": string,"created_at": string,"id": string,"interview_note": string | null,"is_seed": boolean,"job_id": string,"match_score": number,"previous_status": Database["public"]['Enums']["application_status"] | null,"profile_version_id": string | null,"rejected_at": string | null,"scoring_version": string,"status": Database["public"]['Enums']["application_status"],"swipe_id": string | null,"updated_at": string,"application_tile": Json | null
                   }
-                  ComputedFields: never
+                  ComputedFields: "application_tile"
                   Insert: {
                     "advanced_by"?: string | null,"anonymized"?: boolean,"breakdown"?: NonNullable<Json>,"candidate_id"?: string | null,"committed_at": string,"created_at"?: string,"id"?: string,"interview_note"?: string | null,"is_seed"?: boolean,"job_id": string,"match_score": number,"previous_status"?: Database["public"]['Enums']["application_status"] | null,"profile_version_id"?: string | null,"rejected_at"?: string | null,"scoring_version": string,"status"?: Database["public"]['Enums']["application_status"],"swipe_id"?: string | null,"updated_at"?: string
                   }
@@ -544,8 +544,20 @@ isOneToOne: false
                 }
           }
           Functions: {
-            "advance_resume_status":
+            "advance":
+{ Args: { "p_application_id": string,"p_note"?: string }; Returns: undefined
+                           },
+"advance_resume_status":
 { Args: { "p_from": Database["public"]['Enums']["resume_status"],"p_resume_id": string,"p_to": Database["public"]['Enums']["resume_status"] }; Returns: boolean
+                           },
+"application_tile":
+{ Args: { "p_row": Omit<Database["public"]['Tables']["applications"]['Row'], Database["public"]['Tables']["applications"]['ComputedFields']> }; Returns: Json
+                           },
+"blind_evidence":
+{ Args: { "p_candidate": string,"p_text": string }; Returns: string
+                           },
+"change_application":
+{ Args: { "p_action": string,"p_id": string,"p_text"?: string }; Returns: undefined
                            },
 "claim_resume_parse":
 { Args: { "p_resume_id": string,"p_stale_seconds"?: number }; Returns: boolean
@@ -617,8 +629,20 @@ isOneToOne: false
 "feed_freshness":
 { Args: { "p_published_at": string }; Returns: number
                            },
+"get_application_contact":
+{ Args: { "p_application_id": string }; Returns: Json
+                           },
+"get_board":
+{ Args: { "p_filters"?: Json,"p_job_id": string,"p_limit"?: number,"p_offset"?: number }; Returns: Json
+                           },
+"get_candidate_detail":
+{ Args: { "p_application_id": string }; Returns: Json
+                           },
 "get_feed":
 { Args: { "p_cursor"?: string,"p_limit"?: number }; Returns: Json
+                           },
+"get_interview_list":
+{ Args: { "p_job_id"?: string }; Returns: Json
                            },
 "has_my_application":
 { Args: { "p_job_id": string }; Returns: boolean
@@ -655,6 +679,12 @@ isOneToOne: false
 "my_owned_company_id":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
+"open_application":
+{ Args: { "p_application_id": string }; Returns: undefined
+                           },
+"reject":
+{ Args: { "p_application_id": string,"p_reason"?: string }; Returns: undefined
+                           },
 "revoke_invite":
 { Args: { "p_code": string }; Returns: undefined
                            },
@@ -664,6 +694,9 @@ isOneToOne: false
 "save_preferences":
 { Args: { "p_prefs": Json }; Returns: undefined
                            },
+"save_requirements":
+{ Args: { "p_job_id": string,"p_requirements": Json }; Returns: undefined
+                           },
 "save_resume_draft":
 { Args: { "p_education": Json,"p_extraction": Json,"p_file_hash": string,"p_llm_model": string,"p_llm_provider": string,"p_resume_id": string,"p_schema_version": number,"p_skills": Json,"p_total_years": number }; Returns: {
               "profile_version_id": string,"version": number
@@ -672,11 +705,29 @@ isOneToOne: false
 "set_initial_role":
 { Args: { "p_role": Database["public"]['Enums']["app_role"] }; Returns: undefined
                            },
+"set_job_status":
+{ Args: { "p_job_id": string,"p_status": Database["public"]['Enums']["job_status"] }; Returns: undefined
+                           },
+"set_pass_reason":
+{ Args: { "p_reason": Database["public"]['Enums']["pass_reason"],"p_swipe_id": string }; Returns: undefined
+                           },
 "skills_centroid":
 { Args: { "p_skill_ids": (string)[] }; Returns: string
                            },
 "start_job_parse":
 { Args: { "p_job_id": string }; Returns: boolean
+                           },
+"swipe":
+{ Args: { "p_direction": Database["public"]['Enums']["swipe_direction"],"p_job_id": string,"p_reason"?: Database["public"]['Enums']["pass_reason"] }; Returns: Json
+                           },
+"undo_reject":
+{ Args: { "p_application_id": string }; Returns: undefined
+                           },
+"undo_swipe":
+{ Args: { "p_swipe_id": string }; Returns: undefined
+                           },
+"withdraw":
+{ Args: { "p_application_id": string }; Returns: undefined
                            }
           }
           Enums: {
