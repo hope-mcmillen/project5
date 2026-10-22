@@ -30,7 +30,9 @@ class CandidateDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isResume = location == Routes.profileResume;
+    final isResume =
+        location == Routes.profileResume ||
+        location.startsWith('/c/onboarding');
     final destinations = [
       (
         label: 'Resume',

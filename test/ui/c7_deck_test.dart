@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/windows_golden.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:project5/app/app.dart';
 import 'package:project5/app/dev_session.dart';
@@ -66,9 +69,9 @@ void main() {
       ),
     );
     expect(find.text('Undo (5s)'), findsOneWidget);
-    await expectLater(
+    await expectWindowsGolden(
       find.byType(MaterialApp),
-      matchesGoldenFile('goldens/deck_feedback_360.png'),
+      'goldens/deck_feedback_360.png',
     );
     now = now.add(const Duration(seconds: 2));
     await tester.pump(const Duration(seconds: 2));

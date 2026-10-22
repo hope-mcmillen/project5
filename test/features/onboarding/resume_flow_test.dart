@@ -29,6 +29,49 @@ ResumeFile validFile() => ResumeFile.fromBytes(
 );
 
 void main() {
+  test('cancel ignores a late file selection', () async {
+    final picked = Completer<ResumeFile?>();
+    final container = ProviderContainer(
+      overrides: [resumePickerProvider.overrideWithValue(() => picked.future)],
+    );
+    addTearDown(container.dispose);
+    final subscription = container.listen(uploadControllerProvider, (_, _) {});
+    addTearDown(subscription.close);
+    final controller = container.read(uploadControllerProvider.notifier);
+    final pending = controller.chooseFile();
+    controller.cancel();
+    picked.complete(validFile());
+    await pending;
+    expect(container.read(uploadControllerProvider).file, isNull);
+    expect(container.read(uploadControllerProvider).busy, isFalse);
+  });
+
+  test('cancel ignores an upload completing after cancellation', () async {
+    final repo = FakeResumeRepository(
+      latency: const Duration(milliseconds: 20),
+    );
+    addTearDown(repo.dispose);
+    final container = ProviderContainer(
+      overrides: [
+        resumePickerProvider.overrideWithValue(() async => validFile()),
+        resumeRepositoryProvider.overrideWithValue(repo),
+      ],
+    );
+    addTearDown(container.dispose);
+    final subscription = container.listen(uploadControllerProvider, (_, _) {});
+    addTearDown(subscription.close);
+    final controller = container.read(uploadControllerProvider.notifier);
+    await controller.chooseFile();
+    final pending = controller.upload();
+    controller.cancel();
+    await pending;
+    final state = container.read(uploadControllerProvider);
+    expect(state.resumeId, isNull);
+    expect(state.file, isNull);
+    expect(state.busy, isFalse);
+    expect(state.error, isNull);
+  });
+
   test(
     'picker cancellation is quiet and repeated requests do not overlap',
     () async {
@@ -144,6 +187,25 @@ void main() {
     expect(router.state.uri.path, contains('/c/onboarding/progress/'));
     return router.state.pathParameters['resumeId']!;
   }
+
+  testWidgets('skip resume opens the deck and the sidebar can reopen Resume', (
+    tester,
+  ) async {
+    final repo = FakeResumeRepository(latency: Duration.zero);
+    addTearDown(repo.dispose);
+    final router = await openResume(tester, repo);
+    await tester.ensureVisible(find.text('Skip for now'));
+    await tester.tap(find.text('Skip for now'));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, Routes.deck);
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Resume'));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, Routes.profileResume);
+    expect(find.byTooltip('Open navigation menu'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'selection, reading stages, and ready status reach Review automatically',

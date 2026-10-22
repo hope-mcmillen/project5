@@ -8,26 +8,32 @@ import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/components/status_chip.dart';
 import '../../../ui/components/empty_state.dart';
 import '../../../ui/theme/rr_tokens.dart';
-import '../../../core/models/application.dart';
 import '../data/application_repository.dart';
-
-final myApplicationsProvider = StreamProvider.autoDispose<List<Application>>(
-  (ref) => ref.watch(applicationRepositoryProvider).watchMine(),
-);
+import 'pipeline_providers.dart';
+import '../../../ui/components/pipeline_timeline.dart';
 
 class PipelineScreen extends ConsumerWidget {
   const PipelineScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) => BrandedPage(
     title: 'Applications',
-    description: 'Follow the opportunities you have applied for. These applications are local demo data.',
+    description: ref.watch(applicationRepositoryProvider).isDemo
+        ? 'Follow your applications. This preview uses local demo data.'
+        : 'Follow your applications as recruiters review them.',
     child: ref
         .watch(myApplicationsProvider)
         .when(
           loading: () => const ShimmerShape(),
-          error: (_, _) => TextButton(
-            onPressed: () => ref.invalidate(myApplicationsProvider),
-            child: const Text('Retry applications'),
+          error: (_, _) => Column(
+            children: [
+              const Text(
+                'We could not refresh your applications. Check your connection and try again.',
+              ),
+              TextButton(
+                onPressed: () => ref.invalidate(myApplicationsProvider),
+                child: const Text('Retry applications'),
+              ),
+            ],
           ),
           data: (applications) => applications.isEmpty
               ? EmptyState(
@@ -42,6 +48,7 @@ class PipelineScreen extends ConsumerWidget {
                       Padding(
                         padding: const EdgeInsets.only(bottom: RRSpace.md),
                         child: Card(
+                          key: ValueKey(application.id),
                           child: Padding(
                             padding: const EdgeInsets.all(RRSpace.lg),
                             child: Column(
@@ -53,10 +60,25 @@ class PipelineScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(height: RRSpace.sm),
                                 Text(application.companyName ?? 'Company'),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: StatusChip(status: application.status),
+                                Semantics(
+                                  liveRegion: true,
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: StatusChip(
+                                      status: application.status,
+                                    ),
+                                  ),
                                 ),
+                                const SizedBox(height: RRSpace.sm),
+                                Text(
+                                  'Updated ${applicationDate(context, application.updatedAt)}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                if (hasNoResponse(application, DateTime.now()))
+                                  const Padding(
+                                    padding: EdgeInsets.only(top: RRSpace.sm),
+                                    child: Text('No response yet'),
+                                  ),
                                 TextButton(
                                   onPressed: () => context.push(
                                     Routes.applicationDetailFor(application.id),

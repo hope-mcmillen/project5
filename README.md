@@ -283,5 +283,35 @@ builds. Preview pages retain existing navigation callbacks and make their protot
 status explicit; new button labels describe the action instead of task details.
 
 Visual regression images are in `test/ui/goldens/`. Run `flutter test` for model,
-navigation, component, layout, and golden checks. Intentionally changed visuals
-can be regenerated with `flutter test --update-goldens test/ui`.
+navigation, component, and layout checks on every host. Exact pixel comparisons
+use Windows and Flutter 3.47.1, matching the required Windows visual CI job.
+See the [baseline guide](test/ui/goldens/README.md) before regenerating images.
+
+## Application tracking and interview contacts (C10)
+
+In the configured Supabase entry point, Applications now uses the signed-in
+candidate's `my_applications` view. A candidate-filtered `applications` Realtime
+stream triggers serialized refreshes, including after reconnection. Entries sort
+by their latest update and announce status changes through accessibility live
+regions. Opening an application shows its dated `status_events` timeline.
+
+Applications still awaiting their first review show **No response yet** after
+21 days. Applied, Under review, and Interview requested applications offer a
+confirmed **Withdraw application** action using the `withdraw` RPC. Failures keep
+the application and offer a retry; withdrawn applications remain in the history.
+
+Only Interview requested applications load `get_application_contact`, protected
+by the backend's ownership and status checks. The contact card shows the recruiter
+name, email, and optional note, with Copy email and Email recruiter actions.
+Status changes remove the contact card, including when a previous request is
+still in flight. The email address remains copyable if no email app is available.
+
+`main_fake.dart` retains local application data; tests and previews can drive
+status transitions with `FakeApplicationRepository.setStatus`. The normal entry
+point uses live applications. Resume parsing and job swipes remain demo-backed
+until C5/C8; demo jobs cannot create real applications. The existing A8/A9
+migrations and Realtime publication must be present on the hosted project.
+
+Pipeline repository and widget coverage is in `test/features/pipeline/` and
+`test/ui/application_pipeline_test.dart`. No hosted database data is modified by
+these tests.

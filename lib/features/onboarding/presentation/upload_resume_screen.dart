@@ -128,6 +128,29 @@ class UploadResumeScreen extends ConsumerWidget {
                   semanticsLabel: 'Uploading your resume',
                 ),
               ],
+              const SizedBox(height: RRSpace.md),
+              if (file != null || state.busy)
+                OutlinedButton.icon(
+                  onPressed: controller.cancel,
+                  icon: const Icon(Icons.close),
+                  label: Text(
+                    state.phase == UploadPhase.uploading
+                        ? 'Cancel upload'
+                        : 'Cancel selection',
+                  ),
+                ),
+              TextButton(
+                onPressed: () {
+                  controller.cancel();
+                  context.go(Routes.deck);
+                },
+                child: const Text('Skip for now'),
+              ),
+              Text(
+                'You can return to Resume from the menu whenever you are ready. '
+                'Complete your profile before applying to jobs.',
+                style: text.bodySmall?.copyWith(color: RRColors.inkMuted),
+              ),
               const SizedBox(height: RRSpace.lg),
               Text(
                 'PDF or DOCX · Maximum 5 MB',
