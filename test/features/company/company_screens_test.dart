@@ -214,7 +214,7 @@ void main() {
     router.go(Routes.companySettings);
     await tester.pumpAndSettle();
 
-    expect(find.text('Rhombus Labs'), findsOneWidget);
+    expect(find.text('Rhombus Labs'), findsWidgets); // page + rail
     expect(find.text('You\'re a member'), findsOneWidget);
     expect(find.text('Invite codes'), findsNothing);
 
