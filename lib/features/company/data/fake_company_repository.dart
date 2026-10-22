@@ -194,6 +194,19 @@ class FakeCompanyRepository implements CompanyRepository {
   @override
   String? logoUrl(String? logoPath) => null;
 
+  /// Test hook: what A10's domain verification would set.
+  void setVerified(String companyId, {required bool verified}) {
+    final company = _companies[companyId]!;
+    _companies[companyId] = Company(
+      id: company.id,
+      name: company.name,
+      website: company.website,
+      logoPath: company.logoPath,
+      verified: verified,
+      createdBy: company.createdBy,
+    );
+  }
+
   /// Deterministic codes from the unambiguous alphabet (no I, L, O, 0, 1).
   static String _code(int seed) {
     const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';

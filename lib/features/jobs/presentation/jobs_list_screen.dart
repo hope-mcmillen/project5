@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../app/widgets/state_views.dart';
 import '../../../core/models/job_status.dart';
+import '../../company/presentation/widgets/company_header.dart';
+import '../../../app/shells.dart';
 import '../data/job_repository.dart';
 import '../domain/job_summary.dart';
 import 'job_actions.dart';
@@ -25,7 +27,13 @@ class JobsListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Jobs'),
+        // On phones there's no rail, so the company shows under the title.
+        title: MediaQuery.sizeOf(context).width < RecruiterShell.railBreakpoint
+            ? const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [Text('Jobs'), CompanySubtitle()],
+              )
+            : const Text('Jobs'),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),

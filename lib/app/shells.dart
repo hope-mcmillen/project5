@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/company/presentation/widgets/company_header.dart';
+
 /// Bottom navigation for the candidate tabs: Deck · Applications · Profile.
 ///
 /// SCAFFOLD: basic NavigationBar. Styling comes later (resurhombus-ui skill).
@@ -101,6 +103,13 @@ class RecruiterShell extends StatelessWidget {
                 selectedIndex: navigationShell.currentIndex,
                 onDestinationSelected: _select,
                 extended: extended,
+                // RC-22: the company and its verified status.
+                leading: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: extended
+                      ? const SizedBox(width: 224, child: CompanyHeader())
+                      : const CompanyHeader(compact: true),
+                ),
                 labelType: extended
                     ? NavigationRailLabelType.none
                     : NavigationRailLabelType.all,
