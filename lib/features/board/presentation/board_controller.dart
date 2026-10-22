@@ -142,6 +142,13 @@ class BoardController extends AsyncNotifier<BoardState> {
     );
   }
 
+  /// Updates one tile's status locally (e.g. after the detail view opened
+  /// it), without refetching.
+  void markStatus(String applicationId, ApplicationStatus status) => _set([
+    for (final t in _current.tiles)
+      t.applicationId == applicationId ? t.copyWith(status: status) : t,
+  ]);
+
   /// Advances to INTERVIEW_REQUESTED. Throws (after rolling back) on error.
   Future<void> advance(String applicationId, {String? note}) async {
     final before = _current.tiles;

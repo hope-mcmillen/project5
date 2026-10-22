@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/supabase/supabase_providers.dart';
 import '../domain/board_change.dart';
+import '../domain/candidate_detail.dart';
 import '../domain/board_tile.dart';
 import 'supabase_board_repository.dart';
 
@@ -20,6 +21,19 @@ abstract interface class BoardRepository {
 
   /// Only works within 10 s of [reject].
   Future<void> undoReject(String applicationId);
+
+  /// `rpc('open_application')`: moves APPLIED to UNDER_REVIEW (idempotent).
+  Future<void> openApplication(String applicationId);
+
+  /// `rpc('get_candidate_detail')`.
+  Future<CandidateDetail> candidateDetail(String applicationId);
+
+  /// `rpc('get_interview_list')` for one job.
+  Future<List<CandidateDetail>> interviewList(String jobId);
+
+  /// A signed resume link valid for 10 minutes (`resume-url` Edge
+  /// Function). Throws `resume_not_available` for manual profiles.
+  Future<Uri> resumeUrl(String applicationId);
 
   /// Realtime changes to [jobId]'s applications. Also emits a
   /// non-insert change after a reconnect, so the board can catch up.
