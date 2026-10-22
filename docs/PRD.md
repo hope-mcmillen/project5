@@ -189,6 +189,7 @@ flowchart TD
 - **C-ON-4** Users can add, remove, and rename skills, and change years. Edited fields are marked `source: user` and survive later re-parses.
 - **C-ON-5** A profile can't be submitted to any job until the Review & Confirm screen is accepted.
 - **C-ON-6** Uploading a new resume creates a new profile version. All open applications keep a snapshot of the version they were submitted with.
+- **C-ON-7** Candidates can skip resume setup and navigate through Resume, Profile, Applications, and the job deck using the sidebar. Cancelling an upload clears the current selection and prevents a late result from opening progress. Skipping does not mark a profile confirmed or remove the confirmation requirement for applying.
 - **C-ON-7** The resume file is never stored. Only verified experiences, skills, and education are saved, on the candidate's draft profile version, and the upload screen says so.
 
 ### 5.2 Flow: Swipe Deck & Apply

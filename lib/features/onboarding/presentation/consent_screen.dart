@@ -17,7 +17,11 @@ class ConsentScreen extends StatelessWidget {
       description: 'Review how your resume will be used to build your skills profile before continuing.',
       tasks: const ['CA-03'],
       stories: const ['US-07'],
-      links: [PageLink('Agree and continue', Routes.candidateUpload)],
+      preferMenuButton: true,
+      links: [
+        PageLink('Agree and continue', Routes.candidateUpload),
+        PageLink('Skip resume for now', Routes.deck),
+      ],
       actions: const [OnboardingSignOutAction()],
     );
   }

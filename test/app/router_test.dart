@@ -67,10 +67,13 @@ void main() {
       expect(go(s, Routes.deck), Routes.resetPassword);
     });
 
-    test('new candidate is sent to onboarding, then the deck', () {
+    test('new candidate can skip onboarding and use candidate navigation', () {
       const fresh = RouteSession.candidate(onboarded: false);
       expect(go(fresh, Routes.signIn), Routes.candidateConsent);
-      expect(go(fresh, Routes.deck), Routes.candidateConsent);
+      expect(go(fresh, Routes.deck), isNull);
+      expect(go(fresh, Routes.candidateProfile), isNull);
+      expect(go(fresh, Routes.profileResume), isNull);
+      expect(go(fresh, Routes.pipeline), isNull);
       expect(go(fresh, Routes.candidateUpload), isNull);
 
       const done = RouteSession.candidate();
@@ -97,6 +100,30 @@ void main() {
         Routes.jobs,
       );
     });
+  });
+
+  testWidgets('new candidate can leave consent through the sidebar', (
+    tester,
+  ) async {
+    final router = buildRouter(
+      session: () => const RouteSession.candidate(onboarded: false),
+      initialLocation: Routes.candidateConsent,
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: fakeRepositoryOverrides(latency: Duration.zero),
+        child: MaterialApp.router(routerConfig: router),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Applications'));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, Routes.pipeline);
+    expect(find.byTooltip('Open navigation menu'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   group('every route builds a page', () {

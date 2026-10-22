@@ -27,11 +27,20 @@ final uploadControllerProvider =
     );
 
 class UploadController extends Notifier<UploadState> {
+  int _operation = 0;
+
   @override
   UploadState build() => const UploadState();
 
+  /// Discard this attempt; a late picker or upload result must not navigate.
+  void cancel() {
+    _operation++;
+    state = const UploadState();
+  }
+
   Future<void> chooseFile() async {
     if (state.busy) return;
+    final operation = ++_operation;
     final previous = state.file;
     state = UploadState(file: previous, phase: UploadPhase.choosing);
     try {
@@ -47,11 +56,11 @@ class UploadController extends Notifier<UploadState> {
                 'kb': (selected.bytes.length / 1024).round(),
               },
       );
-      if (!ref.mounted) return;
+      if (!ref.mounted || operation != _operation) return;
       state = UploadState(file: selected ?? previous);
     } catch (error) {
       AppLog.warn('resume', 'file rejected', error);
-      if (!ref.mounted) return;
+      if (!ref.mounted || operation != _operation) return;
       state = UploadState(
         error: error is AppFailure
             ? error.message
@@ -63,6 +72,7 @@ class UploadController extends Notifier<UploadState> {
   Future<void> upload() async {
     final file = state.file;
     if (file == null || state.busy) return;
+    final operation = ++_operation;
     state = UploadState(file: file, phase: UploadPhase.uploading);
     try {
       final resume = await ref
@@ -72,10 +82,10 @@ class UploadController extends Notifier<UploadState> {
             bytes: file.bytes,
             fileHash: file.fileHash,
           );
-      if (!ref.mounted) return;
+      if (!ref.mounted || operation != _operation) return;
       state = UploadState(file: file, resumeId: resume.id);
     } catch (error) {
-      if (!ref.mounted) return;
+      if (!ref.mounted || operation != _operation) return;
       state = UploadState(
         file: file,
         error: error is AppFailure ? error.message : 'Your resume could not be uploaded. Check your connection and try again.',
