@@ -47,7 +47,7 @@ class Application {
     breakdown: (json['breakdown'] as List? ?? const [])
         .map((v) => BreakdownItem.fromJson(v as Map<String, dynamic>))
         .toList(),
-    scoringVersion: json['scoring_version'] as String,
+    scoringVersion: json['scoring_version'] as String? ?? 'unknown',
     committedAt: DateTime.parse(json['committed_at'] as String),
     createdAt: DateTime.parse(json['created_at'] as String),
     updatedAt: DateTime.parse(json['updated_at'] as String),

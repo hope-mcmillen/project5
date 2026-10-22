@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/misc.dart';
 
+import '../core/errors/app_failure.dart';
+
 import '../features/auth/data/auth_repository.dart';
 import '../features/auth/data/fake_auth_repository.dart';
 import '../features/company/data/company_repository.dart';
@@ -52,6 +54,7 @@ List<Override> fakeRepositoryOverrides({
 List<Override> candidateRepositoryOverrides({
   Duration latency = const Duration(milliseconds: 300),
   bool simulateParsing = true,
+  bool includeApplications = true,
 }) => [
   profileRepositoryProvider.overrideWith(
     (ref) => FakeProfileRepository(latency: latency),
@@ -65,13 +68,18 @@ List<Override> candidateRepositoryOverrides({
     return repository;
   }),
   resumeSimulationProvider.overrideWithValue(true),
-  ...feedAndApplicationOverrides(latency: latency),
+  ...feedAndApplicationOverrides(
+    latency: latency,
+    includeApplications: includeApplications,
+  ),
 ];
 
-/// The deck and pipeline still run on fakes in the Supabase build: they have
-/// no Supabase repositories yet. Resume parsing and profiles are real there.
+/// The deck feed still runs on fakes in the Supabase build: it has no
+/// Supabase repository yet. Resume parsing and profiles are real there, and
+/// so are applications (C10) when [includeApplications] is false.
 List<Override> feedAndApplicationOverrides({
   Duration latency = const Duration(milliseconds: 300),
+  bool includeApplications = true,
 }) => [
   feedRepositoryProvider.overrideWith((ref) {
     final createdApplications = <String>{};
@@ -87,6 +95,12 @@ List<Override> feedAndApplicationOverrides({
             .read(profileRepositoryProvider)
             .latestVersion();
         final applications = ref.read(applicationRepositoryProvider);
+        if (!applications.isDemo) {
+          throw const AppFailure(
+            'demo_job',
+            'These are demo jobs. Use the fake-data preview to try applying; live job applications are not connected yet.',
+          );
+        }
         if (version != null && applications is FakeApplicationRepository) {
           if (applications.recordApplication(job, version.id)) {
             createdApplications.add(job.jobId);
@@ -102,9 +116,10 @@ List<Override> feedAndApplicationOverrides({
       },
     );
   }),
-  applicationRepositoryProvider.overrideWith((ref) {
-    final repository = FakeApplicationRepository(latency: latency);
-    ref.onDispose(repository.dispose);
-    return repository;
-  }),
+  if (includeApplications)
+    applicationRepositoryProvider.overrideWith((ref) {
+      final repository = FakeApplicationRepository(latency: latency);
+      ref.onDispose(repository.dispose);
+      return repository;
+    }),
 ];
