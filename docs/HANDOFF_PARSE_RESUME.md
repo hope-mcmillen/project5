@@ -84,7 +84,7 @@ supabase functions deploy parse-resume
 
 The new function calls `save_parsed_profile`. If it's deployed before the migration, every parse fails with `internal`.
 
-**As of 2026-10-22, neither `parse-resume` nor `parse-job` is deployed on the remote project.** Both return HTTP 404 ("Requested function was not found"); only `resume-url` exists. The app logs this as `FunctionsHttpException(status: 404, … NOT_FOUND)`. Deploy `parse-job` too, so recruiters can parse job descriptions. It needs no new migration, only the same Gemini secrets:
+**As of 2026-10-22, neither `parse-resume` nor `parse-job` is deployed on the remote project.** Both return HTTP 404 ("Requested function was not found"); `resume-url` and `delete-account` are the deployed A-owned functions. The app logs this as `FunctionsHttpException(status: 404, … NOT_FOUND)`. Deploy `parse-job` too, so recruiters can parse job descriptions. It needs no new migration, only the same Gemini secrets:
 
 ```sh
 supabase functions deploy parse-job
@@ -140,3 +140,51 @@ select count(*) from storage.objects where bucket_id = 'resumes' and name like '
 ## Prompt to give your AI agent
 
 > Read `docs/HANDOFF_PARSE_RESUME.md` and carry out steps 1–4 on the `resume-parsing` branch. Step 1 is local only: fix anything that fails and tell me what you changed. Stop and ask me before steps 2–3 change anything remote, and get my yes right before `supabase db push` and right before `supabase functions deploy parse-resume`. Never print secret values. Report the results of each step, including the SQL checks in step 4.
+
+
+## Database-owner validation — October 22, 2026
+
+- Source branch `resume-parsing`, original handoff commit `88e8482`.
+  Integrated teammate update `bc27dd5` during verification, preserving the new
+  sign-out controls, live C10 application pipeline and Windows golden setup.
+  None of those concurrent updates introduced another database migration.
+- Required local start/reset/lint passed. All **457 pgTAP assertions in ten files**
+  pass, including parsed profiles and the 20-table RLS check. No migration or
+  pgTAP expectations needed changes.
+- Exact Deno 2.9.6 runtime: `task check` clean; `task test` **113 pass, six live
+  checks ignored**. The complete CI Edge suite (including the A-owned endpoints)
+  passes **119 tests, six ignored**, and the existing live-service privacy/deletion
+  integration test passes on Deno 2.9.6. Flutter analyze clean; the six new
+  repository/review tests pass. After integrating the teammate's updates,
+  the complete Flutter suite passes **196 tests** on macOS. Exact golden pixel
+  comparisons are Windows-only under the teammate's baseline policy; no golden
+  files were changed by this verification.
+- Regenerated `supabase/types/database.types.ts` for the new table/columns/RPCs.
+- Additional actual local Auth → multipart/SSE Edge → service RPC → candidate
+  review/confirmation check found missing mock fixture assets in the Edge bundle.
+  Fixed `supabase/config.toml` with explicit synthetic JSON/text `static_files`
+  for parse-resume, as supported by the
+  [Supabase CLI configuration](https://supabase.com/docs/guides/local-development/cli/config#functions.function_name.static_files).
+  No extraction logic, prompts, schema semantics or test expectations changed.
+- The real-service mock check now passes: version 1, source resume, resume_id
+  null, two experiences, confirmed active profile, zero resumes rows and zero
+  stored files. Progress: PARSING_LAYOUT → EXTRACTING → NORMALIZING → READY.
+  Ready log reports 11 skills, two experiences and zero repairs. The temporary
+  local test account/usage rows are removed afterward. No Gemini calls made.
+- Added `supabase/tests/parsed_profile_api_smoke.py` to guard that packaging and
+  real database boundary in CI; CI uses Deno 2.9.6 and an explicit mock provider.
+- Hosted read-only checks: all prior 17 migrations match; **only**
+  `20261022200000_parsed_profiles_without_storage` is pending; no unknown remote
+  migrations. The existing hosted functions are `resume-url` and `delete-account`;
+  both `parse-resume` and `parse-job` are absent. The updated handoff now also
+  requests deploying parse-job after the same secret prerequisites. Required
+  hosted secret names **LLM_PROVIDER and GEMINI_API_KEY are
+  missing**. Owner was asked to set them privately. No secret values printed.
+- Hosted migration push, parse-resume deployment, Gemini upload, app route check
+  and hosted SQL assertions are **pending**. Each of the two writes still needs
+  the owner's explicit yes immediately before execution, per this handoff.
+- Existing ignored app configuration points at local Supabase; hosted rehearsal
+  must use a separate matching hosted URL/public-key config. Do not upload local
+  service keys or a real candidate resume to Gemini.
+- Earlier local emulator-launch edits (.gitignore/README/.vscode/example) were
+  preserved separately and are not part of this verification change.

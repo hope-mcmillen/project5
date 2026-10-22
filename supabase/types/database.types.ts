@@ -118,6 +118,26 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"candidate_experiences": {
+                  Row: {
+                    "end_month": string | null,"evidence": string,"highlights": (string)[],"id": string,"kind": Database["public"]['Enums']["experience_kind"],"organization": string | null,"profile_version_id": string,"skills_used": (string)[],"sort_order": number,"start_month": string | null,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "end_month"?: string | null,"evidence": string,"highlights"?: (string)[],"id"?: string,"kind"?: Database["public"]['Enums']["experience_kind"],"organization"?: string | null,"profile_version_id": string,"skills_used"?: (string)[],"sort_order": number,"start_month"?: string | null,"title": string
+                  }
+                  Update: {
+                    "end_month"?: string | null,"evidence"?: string,"highlights"?: (string)[],"id"?: string,"kind"?: Database["public"]['Enums']["experience_kind"],"organization"?: string | null,"profile_version_id"?: string,"skills_used"?: (string)[],"sort_order"?: number,"start_month"?: string | null,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "candidate_experiences_profile_version_id_fkey"
+      columns: ["profile_version_id"]
+isOneToOne: false
+      referencedRelation: "profile_versions"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"candidate_skills": {
                   Row: {
                     "evidence": string | null,"id": string,"profile_version_id": string,"raw_name": string,"skill_id": string | null,"source": Database["public"]['Enums']["skill_source"],"years": number | null
@@ -316,14 +336,14 @@ isOneToOne: false
                   ]
                 },"profile_versions": {
                   Row: {
-                    "candidate_id": string,"confirmed": boolean,"confirmed_at": string | null,"created_at": string,"education": NonNullable<Json>,"embedding": string | null,"embedding_model": string | null,"id": string,"is_seed": boolean,"resume_id": string | null,"source": Database["public"]['Enums']["profile_source"],"total_years": number | null,"version": number
+                    "candidate_id": string,"confirmed": boolean,"confirmed_at": string | null,"created_at": string,"education": NonNullable<Json>,"embedding": string | null,"embedding_model": string | null,"id": string,"is_seed": boolean,"llm_model": string | null,"resume_id": string | null,"schema_version": number | null,"source": Database["public"]['Enums']["profile_source"],"total_years": number | null,"version": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "candidate_id": string,"confirmed"?: boolean,"confirmed_at"?: string | null,"created_at"?: string,"education"?: NonNullable<Json>,"embedding"?: string | null,"embedding_model"?: string | null,"id"?: string,"is_seed"?: boolean,"resume_id"?: string | null,"source"?: Database["public"]['Enums']["profile_source"],"total_years"?: number | null,"version": number
+                    "candidate_id": string,"confirmed"?: boolean,"confirmed_at"?: string | null,"created_at"?: string,"education"?: NonNullable<Json>,"embedding"?: string | null,"embedding_model"?: string | null,"id"?: string,"is_seed"?: boolean,"llm_model"?: string | null,"resume_id"?: string | null,"schema_version"?: number | null,"source"?: Database["public"]['Enums']["profile_source"],"total_years"?: number | null,"version": number
                   }
                   Update: {
-                    "candidate_id"?: string,"confirmed"?: boolean,"confirmed_at"?: string | null,"created_at"?: string,"education"?: NonNullable<Json>,"embedding"?: string | null,"embedding_model"?: string | null,"id"?: string,"is_seed"?: boolean,"resume_id"?: string | null,"source"?: Database["public"]['Enums']["profile_source"],"total_years"?: number | null,"version"?: number
+                    "candidate_id"?: string,"confirmed"?: boolean,"confirmed_at"?: string | null,"created_at"?: string,"education"?: NonNullable<Json>,"embedding"?: string | null,"embedding_model"?: string | null,"id"?: string,"is_seed"?: boolean,"llm_model"?: string | null,"resume_id"?: string | null,"schema_version"?: number | null,"source"?: Database["public"]['Enums']["profile_source"],"total_years"?: number | null,"version"?: number
                   }
                   Relationships: [
                     {
@@ -606,7 +626,33 @@ isOneToOne: false
 "embedding_model": string | null,
 "id": string,
 "is_seed": boolean,
+"llm_model": string | null,
 "resume_id": string | null,
+"schema_version": number | null,
+"source": Database["public"]['Enums']["profile_source"],
+"total_years": number | null,
+"version": number
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "profile_versions"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"create_review_draft":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "candidate_id": string,
+"confirmed": boolean,
+"confirmed_at": string | null,
+"created_at": string,
+"education": NonNullable<Json>,
+"embedding": string | null,
+"embedding_model": string | null,
+"id": string,
+"is_seed": boolean,
+"llm_model": string | null,
+"resume_id": string | null,
+"schema_version": number | null,
 "source": Database["public"]['Enums']["profile_source"],
 "total_years": number | null,
 "version": number
@@ -703,6 +749,11 @@ isOneToOne: false
 "save_job_draft":
 { Args: { "p_fields": Json,"p_job_id": string,"p_requirements": Json }; Returns: Json
                            },
+"save_parsed_profile":
+{ Args: { "p_candidate_id": string,"p_education": Json,"p_experiences": Json,"p_llm_model": string,"p_schema_version": number,"p_skills": Json,"p_total_years": number }; Returns: {
+              "profile_version_id": string,"version": number
+            }[]
+                           },
 "save_preferences":
 { Args: { "p_prefs": Json }; Returns: undefined
                            },
@@ -743,7 +794,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "app_role": "candidate"|"recruiter","application_status": "APPLIED"|"UNDER_REVIEW"|"INTERVIEW_REQUESTED"|"NOT_SELECTED"|"WITHDRAWN"|"JOB_CLOSED","company_role": "owner"|"member","job_status": "DRAFT"|"OPEN"|"PAUSED"|"CLOSED","job_type": "full_time"|"part_time"|"contract"|"internship","parse_status": "PENDING"|"READY"|"FAILED","pass_reason": "location"|"salary"|"stack"|"seniority"|"company","profile_source": "resume"|"manual","remote_type": "onsite"|"hybrid"|"remote","resume_status": "UPLOADED"|"PARSING_LAYOUT"|"EXTRACTING"|"NORMALIZING"|"READY"|"FAILED","skill_source": "ai"|"user","swipe_direction": "left"|"right"
+            "app_role": "candidate"|"recruiter","application_status": "APPLIED"|"UNDER_REVIEW"|"INTERVIEW_REQUESTED"|"NOT_SELECTED"|"WITHDRAWN"|"JOB_CLOSED","company_role": "owner"|"member","experience_kind": "job"|"internship"|"research"|"project"|"volunteer"|"other","job_status": "DRAFT"|"OPEN"|"PAUSED"|"CLOSED","job_type": "full_time"|"part_time"|"contract"|"internship","parse_status": "PENDING"|"READY"|"FAILED","pass_reason": "location"|"salary"|"stack"|"seniority"|"company","profile_source": "resume"|"manual","remote_type": "onsite"|"hybrid"|"remote","resume_status": "UPLOADED"|"PARSING_LAYOUT"|"EXTRACTING"|"NORMALIZING"|"READY"|"FAILED","skill_source": "ai"|"user","swipe_direction": "left"|"right"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -863,7 +914,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "app_role": ["candidate", "recruiter"],"application_status": ["APPLIED", "UNDER_REVIEW", "INTERVIEW_REQUESTED", "NOT_SELECTED", "WITHDRAWN", "JOB_CLOSED"],"company_role": ["owner", "member"],"job_status": ["DRAFT", "OPEN", "PAUSED", "CLOSED"],"job_type": ["full_time", "part_time", "contract", "internship"],"parse_status": ["PENDING", "READY", "FAILED"],"pass_reason": ["location", "salary", "stack", "seniority", "company"],"profile_source": ["resume", "manual"],"remote_type": ["onsite", "hybrid", "remote"],"resume_status": ["UPLOADED", "PARSING_LAYOUT", "EXTRACTING", "NORMALIZING", "READY", "FAILED"],"skill_source": ["ai", "user"],"swipe_direction": ["left", "right"]
+            "app_role": ["candidate", "recruiter"],"application_status": ["APPLIED", "UNDER_REVIEW", "INTERVIEW_REQUESTED", "NOT_SELECTED", "WITHDRAWN", "JOB_CLOSED"],"company_role": ["owner", "member"],"experience_kind": ["job", "internship", "research", "project", "volunteer", "other"],"job_status": ["DRAFT", "OPEN", "PAUSED", "CLOSED"],"job_type": ["full_time", "part_time", "contract", "internship"],"parse_status": ["PENDING", "READY", "FAILED"],"pass_reason": ["location", "salary", "stack", "seniority", "company"],"profile_source": ["resume", "manual"],"remote_type": ["onsite", "hybrid", "remote"],"resume_status": ["UPLOADED", "PARSING_LAYOUT", "EXTRACTING", "NORMALIZING", "READY", "FAILED"],"skill_source": ["ai", "user"],"swipe_direction": ["left", "right"]
           }
         }
 } as const
