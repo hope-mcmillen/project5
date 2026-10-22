@@ -6,7 +6,6 @@ import 'package:project5/app/dev_session.dart';
 import 'package:project5/app/router.dart';
 import 'package:project5/app/routes.dart';
 import 'package:project5/core/models/app_role.dart';
-import 'package:project5/ui/scaffold/placeholder_page.dart';
 
 import '../support/fake_scope.dart';
 
@@ -172,7 +171,7 @@ void main() {
     expect(find.text('Welcome'), findsWidgets);
 
     Future<void> tap(String label) async {
-      await tester.scrollUntilVisible(find.text(label), 100);
+      await tester.ensureVisible(find.text(label));
       await tester.tap(find.text(label));
       await tester.pumpAndSettle();
     }
@@ -192,9 +191,14 @@ void main() {
     expect(find.text('Your deck'), findsWidgets);
     expect(find.byTooltip('Open navigation menu'), findsOneWidget);
 
-    final router = GoRouter.of(
-      tester.element(find.byType(PlaceholderPage).first),
-    );
+    final router = GoRouter.of(tester.element(find.byType(Scaffold).first));
     expect(router.state.uri.path, Routes.deck);
+    await tester.tap(find.text('Apply'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Demo application saved'), findsOneWidget);
+    router.go(Routes.pipeline);
+    await tester.pumpAndSettle();
+    expect(find.text('Pelican Path Health'), findsNWidgets(7));
+    expect(tester.takeException(), isNull);
   });
 }

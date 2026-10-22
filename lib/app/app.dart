@@ -26,11 +26,14 @@ class _ResuRhombusAppState extends State<ResuRhombusApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'ResuRhombus',
-      debugShowCheckedModeBanner: false,
-      theme: buildRRTheme(),
-      routerConfig: _router,
+    return DevSessionScope(
+      session: widget.session ?? devSession,
+      child: MaterialApp.router(
+        title: 'ResuRhombus',
+        debugShowCheckedModeBanner: false,
+        theme: buildRRTheme(),
+        routerConfig: _router,
+      ),
     );
   }
 }

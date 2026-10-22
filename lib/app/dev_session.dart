@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../core/models/app_role.dart';
 
@@ -42,3 +42,18 @@ class DevSession extends ChangeNotifier {
 
 /// Single app-wide instance for the scaffold.
 final devSession = DevSession();
+
+class DevSessionScope extends InheritedWidget {
+  const DevSessionScope({
+    super.key,
+    required this.session,
+    required super.child,
+  });
+  final DevSession session;
+  static DevSession of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<DevSessionScope>()?.session ??
+      devSession;
+  @override
+  bool updateShouldNotify(DevSessionScope oldWidget) =>
+      oldWidget.session != session;
+}

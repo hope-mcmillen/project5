@@ -29,8 +29,34 @@ For previews and tests:
 - Each provider scope owns fresh fake state and disposes stream resources.
 
 These fakes provide synthetic screen-development data. They do not implement
-database authorization or real document parsing. Resume selection and progress
-are implemented in C3; the remaining candidate screens are still scaffolded.
+database authorization or real document parsing. Resume selection and progress,
+skill review, preferences, and the swipe deck are available in this local preview.
+
+## Candidate skills, preferences, and swiping (C4 / C6)
+
+After the resume preview, Review lets candidates add or rename skills through
+taxonomy search, remove skills, adjust experience in half-year steps, and inspect
+highlighted source evidence. Edits remain local until **Confirm skills** succeeds.
+Revisiting a confirmed profile creates a new draft and preserves the previous
+version used by existing applications. Custom skills are labeled as unscored.
+
+Preferences support locations, work arrangement, role type, sponsorship, an
+optional annual USD salary minimum, and lower-match roles. Saving filters the deck
+without altering match scores. Remote roles ignore the location list; a salary
+minimum excludes roles without a salary range. Onboarding advances only after a
+successful save. Profile provides access to skills, preferences, and Resume.
+
+The deck shows three stacked branded job cards. Swipe right to apply or left to
+pass, or use the labeled buttons. Short drags spring back; committed gestures show
+Apply/Pass stamps and fly out. Reduced motion uses short linear animations. Failed
+actions restore the card, repeated actions are blocked, and applying requires
+confirmed skills. Successful demo applications appear under Applications with the
+profile version used when applying.
+
+**This is in-memory demo behavior:** preferences, decisions, and applications reset
+when the app restarts. No application is sent to an employer. Supabase onboarding
+and live feed/application persistence remain C5 and C8 respectively. Device
+performance profiling is still required to establish the 60 fps target.
 
 ## Resume upload and reading preview (C3)
 
