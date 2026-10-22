@@ -1,4 +1,7 @@
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart';
+
+import '../ui/components/component_gallery.dart';
 
 import '../core/models/app_role.dart';
 import '../features/auth/presentation/forgot_password_screen.dart';
@@ -48,6 +51,7 @@ String homeFor(DevSession session) => switch (session.role) {
 /// enforcement; this guard is for UX only.
 String? resolveRedirect(DevSession session, Uri uri) {
   final path = uri.path;
+  if (kDebugMode && path == '/dev/gallery') return null;
   final isPublic =
       Routes.publicPaths.contains(path) || path == Routes.roleChoice;
 
@@ -86,6 +90,11 @@ GoRouter buildRouter(DevSession session) {
     redirect: (context, state) => resolveRedirect(session, state.uri),
     errorBuilder: (context, state) => NotFoundScreen(uri: state.uri),
     routes: [
+      if (kDebugMode)
+        GoRoute(
+          path: '/dev/gallery',
+          builder: (context, state) => const ComponentGallery(),
+        ),
       // ---------- Public ----------
       GoRoute(
         path: Routes.welcome,

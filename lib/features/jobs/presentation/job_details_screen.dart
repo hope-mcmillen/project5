@@ -15,13 +15,13 @@ class JobDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Job details',
-      description: 'Location, remote, job type, sponsorship, salary range; publish / pause / close (set_job_status).',
+      description: 'Review your job details before publishing the opportunity.',
       tasks: const ['RC-10', 'RC-11'],
       stories: const ['US-36', 'US-37'],
       params: {'jobId': jobId},
       links: [
         PageLink('Edit requirements', Routes.jobRequirementsFor(jobId)),
-        PageLink('[Fake] Publish → open board', Routes.boardFor(jobId)),
+        PageLink('Publish job', Routes.boardFor(jobId)),
         PageLink('Save as draft', Routes.jobs),
       ],
     );

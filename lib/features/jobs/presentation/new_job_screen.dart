@@ -13,14 +13,11 @@ class NewJobScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'New job',
-      description: 'Paste the raw job description; creates a DRAFT job and invokes parse-job.',
+      description: 'Start with a job description, then review the skills your team needs.',
       tasks: const ['RC-08'],
       stories: const ['US-34'],
       links: [
-        PageLink(
-          '[Fake] Requirements extracted → review',
-          Routes.jobRequirementsFor(DemoIds.job),
-        ),
+        PageLink('Review requirements', Routes.jobRequirementsFor(DemoIds.job)),
       ],
     );
   }

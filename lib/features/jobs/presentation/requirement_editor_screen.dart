@@ -15,11 +15,11 @@ class RequirementEditorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Requirements',
-      description: 'RequirementEditor: Required/Preferred, min years, 15/8 limits, JD evidence → save_requirements.',
+      description: 'Review the skills and experience needed for this role.',
       tasks: const ['RC-09a', 'RC-09b', 'AI-18'],
       stories: const ['US-35', 'US-39'],
       params: {'jobId': jobId},
-      links: [PageLink('Next: job details', Routes.jobDetailsFor(jobId))],
+      links: [PageLink('Edit job details', Routes.jobDetailsFor(jobId))],
     );
   }
 }

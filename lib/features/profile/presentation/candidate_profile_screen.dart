@@ -14,7 +14,7 @@ class CandidateProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Profile',
-      description: 'Confirmed skills summary, links to preferences and resume re-upload, sign out, delete account.',
+      description: 'Keep your experience up to date. Manage your preferences and update your resume here.',
       tasks: const ['CA-08', 'PL-09', 'PL-24'],
       stories: const ['US-04', 'US-13', 'US-50'],
       links: [

@@ -13,12 +13,13 @@ class PipelineScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Applications',
-      description: 'Every application with StatusChip, live via Realtime.',
+      description:
+          'Follow your applications and see where each opportunity stands.',
       tasks: const ['CA-17'],
       stories: const ['US-25', 'US-26'],
       links: [
         PageLink(
-          '[Fake] Open an application',
+          'View application',
           Routes.applicationDetailFor(DemoIds.application),
           mode: LinkMode.push,
         ),

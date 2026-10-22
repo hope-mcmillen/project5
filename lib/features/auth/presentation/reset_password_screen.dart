@@ -13,10 +13,10 @@ class ResetPasswordScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Set a new password',
-      description: 'Opened from the reset email (AuthChangeEvent.passwordRecovery). Calls updateUser.',
+      description: 'Choose a new password for your account.',
       tasks: const ['PL-09', 'PL-10'],
       stories: const ['US-05'],
-      links: [PageLink('Save and sign in', Routes.signIn)],
+      links: [PageLink('Save password', Routes.signIn)],
     );
   }
 }

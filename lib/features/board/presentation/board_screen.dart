@@ -15,7 +15,8 @@ class BoardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Applicants',
-      description: 'MosaicGrid of blind CandidateTiles from get_board, TriangleActions, filters, shortcuts.',
+      description:
+          'Review applicants by technical match and explore their skills.',
       tasks: const ['RC-12', 'RC-13', 'RC-14', 'RC-17', 'RC-19'],
       stories: const [
         'US-40',
@@ -29,7 +30,7 @@ class BoardScreen extends StatelessWidget {
       params: {'jobId': jobId},
       links: [
         PageLink(
-          '[Fake] Open a candidate',
+          'View candidate',
           Routes.candidateDetailFor(jobId, DemoIds.application),
           mode: LinkMode.push,
         ),

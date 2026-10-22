@@ -29,8 +29,42 @@ For previews and tests:
 - Each provider scope owns fresh fake state and disposes stream resources.
 
 These fakes provide synthetic screen-development data. They do not implement
-database authorization or real document parsing. Candidate screen content is
-still scaffolded; its UI is covered by later stories.
+database authorization or real document parsing. Resume selection and progress
+are implemented in C3; the remaining candidate screens are still scaffolded.
+
+## Resume upload and reading preview (C3)
+
+Both `flutter run` and `flutter run -t lib/main_fake.dart` currently use local
+repositories in this navigation scaffold. Open Resume, choose a PDF or DOCX up to
+5 MiB, then select Upload resume. The picker checks the extension and file header,
+reads bounded bytes on mobile and web, and computes a SHA-256 content hash.
+
+The progress screen follows repository statuses through uploading/reading,
+experience extraction, and skill normalization, then opens Review automatically.
+Failures and the 60-second deadline offer another file or a manual profile draft.
+Motion pauses in the background and respects the system's reduced-motion setting.
+
+**Reading is simulated:** the selected bytes remain in memory; nothing is sent to
+Supabase or an AI service. Real storage and document parsing belong to C5. To drive
+failure states in tests, use `FakeResumeRepository.setStatus`; turn off automatic
+stages with `simulateParsing: false` in `fakeRepositoryOverrides`.
+
+## Shared visual system (C2)
+
+`lib/ui/theme/rr_theme.dart` defines the branded theme used by both roles.
+Colors, spacing, radii, and motion tokens live in `rr_tokens.dart`; extra brand
+colors are available through `context.rr`. Fonts are bundled in `assets/fonts/`
+with their open-source licenses, so runtime font downloads are disabled.
+
+Reusable, data-only components live in `lib/ui/components/`. The debug-only
+`/dev/gallery` route previews score badges, application statuses, company badges,
+rhombus variants, loading placeholders, and empty states. It is absent in release
+builds. Preview pages retain existing navigation callbacks and make their prototype
+status explicit; new button labels describe the action instead of task details.
+
+Visual regression images are in `test/ui/goldens/`. Run `flutter test` for model,
+navigation, component, layout, and golden checks. Intentionally changed visuals
+can be regenerated with `flutter test --update-goldens test/ui`.
 
 ## Getting Started
 

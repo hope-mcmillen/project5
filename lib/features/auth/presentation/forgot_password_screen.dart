@@ -13,12 +13,11 @@ class ForgotPasswordScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Forgot password',
-      description:
-          'Email field that sends a reset link (resetPasswordForEmail).',
+      description: 'Recover access to your account and choose a new password.',
       tasks: const ['PL-09', 'PL-10'],
       stories: const ['US-05'],
       links: [
-        PageLink('[Fake] Open reset link from email', Routes.resetPassword),
+        PageLink('Reset password', Routes.resetPassword),
         PageLink('Back to sign in', Routes.signIn),
       ],
     );

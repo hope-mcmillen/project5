@@ -15,7 +15,7 @@ class DeepDiveScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Match details',
-      description: 'Job summary, RadarDeepDive (shared widget) and the plain-language gap list. Apply/Pass from here too.',
+      description: 'See how your experience lines up with this role and where you can grow.',
       tasks: const ['CA-16'],
       stories: const ['US-23', 'US-24'],
       params: {'jobId': jobId},

@@ -15,17 +15,17 @@ class SignInScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Sign in',
-      description: 'Email + password and Google sign-in. Router sends each role to its home.',
+      description: 'Welcome back. Choose your workspace to continue.',
       tasks: const ['PL-09', 'PL-10'],
       stories: const ['US-02', 'US-03'],
       links: [
         PageLink(
-          '[Fake] Sign in as candidate',
+          'Sign in as candidate',
           Routes.deck,
           onBefore: () => devSession.signIn(AppRole.candidate),
         ),
         PageLink(
-          '[Fake] Sign in as recruiter',
+          'Sign in as recruiter',
           Routes.jobs,
           onBefore: () => devSession.signIn(AppRole.recruiter),
         ),
@@ -34,7 +34,7 @@ class SignInScreen extends StatelessWidget {
           Routes.forgotPassword,
           mode: LinkMode.push,
         ),
-        PageLink('New here? Get started', Routes.welcome),
+        PageLink('Create account', Routes.welcome),
       ],
     );
   }

@@ -20,12 +20,13 @@ class CandidateDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Candidate',
-      description: 'Blind detail: RadarDeepDive + skill evidence; opening sets Under Review. Advance / reject actions.',
+      description:
+          'Explore this candidate\'s experience and decide on the next step.',
       tasks: const ['RC-15'],
       stories: const ['US-42', 'US-43', 'US-44'],
       params: {'jobId': jobId, 'applicationId': applicationId},
       links: [
-        PageLink('[Fake] Advance → interviews', Routes.interviews),
+        PageLink('Request interview', Routes.interviews),
         PageLink('Back to board', Routes.boardFor(jobId)),
       ],
     );

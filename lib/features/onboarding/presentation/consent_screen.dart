@@ -13,7 +13,7 @@ class ConsentScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Before we start',
-      description: 'Consent to resume processing and data use (PRD §5.1, A-6).',
+      description: 'Review how your resume will be used to build your skills profile before continuing.',
       tasks: const ['CA-03'],
       stories: const ['US-07'],
       links: [PageLink('Agree and continue', Routes.candidateUpload)],

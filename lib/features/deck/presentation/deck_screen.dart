@@ -13,7 +13,7 @@ class DeckScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Your deck',
-      description: 'SwipeDeck of JobCards from get_feed, DeckActionBar, UndoToast, PassReasonChips, empty state.',
+      description: 'Explore opportunities that fit your experience. Open a role to see your match in more detail.',
       tasks: const [
         'CA-10',
         'CA-11',
@@ -35,12 +35,12 @@ class DeckScreen extends StatelessWidget {
       ],
       links: [
         PageLink(
-          '[Fake] Tap a card → Radar deep-dive',
+          'View match details',
           Routes.deepDiveFor(DemoIds.job),
           mode: LinkMode.push,
         ),
-        PageLink('Empty deck: widen filters', Routes.profilePreferences),
-        PageLink('Empty deck: update resume', Routes.profileResume),
+        PageLink('Edit job preferences', Routes.profilePreferences),
+        PageLink('Update resume', Routes.profileResume),
       ],
     );
   }

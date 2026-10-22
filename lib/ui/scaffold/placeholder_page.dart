@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+
+import '../theme/rr_tokens.dart';
+import '../components/rhombus_mark.dart';
+import '../components/action_button.dart';
+
 import 'package:go_router/go_router.dart';
 
 import '../../app/candidate_menu.dart';
@@ -61,54 +67,92 @@ class PlaceholderPage extends StatelessWidget {
     final theme = Theme.of(context);
     final location = GoRouterState.of(context).uri.toString();
 
-    final body = ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: theme.textTheme.headlineSmall),
-                const SizedBox(height: 8),
-                Text(description, style: theme.textTheme.bodyMedium),
-                const SizedBox(height: 12),
-                _Meta(label: 'Route', value: location),
-                for (final entry in params.entries)
-                  _Meta(label: entry.key, value: entry.value),
-                if (tasks.isNotEmpty)
-                  _Meta(label: 'Tasks', value: tasks.join(', ')),
-                if (stories.isNotEmpty)
-                  _Meta(label: 'Stories', value: stories.join(', ')),
+    final body = SafeArea(
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: RRSpace.pageWidth),
+          child: ListView(
+            padding: const EdgeInsets.all(RRSpace.xl),
+            children: [
+              Row(
+                children: [
+                  const RhombusMark(size: RRSpace.xl),
+                  const SizedBox(width: RRSpace.sm),
+                  Expanded(
+                    child: Text(
+                      'RESURHOMBUS',
+                      style: theme.textTheme.labelLarge,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: RRSpace.xxl),
+              Text(title, style: theme.textTheme.displaySmall),
+              const SizedBox(height: RRSpace.md),
+              Text(
+                description,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: RRColors.inkMuted,
+                ),
+              ),
+              const SizedBox(height: RRSpace.xl),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(RRSpace.xl),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text('Your next step', style: theme.textTheme.titleLarge),
+                      const SizedBox(height: RRSpace.lg),
+                      for (final (index, link) in links.indexed)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: RRSpace.md),
+                          child: ActionButton(
+                            label: link.label,
+                            primary: index == 0,
+                            onPressed: () {
+                              link.onBefore?.call();
+                              switch (link.mode) {
+                                case LinkMode.go:
+                                  context.go(link.location);
+                                case LinkMode.push:
+                                  context.push(link.location);
+                              }
+                            },
+                          ),
+                        ),
+                      Text(
+                        'Prototype preview · Actions demonstrate the flow.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: RRColors.inkMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (kDebugMode) ...[
+                const SizedBox(height: RRSpace.xl),
+                ExpansionTile(
+                  title: const Text('Development details'),
+                  childrenPadding: const EdgeInsets.all(RRSpace.lg),
+                  children: [
+                    _Meta(label: 'Route', value: location),
+                    for (final entry in params.entries)
+                      _Meta(label: entry.key, value: entry.value),
+                    if (tasks.isNotEmpty)
+                      _Meta(label: 'Tasks', value: tasks.join(', ')),
+                    if (stories.isNotEmpty)
+                      _Meta(label: 'Stories', value: stories.join(', ')),
+                  ],
+                ),
               ],
-            ),
+            ],
           ),
         ),
-        if (links.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          Text('Connections', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 8),
-          for (final link in links)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: OutlinedButton(
-                onPressed: () {
-                  link.onBefore?.call();
-                  switch (link.mode) {
-                    case LinkMode.go:
-                      context.go(link.location);
-                    case LinkMode.push:
-                      context.push(link.location);
-                  }
-                },
-                child: Text(link.label),
-              ),
-            ),
-        ],
-      ],
+      ),
     );
-
     if (!showAppBar) return body;
     final menu = CandidateMenuScope.maybeOf(context);
     final canPop = Navigator.of(context).canPop();

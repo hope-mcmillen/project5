@@ -14,12 +14,12 @@ class JoinCompanyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Join company',
-      description: '8-character invite code → join_company RPC.',
+      description: 'Use your company invitation to join the team.',
       tasks: const ['RC-07', 'PL-13', 'PL-15'],
       stories: const ['US-32'],
       links: [
         PageLink(
-          '[Fake] Join with code',
+          'Join with code',
           Routes.jobs,
           onBefore: () => devSession.completeCompanyOnboarding(),
         ),

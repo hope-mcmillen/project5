@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'dev_session.dart';
 import 'router.dart';
+import '../ui/theme/rr_theme.dart';
 
 class ResuRhombusApp extends StatefulWidget {
   const ResuRhombusApp({super.key, this.session});
@@ -28,11 +29,7 @@ class _ResuRhombusAppState extends State<ResuRhombusApp> {
     return MaterialApp.router(
       title: 'ResuRhombus',
       debugShowCheckedModeBanner: false,
-      // TODO(RC-01): replace with buildRRTheme() from lib/ui/theme/.
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF4E8098),
-        scaffoldBackgroundColor: const Color(0xFFFCF7F8),
-      ),
+      theme: buildRRTheme(),
       routerConfig: _router,
     );
   }

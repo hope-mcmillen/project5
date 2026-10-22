@@ -8,6 +8,13 @@ import 'package:project5/app/routes.dart';
 import 'package:project5/core/models/app_role.dart';
 import 'package:project5/ui/scaffold/placeholder_page.dart';
 
+import '../support/fake_scope.dart';
+
+import 'dart:typed_data';
+
+import 'package:project5/features/onboarding/data/resume_picker.dart';
+import 'package:project5/features/onboarding/domain/resume_file.dart';
+
 void main() {
   group('resolveRedirect', () {
     late DevSession session;
@@ -102,7 +109,9 @@ void main() {
       String location,
     ) async {
       final router = buildRouter(session);
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(
+        fakeScope(MaterialApp.router(routerConfig: router)),
+      );
       router.go(location);
       await tester.pumpAndSettle();
       expect(
@@ -111,7 +120,7 @@ void main() {
         reason: 'redirected away from $location',
       );
       expect(
-        find.byType(PlaceholderPage),
+        find.byType(Scaffold),
         findsWidgets,
         reason: 'no page for $location',
       );
@@ -145,7 +154,20 @@ void main() {
 
   testWidgets('click-through: candidate sign-up to deck', (tester) async {
     addTearDown(devSession.signOut);
-    await tester.pumpWidget(const ResuRhombusApp());
+    await tester.pumpWidget(
+      fakeScope(
+        const ResuRhombusApp(),
+        simulateParsing: true,
+        overrides: [
+          resumePickerProvider.overrideWithValue(
+            () async => ResumeFile.fromBytes(
+              name: 'resume.pdf',
+              bytes: Uint8List.fromList('%PDF-1.7'.codeUnits),
+            ),
+          ),
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Welcome'), findsWidgets);
 
@@ -155,16 +177,17 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    await tap("I'm looking for a job → Sign up");
-    await tap('[Fake] Create candidate account');
+    await tap("Find a job");
+    await tap('Create candidate account');
     expect(
       find.text('Before we start'),
       findsWidgets,
     ); // redirected to onboarding
     await tap('Agree and continue');
-    await tap('[Fake] Upload resume');
-    await tap('[Fake] Parsing finished');
-    await tap('Looks right, continue');
+    await tap('Choose file');
+    await tap('Upload resume');
+    expect(find.text('Review your skills'), findsWidgets);
+    await tap('Confirm skills');
     await tap('Start swiping');
     expect(find.text('Your deck'), findsWidgets);
     expect(find.byTooltip('Open navigation menu'), findsOneWidget);

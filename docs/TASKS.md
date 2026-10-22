@@ -394,6 +394,16 @@ screen UI remain in their later task blocks.
 #### C2 · As a user, I want one consistent branded look and reusable components, so every screen feels polished and readable.
 **Covers:** RC-01, RC-02 · **Size:** ≈ 2 days · **Needs:** — · **Stories:** —
 
+**Implementation:** Both role flows use `buildRRTheme()`, shared color/spacing
+tokens, and the `context.rr` extension. Inter and Space Grotesk fonts are bundled
+with licenses for offline use. Shared components include RhombusMark, ScoreBadge
+(three sizes), StatusChip, CompanyBadge, EmptyState, ShimmerShape, and ActionButton.
+The debug-only `/dev/gallery` route previews them. Existing page actions use
+plain function labels, such as Upload resume, Review skills, and Publish job;
+navigation and callbacks are preserved. Technical metadata is collapsed in debug
+builds. Golden tests cover score/status components and phone/desktop Resume
+layouts; tests also check large text and reduced-motion loading.
+
 **Build**
 - **RC-01 Theme:** `lib/ui/theme/rr_tokens.dart`, `rr_theme_ext.dart`, and `rr_theme.dart`, copied from `.claude/skills/resurhombus-ui/references/tokens-and-theme.md`. Add `google_fonts` (Space Grotesk and Inter). Replace the placeholder `ThemeData` in `lib/app/app.dart` (coordinate with D) and add the `context.rr` extension.
 - **RC-02 Components:** In `lib/ui/components/`: `RhombusMark` (a `CustomPainter` with filled, outlined, and dashed variants), `ScoreBadge` (3 sizes, band label, semantics), `EmptyState`, `ShimmerShape`, `StatusChip`, and `CompanyBadge`. A debug-only `/dev/gallery` route showing each one. Golden tests for `ScoreBadge` and `StatusChip`.
@@ -402,6 +412,18 @@ screen UI remain in their later task blocks.
 
 #### C3 · As a candidate, I want to pick my resume and watch a branded progress screen, so I know it is uploading and being read.
 **Covers:** CA-03, CA-04 · **Size:** ≈ 2 days · **Needs:** C1, C2 · **Stories:** US-07, US-08
+
+**Implementation:** Resume selection uses `file_picker` 13's `pickFile` and
+byte-stream API (the replacement for the older `withData` option), with PDF/DOCX
+filters, a bounded 5 MiB read, header validation, and SHA-256 hashing. The upload
+controller exposes choosing, uploading, and inline error states. Both entry points
+use the local repositories in this scaffold. The fake emits reading stages;
+`resumeStatusProvider` drives the branded prism screen, routes READY to Review,
+and enforces a 60-second deadline. FAILED, stream errors, and timeouts offer retry
+or manual draft creation. Resume sidebar access and existing review routes remain.
+Tests cover validation, cancellation, upload retry, each parse stage, timeout,
+fallback, navigation races, reduced motion, and phone/desktop visual snapshots.
+Actual storage and AI parsing remain C5 integration work.
 
 **Build**
 - **CA-03 Upload screen:** Replace `UploadResumeScreen`'s placeholder. Use `file_picker` (`allowedExtensions: ['pdf','docx']`, `withData: true` so it works on web). Validate size ≤ 5 MB, the extension, and the magic bytes (`%PDF` or the `PK` zip header). Compute a sha256 with the `crypto` package, call `ResumeRepository.upload()` (fake for now), and navigate to `Routes.parseProgress(id)`. Show inline errors.

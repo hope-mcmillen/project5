@@ -13,10 +13,10 @@ class ReviewProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Review your skills',
-      description: 'SkillReviewList: edit years, remove, add from taxonomy, view evidence. Confirms via confirm_profile.',
+      description: 'Check your skills and experience before continuing to your job preferences.',
       tasks: const ['CA-05a', 'CA-05b', 'CA-08'],
       stories: const ['US-09', 'US-10', 'US-11'],
-      links: [PageLink('Looks right, continue', Routes.candidatePreferences)],
+      links: [PageLink('Confirm skills', Routes.candidatePreferences)],
     );
   }
 }

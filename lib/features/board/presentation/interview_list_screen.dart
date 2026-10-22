@@ -13,12 +13,12 @@ class InterviewListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Interviews',
-      description: 'Advanced candidates with identity, email and signed resume link (resume-url function).',
+      description: 'Keep track of candidates you want to meet.',
       tasks: const ['RC-16', 'PL-23'],
       stories: const ['US-47', 'US-49'],
       links: [
         PageLink(
-          '[Fake] Open an advanced candidate',
+          'View candidate',
           Routes.candidateDetailFor(DemoIds.job, DemoIds.application),
         ),
       ],

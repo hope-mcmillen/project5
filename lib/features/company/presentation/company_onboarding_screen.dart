@@ -13,7 +13,7 @@ class CompanyOnboardingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Set up your company',
-      description: 'Recruiters must belong to one company: create a new workspace or join with an invite code.',
+      description: 'Create a workspace for your team or join an existing company with an invite code.',
       tasks: const ['RC-07'],
       stories: const ['US-30', 'US-32'],
       links: [

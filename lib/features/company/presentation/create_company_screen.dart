@@ -14,12 +14,13 @@ class CreateCompanyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Create company',
-      description: 'Name, website, logo → create_company RPC. Caller becomes owner; verified badge computed.',
+      description:
+          'Set up your company workspace to start sharing opportunities.',
       tasks: const ['RC-07', 'PL-13', 'PL-15'],
       stories: const ['US-30', 'US-33'],
       links: [
         PageLink(
-          '[Fake] Create company',
+          'Create company',
           Routes.jobs,
           onBefore: () => devSession.completeCompanyOnboarding(),
         ),

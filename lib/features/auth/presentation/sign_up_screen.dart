@@ -17,22 +17,22 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Sign up',
-      description: 'Email + password and Google sign-up. Passes the chosen role in sign-up metadata. Terms checkbox.',
+      description: 'Start your journey as a candidate or recruiter.',
       tasks: const ['PL-09', 'PL-10'],
       stories: const ['US-02'],
       params: {'Role': role ?? 'not chosen'},
       links: [
         PageLink(
-          '[Fake] Create candidate account',
+          'Create candidate account',
           Routes.deck,
           onBefore: () => devSession.signIn(AppRole.candidate),
         ),
         PageLink(
-          '[Fake] Create recruiter account',
+          'Create recruiter account',
           Routes.jobs,
           onBefore: () => devSession.signIn(AppRole.recruiter),
         ),
-        PageLink('Have an account? Sign in', Routes.signIn),
+        PageLink('Sign in', Routes.signIn),
       ],
     );
   }

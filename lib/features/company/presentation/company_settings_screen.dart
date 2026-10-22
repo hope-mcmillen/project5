@@ -14,7 +14,7 @@ class CompanySettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Company',
-      description: 'Company info, verified badge, invite codes (generate / copy / revoke), sign out.',
+      description: 'Manage your company workspace and team access.',
       tasks: const ['RC-18', 'PL-26'],
       stories: const ['US-31', 'US-33'],
       links: [

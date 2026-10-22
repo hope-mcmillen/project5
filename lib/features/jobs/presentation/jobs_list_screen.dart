@@ -13,18 +13,19 @@ class JobsListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Jobs',
-      description: 'Company jobs with status and new/total applicant counts (company_jobs_overview).',
+      description:
+          'Manage your job posts and review the people who have applied.',
       tasks: const ['RC-06', 'RC-11'],
       stories: const ['US-37', 'US-38'],
       links: [
         PageLink('New job', Routes.newJob, mode: LinkMode.push),
         PageLink(
-          '[Fake] Open a job\'s board',
+          'View applicants',
           Routes.boardFor(DemoIds.job),
           mode: LinkMode.push,
         ),
         PageLink(
-          '[Fake] Edit a job\'s details',
+          'Edit job details',
           Routes.jobDetailsFor(DemoIds.job),
           mode: LinkMode.push,
         ),

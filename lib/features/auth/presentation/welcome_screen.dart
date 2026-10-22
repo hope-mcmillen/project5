@@ -15,21 +15,14 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Welcome',
-      description: 'Role choice: "I\'m looking for a job" / "I\'m hiring" as two RoleChoiceCards (PRD §4).',
+      description: 'Find your next opportunity or build your team. Choose how you want to get started.',
       tasks: const ['PL-10'],
       stories: const ['US-01'],
       params: {'Pre-selected role': preselectedRole ?? 'none'},
       links: [
-        PageLink(
-          'I\'m looking for a job → Sign up',
-          '${Routes.signUp}?role=candidate',
-        ),
-        PageLink('I\'m hiring → Sign up', '${Routes.signUp}?role=recruiter'),
-        PageLink(
-          'I already have an account → Sign in',
-          Routes.signIn,
-          mode: LinkMode.push,
-        ),
+        PageLink('Find a job', '${Routes.signUp}?role=candidate'),
+        PageLink('Hire candidates', '${Routes.signUp}?role=recruiter'),
+        PageLink('Sign in', Routes.signIn, mode: LinkMode.push),
       ],
     );
   }

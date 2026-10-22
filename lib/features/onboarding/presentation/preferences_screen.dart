@@ -18,15 +18,13 @@ class PreferencesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlaceholderPage(
       title: 'Job preferences',
-      description:
-          'Location, remote, job type, work authorization and an optional salary floor '
-          '→ save_preferences RPC. These become hard filters in get_feed.',
+      description: 'Choose the locations, work arrangements, and roles that fit your next move.',
       tasks: const ['CA-06', 'CA-08'],
       stories: const ['US-12'],
       params: {'Mode': editing ? 'edit (from Profile)' : 'onboarding'},
       links: [
         if (editing)
-          const PageLink('Save', Routes.candidateProfile)
+          const PageLink('Save preferences', Routes.candidateProfile)
         else
           PageLink(
             'Start swiping',
