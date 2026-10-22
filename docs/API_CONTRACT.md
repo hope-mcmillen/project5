@@ -517,7 +517,7 @@ objects, anonymizes retained applications, deletes candidate-owned rows and the
 auth user; failures must be explicit and retries safe. It is not accepted until
 the no-remaining-data integration test passes.
 
-**Implemented/locally verified October 22 (A9/A10).** `resume-url` calls
+**Implemented, locally/CI verified and deployed to the approved hosted dev project October 22 (A9/A10).** `resume-url` calls
 `get_resume_access(p_application_id uuid) → text` with the caller's JWT. It checks
 role, company, committed deadline, non-anonymized INTERVIEW_REQUESTED status, and
 the applied profile snapshot's own resume. Only signing uses the service client.

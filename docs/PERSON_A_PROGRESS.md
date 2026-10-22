@@ -23,13 +23,13 @@ untested or externally blocked acceptance criteria as complete.
 
 - Repository cloned from https://github.com/hope-mcmillen/project5.
 - A1: local CLI config and CI/review templates implemented. Supabase starts locally.
-  User confirms dashboard access. Deployment-tool authentication, Google OAuth activation and GitHub admin setup remain unverified.
+  Hosted CLI access and the approved database/two-function deployment are verified. Google OAuth activation and GitHub admin setup remain unverified.
 - A2: three schema/RLS migrations and the Person A API contract draft implemented;
   local reset, lint and 42 access tests pass. Team contract approval remains pending.
 - A3–A4: implemented, verified and merged into shared master (PR #3).
 - A5–A6: implemented, verified and merged into shared master (PR #2).
 - A7–A8: implemented, CI verified, and merged by the team in PR #8.
-- A9–A10: implemented and locally verified in the final run; publishing/CI evidence follows below.
+- A9–A10: implemented, CI verified, pushed in PR #9 and deployed to the hosted dev project with explicit approval; frontend acceptance remains pending.
 - A11: out of scope per user, not completed.
 - Keep personal work on feature branches; do not merge master without required review.
 - Person B's work was merged into `origin/master` as `db084f3` (PR #1).
@@ -270,7 +270,7 @@ and remaining dependencies explicitly.
 
 | Block | Verified evidence | Remaining acceptance/dependency |
 |---|---|---|
-| A1 | Local services/config; reset/lint/test CI; review template/CODEOWNERS; all 59 owner/story labels | Hosted Google OAuth and deployment authentication/configuration; owner-admin Project/protection/auto-review enforcement unverified |
+| A1 | Local services/config; reset/lint/test CI; review template/CODEOWNERS; all 59 owner/story labels | Hosted Google OAuth/provider settings and owner-admin Project/protection/auto-review enforcement unverified |
 | A2 | Full schema/RLS, generated types, documented contract; clean reset and CI | Explicit C/D team contract approval/freeze remains a team gate |
 | A3 | Actual Auth role signups, one-time role selection, isolation and concurrency tests | Hosted Google sign-in remains unverified |
 | A4 | Company/invite creation/join/revoke, ownership and cap races; merged | No backend implementation blocker; hosted rehearsal pending |
@@ -278,17 +278,46 @@ and remaining dependencies explicitly.
 | A6 | Working local demo logins; deterministic taxonomy/vectors/world; current README | Fresh-teammate setup and full demo rehearsal remain unobserved |
 | A7 | Apply/pass/reasons, five-second undo, UTC 26th-apply denial and real-scoring/concurrency tests; merged | C's complete deck/pipeline integration and hosted rehearsal pending |
 | A8 | Blind exact-key board/detail, transitions/reject undo/withdraw/contact, company isolation and job lifecycle; merged | D's complete board/interview UI integration and hosted rehearsal pending |
-| A9 | Real signed links, multi-client live updates/isolation and full loop rules in CI | Hosted deployment; C/D subscription/deadline-refetch wiring and full-loop rehearsal pending |
-| A10 | Confirmed-domain verification; real retryable deletion, pagination, no-private-data and upload race tests | Hosted deployment and C's deletion UI/confirmation flow pending |
+| A9 | Real signed links, multi-client live updates/isolation and full loop rules in CI | C/D subscription/deadline-refetch wiring and full-loop rehearsal pending |
+| A10 | Confirmed-domain verification; real retryable deletion, pagination, no-private-data and upload race tests | C's deletion UI/confirmation flow pending |
 
 A1–A10 backend implementation is present; **not all end-to-end acceptance criteria
-are complete**. No remote Supabase migrations, secrets or functions were deployed.
-The repo skill explicitly requires asking before linked remote writes. User
-confirmation of dashboard access does not establish CLI deployment access or
-approve a particular deployment. Google OAuth needs real provider configuration;
+are complete**. The implementation handoff initially left hosted deployment
+pending. The user subsequently signed in and explicitly approved the 17 migrations
+and two functions; that deployment is now verified below. No demo seed or secret
+changes were included. Google OAuth needs real provider configuration;
 GitHub admin controls require the owner. A11 is excluded, not completed. Required
 cross-boundary reviews and shared-device/demo rehearsal remain team work.
 
 The scheduled work is superseded by this final run. Disable the heartbeat after
 publishing and recording final check results so it does not make duplicate commits
 later today. Final delivery/CI and automation-stop evidence follows below.
+
+
+### Approved hosted deployment — October 22
+
+- User confirmed CLI sign-in. Read-only project listing verified access to
+  `ehgogfdaxmwnqfogjvmk`. A migration dry-run identified all 17 migrations pending.
+- The user explicitly answered **yes** to deploying those 17 migrations and the
+  `resume-url` / `delete-account` functions, with no demo seed or secret changes.
+- All 17 migrations applied successfully using `--skip-vault`; a subsequent
+  read-only dry-run reports the remote database up to date with no pending items.
+- Deployed exactly the two approved functions from code commit `f842ae4`, both
+  ACTIVE, version 1, with `verify_jwt=true`. No B-owned parse functions deployed.
+- Hosted schema lint passes with zero error results. Both public function URLs
+  return 401 for unauthenticated POST and 200 with CORS headers for browser
+  preflight. No hosted test users/files or demo seed were created. Positive
+  authenticated application/deletion coverage remains the real local test suite;
+  hosted full-loop rehearsal still requires actual taxonomy/data and app wiring.
+- Supabase dashboard:
+  https://supabase.com/dashboard/project/ehgogfdaxmwnqfogjvmk/functions
+- Backend GitHub checks passed for `f842ae4` (both branch and PR runs):
+  https://github.com/hope-mcmillen/project5/actions/runs/39795526579
+  https://github.com/hope-mcmillen/project5/actions/runs/39795662736
+  Android build was still running when recorded; its final result is not claimed.
+- Final draft review PR: https://github.com/hope-mcmillen/project5/pull/9
+  No master merge was performed by this run.
+- Automation `complete-project5-person-a-by-thursday` was deleted after the final
+  implementation was brought forward; it will not repeat the afternoon work.
+- This follow-up commit records deployment evidence only, after Thursday's two
+  implementation commits. It does not change the deployed source or secrets.
