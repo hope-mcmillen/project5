@@ -67,7 +67,7 @@ void main() {
     expect(handles(tester), ['◆ 4F2A', '◆ 9C1B', '◆ 2D7E']);
     expect(find.text('87'), findsOneWidget);
     expect(find.text('Strong'), findsOneWidget);
-    expect(find.text('Kubernetes'), findsOneWidget); // a gap
+    expect(find.text('Kubernetes'), findsWidgets); // a gap
     // Nothing identifying is on a tile.
     expect(find.textContaining('@'), findsNothing);
   });

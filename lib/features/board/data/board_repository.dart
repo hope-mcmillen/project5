@@ -13,6 +13,7 @@ abstract interface class BoardRepository {
     String jobId, {
     int limit = 50,
     int offset = 0,
+    int? minScore,
   });
 
   Future<void> advance(String applicationId, {String? note});

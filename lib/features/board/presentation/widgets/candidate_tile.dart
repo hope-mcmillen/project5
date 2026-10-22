@@ -143,6 +143,8 @@ class _CandidateTileState extends State<CandidateTile> {
             child: Material(
               type: MaterialType.transparency,
               child: InkWell(
+                // The tile's Focus above is the single focus stop.
+                canRequestFocus: false,
                 borderRadius: BorderRadius.circular(12),
                 // A mouse hovering means a pointer device: click opens.
                 onTap: _hovering ? widget.onOpen : widget.onToggleActions,

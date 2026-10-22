@@ -305,8 +305,10 @@ GoRouter buildRouter({
                   ),
                   GoRoute(
                     path: ':jobId/board',
-                    builder: (context, state) =>
-                        BoardScreen(jobId: state.pathParameters['jobId']!),
+                    builder: (context, state) => BoardScreen(
+                      jobId: state.pathParameters['jobId']!,
+                      query: state.uri.queryParameters,
+                    ),
                     routes: [
                       GoRoute(
                         path: ':applicationId',

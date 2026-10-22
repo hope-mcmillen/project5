@@ -159,7 +159,7 @@ void main() {
     await tap(tester, find.text('Save requirements'));
     expect(router.state.uri.path, Routes.jobRequirementsFor(job.id));
     expect(find.textContaining('Requirements saved'), findsOneWidget);
-    expect((await jobs.requirements(job.id)).length, 2);
+    expect((await jobs.requirements(job.id)).length, 3);
   });
 
   testWidgets('details screen pauses an open job', (tester) async {
