@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../app/dev_session.dart';
+import '../../auth/data/auth_repository.dart';
 import '../../../ui/components/branded_page.dart';
 import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/theme/rr_tokens.dart';
@@ -73,9 +74,12 @@ class CandidateProfileScreen extends ConsumerWidget {
         ),
         const SizedBox(height: RRSpace.md),
         TextButton(
-          onPressed: () {
-            DevSessionScope.of(context).signOut();
-            context.go(Routes.welcome);
+          onPressed: () async {
+            await ref.read(authRepositoryProvider).signOut();
+            if (context.mounted) {
+              DevSessionScope.maybeOf(context)?.signOut();
+              context.go(Routes.welcome);
+            }
           },
           child: const Text('Sign out'),
         ),

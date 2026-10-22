@@ -50,22 +50,22 @@ export function getProvider(): LlmProvider; // switch on Deno.env.get("LLM_PROVI
 ## Normalization
 
 1. Lowercase plus alias table lookup. This is exact and cheap.
-2. Otherwise, embed the raw string and call the `match_skills(query vector, threshold 0.88, k 3)` RPC.
+2. Otherwise, embed the raw string and call the `match_skills(query vector, threshold 0.89, k 3)` RPC. Taxonomy skills are embedded as "name: aliases" (`skillEmbedText`).
 3. Otherwise, store it as `unmapped`. It stays on the profile but isn't scored, and it's logged for taxonomy review.
 
-Tune the 0.88 threshold with a small labeled list of alias pairs. Don't guess.
+The 0.89 threshold was tuned on `supabase/tests/fixtures/alias_pairs.json` (96%, no false maps; 0.88 maps "Microsoft Word"-style non-skills, 0.90 starts missing real ones). Re-run `deno task tune:threshold` after changing the taxonomy or embedding text. Don't guess.
 
 ## Scoring changes
 
 The formula is in PRD §8.4. When changing weights or the formula:
 1. Update the SQL function **and** the TypeScript mirror (if one exists for previews) together.
 2. Bump `scoring_version`.
-3. Run the regression fixture: about 50 labeled resume×job pairs in `supabase/tests/fixtures/match_pairs.json` with expected bands. Report the band-agreement % before and after.
+3. Run the regression: 74 hand-labeled resume×job pairs in `supabase/tests/fixtures/match_pairs.json` (`score_test.ts` prints a confusion table and fails below 80%). `deno task tune:score` sweeps parameters. Report the band-agreement % before and after. v1 → v2 went 70% → 84%. Don't relabel pairs to make a formula pass. Labels are human judgment of fit.
 4. Update PRD §8.4.
 
 ## Debugging "the score looks wrong"
 
-Walk the chain in order. Don't jump straight to prompt tweaks:
+Walk the chain in order. Don't jump straight to prompt tweaks. `deno task try:resume <file>` (from `supabase/functions`) prints steps 1–4 for any resume:
 1. **Raw text.** Did text extraction read the section at all? Check whether it took the OCR path (scan), how two-column lines were ordered, and whether the hidden-text filter dropped real text.
 2. **Extraction JSON.** Is the skill present, and does its evidence pass the check?
 3. **Normalization.** Did it map to the right canonical skill, or end up `unmapped` or wrong?

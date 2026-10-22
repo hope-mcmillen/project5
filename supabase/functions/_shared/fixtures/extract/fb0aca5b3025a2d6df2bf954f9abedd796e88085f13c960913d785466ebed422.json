@@ -1,0 +1,100 @@
+{
+  "roles": [
+    {
+      "title": "Frontend Engineer",
+      "start": "2022-09",
+      "end": "present",
+      "skills_used": [
+        "React",
+        "TypeScript",
+        "Next.js",
+        "Storybook",
+        "Tailwind CSS",
+        "Jest",
+        "Cypress"
+      ],
+      "evidence": "Frontend Engineer, Bluebonnet Retail — Sep 2022 – Present"
+    },
+    {
+      "title": "Web Developer",
+      "start": "2021-06",
+      "end": "2022-08",
+      "skills_used": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "GraphQL",
+        "Apollo Client"
+      ],
+      "evidence": "Web Developer, Hill Country Media — Jun 2021 – Aug 2022"
+    }
+  ],
+  "skills": [
+    {
+      "raw": "React",
+      "evidence": "Rebuilt the e-commerce checkout in React and TypeScript on Next.js.",
+      "context": "role:0"
+    },
+    {
+      "raw": "TypeScript",
+      "evidence": "Rebuilt the e-commerce checkout in React and TypeScript on Next.js.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Next.js",
+      "evidence": "Rebuilt the e-commerce checkout in React and TypeScript on Next.js.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Storybook",
+      "evidence": "Created a Storybook component library styled with Tailwind CSS.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Tailwind CSS",
+      "evidence": "Created a Storybook component library styled with Tailwind CSS.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Jest",
+      "evidence": "Wrote Jest unit tests and Cypress end-to-end tests.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Cypress",
+      "evidence": "Wrote Jest unit tests and Cypress end-to-end tests.",
+      "context": "role:0"
+    },
+    {
+      "raw": "HTML",
+      "evidence": "Built marketing pages with responsive web design in HTML, CSS, and JavaScript.",
+      "context": "role:1"
+    },
+    {
+      "raw": "CSS",
+      "evidence": "Built marketing pages with responsive web design in HTML, CSS, and JavaScript.",
+      "context": "role:1"
+    },
+    {
+      "raw": "JavaScript",
+      "evidence": "Built marketing pages with responsive web design in HTML, CSS, and JavaScript.",
+      "context": "role:1"
+    },
+    {
+      "raw": "GraphQL",
+      "evidence": "Queried a GraphQL API with Apollo Client.",
+      "context": "role:1"
+    },
+    {
+      "raw": "Apollo Client",
+      "evidence": "Queried a GraphQL API with Apollo Client.",
+      "context": "role:1"
+    }
+  ],
+  "education": [
+    {
+      "level": "B.A.",
+      "field": "Design"
+    }
+  ]
+}

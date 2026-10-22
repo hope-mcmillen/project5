@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/dev_session.dart';
+import '../../../app/scaffold_hooks.dart';
+
 import '../../../app/routes.dart';
 import '../../../core/models/candidate_models.dart';
 import '../../../core/models/display_labels.dart';
@@ -51,12 +53,13 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
                       _location.clear();
                       final router = GoRouter.of(context);
                       final source = router.state.uri.path;
-                      final session = DevSessionScope.of(context);
+                      final session = DevSessionScope.maybeOf(context);
                       if (await controller.save() &&
                           context.mounted &&
                           router.state.uri.path == source) {
                         if (!widget.editing) {
-                          session.completeCandidateOnboarding();
+                          session?.completeCandidateOnboarding();
+                          finishOnboardingForScaffold(ref, AppRole.candidate);
                         }
                         if (context.mounted) {
                           context.go(

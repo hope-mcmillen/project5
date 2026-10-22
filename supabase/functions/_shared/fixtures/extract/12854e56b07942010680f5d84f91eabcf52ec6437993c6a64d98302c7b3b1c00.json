@@ -1,0 +1,62 @@
+{
+  "roles": [
+    {
+      "title": "Backend Developer",
+      "start": "2020-03",
+      "end": "present",
+      "skills_used": [
+        "Spring Boot",
+        "Java",
+        "Hibernate",
+        "MySQL",
+        "Maven",
+        "JUnit",
+        "Git"
+      ],
+      "evidence": "Backend Developer, Calcasieu Energy Software — Mar 2020 – Present • Built Spring Boot microservices in Java with Hibernate over MySQL. • Maintained Maven builds and JUnit test suites. • Led code review in Git for a team of six."
+    }
+  ],
+  "skills": [
+    {
+      "raw": "Java",
+      "evidence": "Built Spring Boot microservices in Java with Hibernate over MySQL.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Spring Boot",
+      "evidence": "Built Spring Boot microservices in Java with Hibernate over MySQL.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Hibernate",
+      "evidence": "Built Spring Boot microservices in Java with Hibernate over MySQL.",
+      "context": "role:0"
+    },
+    {
+      "raw": "MySQL",
+      "evidence": "Built Spring Boot microservices in Java with Hibernate over MySQL.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Maven",
+      "evidence": "Maintained Maven builds and JUnit test suites.",
+      "context": "role:0"
+    },
+    {
+      "raw": "JUnit",
+      "evidence": "Maintained Maven builds and JUnit test suites.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Git",
+      "evidence": "Led code review in Git for a team of six.",
+      "context": "role:0"
+    }
+  ],
+  "education": [
+    {
+      "level": "BS",
+      "field": "Computer Science"
+    }
+  ]
+}

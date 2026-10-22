@@ -44,6 +44,9 @@ jobs:
       - name: 📥 Get dependencies
         run: flutter pub get
 
+      - name: Analyze Flutter
+        run: flutter analyze
+
       - name: ✅ Run tests
         run: flutter test --coverage
 

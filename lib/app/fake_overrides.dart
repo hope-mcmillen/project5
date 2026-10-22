@@ -1,5 +1,14 @@
 import 'package:flutter_riverpod/misc.dart';
 
+import '../features/auth/data/auth_repository.dart';
+import '../features/auth/data/fake_auth_repository.dart';
+import '../features/company/data/company_repository.dart';
+import '../features/company/data/fake_company_repository.dart';
+import '../features/jobs/data/job_repository.dart';
+import '../features/jobs/data/fake_job_repository.dart';
+import '../features/board/data/board_repository.dart';
+import '../features/board/data/fake_board_repository.dart';
+
 import '../features/profile/data/profile_repository.dart';
 import '../features/profile/data/fake_profile_repository.dart';
 import '../features/deck/data/feed_repository.dart';
@@ -11,6 +20,36 @@ import '../features/pipeline/data/fake_application_repository.dart';
 
 /// Fresh repositories per provider scope. No backend initialization required.
 List<Override> fakeRepositoryOverrides({
+  Duration? latency,
+  bool simulateParsing = true,
+  FakeAuthRepository? auth,
+  FakeCompanyRepository? companies,
+  FakeJobRepository? jobs,
+  FakeBoardRepository? board,
+}) {
+  final effectiveLatency =
+      latency ?? auth?.latency ?? const Duration(milliseconds: 300);
+  final fakeAuth = auth ?? FakeAuthRepository(latency: effectiveLatency);
+  return [
+    authRepositoryProvider.overrideWithValue(fakeAuth),
+    companyRepositoryProvider.overrideWithValue(
+      companies ??
+          FakeCompanyRepository(auth: fakeAuth, latency: fakeAuth.latency),
+    ),
+    jobRepositoryProvider.overrideWithValue(
+      jobs ?? FakeJobRepository(latency: fakeAuth.latency),
+    ),
+    boardRepositoryProvider.overrideWithValue(
+      board ?? FakeBoardRepository(latency: fakeAuth.latency),
+    ),
+    ...candidateRepositoryOverrides(
+      latency: effectiveLatency,
+      simulateParsing: simulateParsing,
+    ),
+  ];
+}
+
+List<Override> candidateRepositoryOverrides({
   Duration latency = const Duration(milliseconds: 300),
   bool simulateParsing = true,
 }) => [

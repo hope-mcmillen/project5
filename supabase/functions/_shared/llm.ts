@@ -2,67 +2,27 @@
 // Functions goes through getProvider(), so switching providers is one setting
 // (LLM_PROVIDER) and tests/CI/seeding run on the free mock.
 //
-// The real provider is Google Gemini (PRD v0.5). It arrives in B3 (AI-09),
-// together with the llm_usage log and the daily token budget (AI-13).
-import { EXTRACTION_SCHEMAS, type SchemaName } from "./schemas.ts";
+// The real provider is Google Gemini (PRD v0.5, gemini.ts). Edge Functions
+// should use getMeteredProvider() from usage.ts, which adds the llm_usage log
+// and the daily token budget (AI-13) on top of this.
+import { GeminiProvider } from "./gemini.ts";
+import {
+  EMBED_DIMS,
+  type EmbedResult,
+  estimateTokens,
+  type ExtractOptions,
+  type ExtractResult,
+  fixtureKey,
+  LlmConfigError,
+  type LlmProvider,
+  normalizeForKey,
+  PROVIDER_NAMES,
+  sha256Hex,
+  type TranscribeResult,
+} from "./llm_base.ts";
+import { EXTRACTION_SCHEMAS } from "./schemas.ts";
 
-/** Vector width of skills/profile_versions/jobs.embedding (vector(1536)). */
-export const EMBED_DIMS = 1536;
-
-export type ProviderName = "mock" | "gemini";
-export const PROVIDER_NAMES: readonly ProviderName[] = ["mock", "gemini"];
-
-export interface Usage {
-  inputTokens: number;
-  outputTokens: number;
-}
-
-export interface ExtractOptions {
-  schemaName: SchemaName;
-  /** JSON Schema sent as the structured-output format (from EXTRACTION_SCHEMAS). */
-  schema: Record<string, unknown>;
-  /** Short declarative instructions. Never contains user text. */
-  system: string;
-  /** Sanitized resume/JD text. Callers wrap it in <resume>…</resume> or <job>…</job>. */
-  untrustedText: string;
-}
-
-export interface ExtractResult<T> {
-  /** Raw model output. Callers must still run validateExtraction() on it. */
-  data: T;
-  usage: Usage;
-  provider: ProviderName;
-  model: string;
-}
-
-export interface EmbedResult {
-  vectors: number[][];
-  usage: Usage;
-  provider: ProviderName;
-  model: string;
-}
-
-export interface TranscribeResult {
-  text: string;
-  usage: Usage;
-  provider: ProviderName;
-  model: string;
-}
-
-export interface LlmProvider {
-  readonly name: ProviderName;
-  extract<T = unknown>(opts: ExtractOptions): Promise<ExtractResult<T>>;
-  embed(texts: string[]): Promise<EmbedResult>;
-  /** OCR for image-only PDFs (PRD §8.1). Text-layer PDFs and DOCX never come here. */
-  transcribe(pdf: Uint8Array<ArrayBuffer>): Promise<TranscribeResult>;
-}
-
-export class LlmConfigError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "LlmConfigError";
-  }
-}
+export * from "./llm_base.ts";
 
 type Env = (key: string) => string | undefined;
 
@@ -77,7 +37,12 @@ export function getProvider(env: Env = (k) => Deno.env.get(k)): LlmProvider {
     case "mock":
       return new MockProvider();
     case "gemini":
-      throw new LlmConfigError(`LLM_PROVIDER=${name} is not implemented yet (B3 / AI-09). Use LLM_PROVIDER=mock.`);
+      return new GeminiProvider({
+        apiKey: env("GEMINI_API_KEY") ?? "",
+        extractModel: env("LLM_EXTRACT_MODEL"),
+        embedModel: env("LLM_EMBED_MODEL"),
+        allowEmbedModelChange: env("ALLOW_EMBED_MODEL_CHANGE") === "true",
+      });
     default:
       throw new LlmConfigError(
         `LLM_PROVIDER must be one of ${PROVIDER_NAMES.join(", ")} (got ${
@@ -85,31 +50,6 @@ export function getProvider(env: Env = (k) => Deno.env.get(k)): LlmProvider {
         }).`,
       );
   }
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Whitespace-insensitive key, so sanitizer spacing changes don't break fixtures. */
-export function normalizeForKey(text: string): string {
-  return text.replace(/\s+/g, " ").trim();
-}
-
-export async function sha256Hex(data: string | Uint8Array<ArrayBuffer>): Promise<string> {
-  const bytes = typeof data === "string" ? new TextEncoder().encode(data) : data;
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-/** File name stem the mock looks up for a given input text. */
-export function fixtureKey(text: string): Promise<string> {
-  return sha256Hex(normalizeForKey(text));
-}
-
-/** Rough token estimate (chars ÷ 4), matching the sanitizer's budget math. */
-export function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
 }
 
 // ---------------------------------------------------------------------------

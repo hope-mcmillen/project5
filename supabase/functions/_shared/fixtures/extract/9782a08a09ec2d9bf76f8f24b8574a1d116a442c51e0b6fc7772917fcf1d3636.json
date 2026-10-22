@@ -1,0 +1,99 @@
+{
+  "roles": [
+    {
+      "title": "Mobile Developer",
+      "start": "2022-03",
+      "end": "present",
+      "skills_used": [
+        "Flutter",
+        "Dart",
+        "Provider",
+        "Riverpod",
+        "Firebase Auth",
+        "Cloud Firestore",
+        "Codemagic"
+      ],
+      "evidence": "Mobile Developer, Levee Labs — Mar 2022 – Present"
+    },
+    {
+      "title": "Junior Flutter Developer",
+      "start": "2020-06",
+      "end": "2022-02",
+      "skills_used": [
+        "Figma",
+        "Bloc",
+        "REST APIs",
+        "Git"
+      ],
+      "evidence": "Junior Flutter Developer, Spanish Moss Studio — Jun 2020 – Feb 2022"
+    }
+  ],
+  "skills": [
+    {
+      "raw": "Flutter",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "role:0"
+    },
+    {
+      "raw": "Dart",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "role:0"
+    },
+    {
+      "raw": "Riverpod",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "role:0"
+    },
+    {
+      "raw": "Bloc",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "role:1"
+    },
+    {
+      "raw": "Firebase",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "skills"
+    },
+    {
+      "raw": "Cloud Firestore",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "role:0"
+    },
+    {
+      "raw": "REST APIs",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "role:1"
+    },
+    {
+      "raw": "Git",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "role:1"
+    },
+    {
+      "raw": "Figma",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "role:1"
+    },
+    {
+      "raw": "Codemagic",
+      "evidence": "Flutter, Dart, Riverpod, Bloc, Firebase, Cloud Firestore, REST APIs, Git, Figma, Codemagic",
+      "context": "role:0"
+    },
+    {
+      "raw": "Provider",
+      "evidence": "Migrated state management from Provider to Riverpod, cutting rebuild bugs by half.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Firebase Auth",
+      "evidence": "Integrated Firebase Auth and Cloud Firestore with an offline-first sync queue.",
+      "context": "role:0"
+    }
+  ],
+  "education": [
+    {
+      "level": "B.S.",
+      "field": "Computer Science"
+    }
+  ]
+}

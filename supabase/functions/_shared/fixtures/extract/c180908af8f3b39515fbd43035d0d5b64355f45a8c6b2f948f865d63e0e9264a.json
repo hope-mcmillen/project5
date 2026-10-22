@@ -1,0 +1,88 @@
+{
+  "roles": [
+    {
+      "title": "Machine Learning Engineer",
+      "start": "2022-04",
+      "end": "present",
+      "skills_used": [
+        "PyTorch",
+        "pgvector",
+        "MLflow",
+        "FastAPI",
+        "Docker",
+        "Google Cloud"
+      ],
+      "evidence": "Machine Learning Engineer, Sabine Health AI — Apr 2022 – Present"
+    },
+    {
+      "title": "Data Scientist",
+      "start": "2020-01",
+      "end": "2022-03",
+      "skills_used": [
+        "scikit-learn",
+        "Pandas",
+        "SQL",
+        "Python"
+      ],
+      "evidence": "Data Scientist, Brazos Analytics — Jan 2020 – Mar 2022"
+    }
+  ],
+  "skills": [
+    {
+      "raw": "Python",
+      "evidence": "Ran A/B testing and statistical analysis in SQL and Python.",
+      "context": "role:1"
+    },
+    {
+      "raw": "PyTorch",
+      "evidence": "Trained PyTorch models that flag sepsis risk from vitals.",
+      "context": "role:0"
+    },
+    {
+      "raw": "scikit-learn",
+      "evidence": "Built churn models with scikit-learn and Pandas.",
+      "context": "role:1"
+    },
+    {
+      "raw": "Pandas",
+      "evidence": "Built churn models with scikit-learn and Pandas.",
+      "context": "role:1"
+    },
+    {
+      "raw": "SQL",
+      "evidence": "Ran A/B testing and statistical analysis in SQL and Python.",
+      "context": "role:1"
+    },
+    {
+      "raw": "MLflow",
+      "evidence": "Tracked experiments in MLflow and served models with FastAPI in Docker on Google Cloud.",
+      "context": "role:0"
+    },
+    {
+      "raw": "FastAPI",
+      "evidence": "Tracked experiments in MLflow and served models with FastAPI in Docker on Google Cloud.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Docker",
+      "evidence": "Tracked experiments in MLflow and served models with FastAPI in Docker on Google Cloud.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Google Cloud",
+      "evidence": "Tracked experiments in MLflow and served models with FastAPI in Docker on Google Cloud.",
+      "context": "role:0"
+    },
+    {
+      "raw": "pgvector",
+      "evidence": "Built a retrieval-augmented generation assistant over care guidelines using pgvector.",
+      "context": "role:0"
+    }
+  ],
+  "education": [
+    {
+      "level": "MS",
+      "field": "Data Science"
+    }
+  ]
+}

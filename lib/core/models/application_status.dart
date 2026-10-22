@@ -1,4 +1,4 @@
-/// Mirrors the database application_status enum.
+/// Mirrors the Postgres `application_status` enum (SCHEMA.md §3).
 enum ApplicationStatus {
   applied('APPLIED'),
   underReview('UNDER_REVIEW'),
@@ -8,8 +8,12 @@ enum ApplicationStatus {
   jobClosed('JOB_CLOSED');
 
   const ApplicationStatus(this.db);
+
+  /// The exact Postgres value.
   final String db;
+
   String toDb() => db;
+
   static ApplicationStatus fromDb(String value) =>
-      values.firstWhere((v) => v.db == value);
+      values.firstWhere((s) => s.db == value);
 }

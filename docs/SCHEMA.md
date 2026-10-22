@@ -83,7 +83,7 @@ erDiagram
 | `skills` | Canonical taxonomy, seeded (AI-01) | Unique `name`, `category`, `aliases text[]` (GIN index), `embedding` (HNSW cosine index) |
 | `skill_relations` | Curated partial credit between related skills | `(skill_id, related_skill_id)` with `credit` between 0 and 1, e.g. MySQL → PostgreSQL = 0.6 |
 | `candidates` | Candidate-specific data | `active_version_id` points to the confirmed profile used for matching. `preferences jsonb` holds the hard filters (shape below). `discoverable` is for Phase 2. |
-| `resumes` | One row per uploaded file | `storage_path` = `resumes/{uid}/{uuid}.pdf\|docx`. `file_hash` (sha256, extraction cache). `status` is UPLOADED → PARSING_LAYOUT → EXTRACTING → NORMALIZING → READY / FAILED. `failure_reason`. `extraction` holds the validated LLM JSON. |
+| `resumes` | One row per uploaded file | `storage_path` = `{uid}/{uuid}.pdf\|docx` inside the `resumes` bucket. `file_hash` (sha256, extraction cache). `status` is UPLOADED → PARSING_LAYOUT → EXTRACTING → NORMALIZING → READY / FAILED. `failure_reason`. `extraction` holds the validated LLM JSON. |
 | `profile_versions` | Versioned candidate profile | Unique `(candidate_id, version)`. `source` is `resume` or `manual`. `confirmed` is required before swiping. `total_years`, `education`, `embedding`. |
 | `candidate_skills` | Skills in one profile version | `skill_id` is null when unmapped (kept but not scored). `raw_name`. `years` is null when the skill is only listed, not evidenced. `evidence` is a quote from the resume. `source` is `ai` or `user`. Unique per version and skill. |
 
@@ -203,7 +203,7 @@ All are `security definer` with `set search_path = public`, and each checks the 
 | `advance(p_application_id, p_note = null)` | recruiter | A | → INTERVIEW_REQUESTED |
 | `reject(p_application_id, p_reason = null)` / `undo_reject(p_application_id)` | recruiter | A | Undo works for 10 s |
 | `get_interview_list(p_job_id = null) → jsonb[]` | recruiter | A | Advanced candidates, with identity |
-| `match_skills(p_embedding vector, p_threshold = 0.88, p_k = 3)` | Edge Functions | B | Nearest canonical skills |
+| `match_skills(p_embedding vector, p_threshold = 0.89, p_k = 3)` | Edge Functions | B | Nearest canonical skills |
 | `compute_match(p_profile_version_id, p_job_id) → {score, breakdown}` | other RPCs | B | PRD §8.4 formula |
 | `get_feed(p_limit = 20, p_cursor text = null) → {cards jsonb[], next_cursor}` | candidate | B | Hard filters, then vector prefilter, then score, then Feed Rank |
 | `register_device(p_token, p_platform)` | any | A | *(Later)* |
@@ -265,3 +265,72 @@ All are `security definer` with `set search_path = public`, and each checks the 
   "education": [{ "level": "BS", "field": "Computer Science" }]
 }
 ```
+
+## 7. Implemented foundation (A2, October 20, 2026)
+
+The three `20261018{090000,100000,110000}` migrations precede B's scoring
+migrations and implement the reference tables, explicit column privileges, RLS,
+security-invoker views and Realtime publication. Helpers `my_company_id()`,
+`my_owned_company_id()` and self-scoped `has_my_application(uuid)` avoid recursive
+policies. Clients cannot directly change role, verification, active profile, parse
+state, job lifecycle or application status. These writes use the scheduled RPCs.
+`my_applications` also filters by caller ID, so recruiters cannot use the candidate
+pipeline view as an alternate board. Storage paths are bucket-relative; pass
+`resumes` separately to the Storage API. Business RPCs remain A3–A11 work.
+
+## 8. Account/company onboarding (A3–A4, October 21, 2026)
+
+Append-only migrations `20261021090000_account_roles.sql` and
+`20261021091000_company_onboarding.sql` implement the auth trigger, one-time
+initial role choice, company creation and invite lifecycle. Existing profiles
+are preserved during backfill. Initial-role/company membership requests lock
+the caller's profile; joining also locks the invite and checks expiry against
+the wall clock after waiting. All mutation RPCs are authenticated-only with
+explicit authorization and a fixed search path. New companies initially remained unverified
+until A10. Storage/logo upload remains A5.
+
+## 9. Private storage and reviewed profiles (A5–A6, October 21, 2026)
+
+Migrations `20261021150000_private_storage.sql` and
+`20261021151000_confirm_profiles_preferences.sql` add bucket policies and the
+three profile/preferences RPCs. Exact validation limits, provenance, total-years
+semantics and immutable upload rules are in API_CONTRACT.md §7.2. Final profile
+vectors use B's taxonomy centroid, matching job vectors without AI calls.
+
+Local seeds load `seed/skills.sql`, `seed/skills_embeddings.sql`,
+`seed/demo_data.sql`, then `seed.sql`. Generated B data is preserved verbatim;
+A's seed marks trigger-created candidate rows as synthetic and configures two
+working local Auth identities. Only the README's local-dev section documents
+demo credentials.
+
+## 10. Application and recruiter RPCs (A7–A8, October 22, 2026)
+
+Four append-only `20261022{090000,091000,092000,093000}` migrations implement
+swipe/undo/reasons, status transitions/contacts, blind board reads, and validated
+job requirement/lifecycle writes. All public mutations require authenticated
+callers and explicitly enforce role/ownership. Internal dispatcher, tile and
+redaction functions have no anon/authenticated EXECUTE grants. Public signatures
+and errors are documented in API_CONTRACT.md §§7.3–7.4. No table shape or B
+scoring formula is changed. Relevant tests include the 26th apply, UTC rollover,
+long-transaction undo expiry, status transition matrix, exact tile key set,
+identity gating, company isolation and independent-session race checks.
+
+
+### A9/A10 backend implementation (October 22, 2026)
+
+Private resume links now use the applied profile snapshot, caller-scoped
+`get_resume_access(uuid)` authorization and service-only Storage signing for
+600 seconds. `PUBLIC_SUPABASE_URL` supplies the external origin in local
+containers. Account deletion uses candidate-only, retryable
+`prepare_account_deletion()` before Edge Storage/Auth cleanup; it detaches swipe
+references, clears private application data, retains anonymized totals, deletes
+candidate-owned rows and blocks uploads through a candidate row lock. Auth is
+removed last. Cross-service failures can leave partial cleanup and return an
+explicit error. Exact confirmed email/website host matching (excluding common
+free-mail domains) supplies the soft company badge; website edits recompute it.
+Trusted local seed fixtures explicitly retain one synthetic verified company.
+See API_CONTRACT §7.5 for the endpoints, lifecycle and remaining frontend gates.
+Real local socket tests cover application, resume parse and job event delivery
+and cross-user/company isolation; they replace a manual Studio-only check with
+repeatable CI evidence. Hosted delivery and C/D screen integration still require
+separate acceptance. A11 notifications remain excluded.

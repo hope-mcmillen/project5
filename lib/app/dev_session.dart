@@ -2,11 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../core/models/app_role.dart';
 
-/// SCAFFOLD ONLY: an in-memory stand-in for the signed-in user, so the
-/// routing can be clicked through before real auth exists.
-///
-/// TODO(PL-09, PL-11): replace with Supabase auth state + `profiles` lookup
-/// (Riverpod providers), and delete this file.
+/// Isolated routing state for candidate component previews and tests.
+/// Both app entry points use auth providers and RouteSession instead.
 class DevSession extends ChangeNotifier {
   AppRole? _role;
   bool _candidateOnboarded = false;
@@ -50,6 +47,8 @@ class DevSessionScope extends InheritedWidget {
     required super.child,
   });
   final DevSession session;
+  static DevSession? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<DevSessionScope>()?.session;
   static DevSession of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<DevSessionScope>()?.session ??
       devSession;

@@ -1,0 +1,98 @@
+{
+  "roles": [
+    {
+      "title": "Data Engineer",
+      "start": "2021-08",
+      "end": "present",
+      "skills_used": [
+        "PySpark",
+        "Apache Airflow",
+        "Snowflake",
+        "dbt",
+        "Apache Kafka"
+      ],
+      "evidence": "Aug 2021 – Present Data Engineer, Atchafalaya Logistics • Built PySpark jobs that process 400GB of shipment telemetry nightly. • Orchestrated 60+ DAGs in Apache Airflow. • Modeled a Snowflake warehouse with dbt using a star schema. • Streamed GPS events through Apache Kafka into Snowflake."
+    },
+    {
+      "title": "Data Analyst",
+      "start": "2019-05",
+      "end": "2021-07",
+      "skills_used": [
+        "SQL",
+        "Tableau",
+        "Excel",
+        "Python",
+        "Pandas"
+      ],
+      "evidence": "May 2019 – Jul 2021 Data Analyst, Acadiana Rail Co. • Wrote SQL reports and Tableau dashboards for the operations team. • Automated Excel reporting with Python and Pandas."
+    }
+  ],
+  "skills": [
+    {
+      "raw": "SQL",
+      "evidence": "Wrote SQL reports and Tableau dashboards for the operations team.",
+      "context": "role:1"
+    },
+    {
+      "raw": "Python",
+      "evidence": "Automated Excel reporting with Python and Pandas.",
+      "context": "role:1"
+    },
+    {
+      "raw": "Apache Spark",
+      "evidence": "Skills SQL | Python | Apache Spark | Apache Airflow | Apache Kafka | Snowflake | dbt | Tableau | AWS",
+      "context": "skills"
+    },
+    {
+      "raw": "Apache Airflow",
+      "evidence": "Orchestrated 60+ DAGs in Apache Airflow.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Apache Kafka",
+      "evidence": "Streamed GPS events through Apache Kafka into Snowflake.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Snowflake",
+      "evidence": "Modeled a Snowflake warehouse with dbt using a star schema.",
+      "context": "role:0"
+    },
+    {
+      "raw": "dbt",
+      "evidence": "Modeled a Snowflake warehouse with dbt using a star schema.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Tableau",
+      "evidence": "Wrote SQL reports and Tableau dashboards for the operations team.",
+      "context": "role:1"
+    },
+    {
+      "raw": "AWS",
+      "evidence": "Skills SQL | Python | Apache Spark | Apache Airflow | Apache Kafka | Snowflake | dbt | Tableau | AWS",
+      "context": "skills"
+    },
+    {
+      "raw": "PySpark",
+      "evidence": "Built PySpark jobs that process 400GB of shipment telemetry nightly.",
+      "context": "role:0"
+    },
+    {
+      "raw": "Excel",
+      "evidence": "Automated Excel reporting with Python and Pandas.",
+      "context": "role:1"
+    },
+    {
+      "raw": "Pandas",
+      "evidence": "Automated Excel reporting with Python and Pandas.",
+      "context": "role:1"
+    }
+  ],
+  "education": [
+    {
+      "level": "B.S.",
+      "field": "Statistics"
+    }
+  ]
+}
