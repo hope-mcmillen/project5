@@ -1,4 +1,5 @@
 import 'candidate_enums.dart';
+import 'candidate_experience.dart';
 import 'education.dart';
 import 'candidate_skill.dart';
 
@@ -16,8 +17,12 @@ class ProfileVersion {
     List<Education> education = const [],
     required this.createdAt,
     List<CandidateSkill> candidateSkills = const [],
+    List<CandidateExperience> experiences = const [],
   }) : education = List.unmodifiable(education),
-       candidateSkills = List.unmodifiable(candidateSkills);
+       candidateSkills = List.unmodifiable(candidateSkills),
+       experiences = List.unmodifiable(
+         [...experiences]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder)),
+       );
   final String id;
   final String candidateId;
   final String? resumeId;
@@ -29,6 +34,9 @@ class ProfileVersion {
   final List<Education> education;
   final DateTime createdAt;
   final List<CandidateSkill> candidateSkills;
+
+  /// Parsed from the resume, most recent first. Empty for manual profiles.
+  final List<CandidateExperience> experiences;
   factory ProfileVersion.fromJson(Map<String, dynamic> json) => ProfileVersion(
     id: json['id'] as String,
     candidateId: json['candidate_id'] as String,
@@ -49,6 +57,9 @@ class ProfileVersion {
     candidateSkills: (json['candidate_skills'] as List? ?? const [])
         .map((v) => CandidateSkill.fromJson(v as Map<String, dynamic>))
         .toList(),
+    experiences: (json['candidate_experiences'] as List? ?? const [])
+        .map((v) => CandidateExperience.fromJson(v as Map<String, dynamic>))
+        .toList(),
   );
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -62,5 +73,6 @@ class ProfileVersion {
     'education': education.map((v) => v.toJson()).toList(),
     'created_at': createdAt.toIso8601String(),
     'candidate_skills': candidateSkills.map((v) => v.toJson()).toList(),
+    'candidate_experiences': experiences.map((v) => v.toJson()).toList(),
   };
 }

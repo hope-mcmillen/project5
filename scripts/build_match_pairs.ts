@@ -8,8 +8,8 @@
 import { MemoryJobRepo } from "../supabase/functions/_shared/job_repo.ts";
 import { parseJob } from "../supabase/functions/_shared/job_pipeline.ts";
 import { MockProvider } from "../supabase/functions/_shared/llm.ts";
-import { parseResume } from "../supabase/functions/_shared/resume_pipeline.ts";
-import { MemoryResumeRepo } from "../supabase/functions/_shared/resume_repo_memory.ts";
+import { MemoryProfileStore } from "../supabase/functions/_shared/profile_store.ts";
+import { parseResume } from "../supabase/functions/_shared/resume_agent.ts";
 import { seedSkillIndex } from "../supabase/functions/_shared/seed_taxonomy.ts";
 
 const SEED = new URL("../supabase/seed/", import.meta.url);
@@ -36,27 +36,19 @@ for (
     b,
   ) => a.name.localeCompare(b.name))
 ) {
-  const repo = new MemoryResumeRepo();
   const user = crypto.randomUUID();
-  const id = crypto.randomUUID();
-  const mime = name.endsWith(".docx")
-    ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    : "application/pdf";
-  repo.add(
-    { id, candidate_id: user, mime_type: mime },
-    await Deno.readFile(new URL(`resumes/${name}`, SEED)),
-  );
+  const store = new MemoryProfileStore(new Set([user]));
   const res = await parseResume({
-    repo,
+    store,
     llm,
     index,
     now: () => TODAY,
     log: () => {},
-  }, { resumeId: id, userId: user });
+  }, { userId: user, filename: name, bytes: await Deno.readFile(new URL(`resumes/${name}`, SEED)) });
   if (res.status !== "READY") {
     throw new Error(`${name}: ${JSON.stringify(res)}`);
   }
-  profiles[name.replace(/\.(pdf|docx)$/, "")] = repo.versions[0].skills
+  profiles[name.replace(/\.(pdf|docx)$/, "")] = store.versions[0].skills
     .filter((s) => s.skill_id)
     .map((s) => ({ skill: s.skill_id!, years: s.years }))
     .sort((a, b) => a.skill.localeCompare(b.skill));

@@ -169,4 +169,23 @@ void main() {
     await tap(tester, find.text('Pause'));
     expect((await jobs.get(job.id)).status, JobStatus.paused);
   });
+
+  testWidgets('an abandoned draft can be deleted from requirements', (
+    tester,
+  ) async {
+    final id = await jobs.createDraft(_description);
+    await jobs.parse(id);
+    final router = await pump(tester, Routes.jobRequirementsFor(id));
+    await tap(tester, find.byTooltip('Delete draft'));
+    expect(find.text('Delete "Mobile Engineer (Flutter)"?'), findsOneWidget);
+    await tap(tester, find.widgetWithText(FilledButton, 'Delete draft'));
+    expect(router.state.uri.path, Routes.jobs);
+    await expectLater(jobs.get(id), throwsA(isA<AppFailure>()));
+  });
+
+  testWidgets('published jobs offer no delete', (tester) async {
+    final job = FakeJobRepository.demoJobs.first;
+    await pump(tester, Routes.jobRequirementsFor(job.id));
+    expect(find.byTooltip('Delete draft'), findsNothing);
+  });
 }

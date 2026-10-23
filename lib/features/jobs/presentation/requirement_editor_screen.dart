@@ -11,6 +11,7 @@ import '../data/job_repository.dart';
 import '../domain/job.dart';
 import '../domain/requirement.dart';
 import '../domain/requirements_state.dart';
+import 'job_actions.dart';
 import 'requirements_controller.dart';
 import 'widgets/description_panel.dart';
 import 'widgets/skill_search_dialog.dart';
@@ -39,6 +40,23 @@ class RequirementEditorScreen extends ConsumerWidget {
               ? 'Requirements'
               : 'Requirements · ${job.value!.displayTitle}',
         ),
+        actions: [
+          // An abandoned New job flow leaves a draft; let it go from here.
+          if (job.value case final j? when j.status == JobStatus.draft)
+            IconButton(
+              tooltip: 'Delete draft',
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () async {
+                final deleted = await deleteDraftJob(
+                  context,
+                  ref,
+                  jobId: j.id,
+                  title: j.displayTitle,
+                );
+                if (deleted && context.mounted) context.go(Routes.jobs);
+              },
+            ),
+        ],
       ),
       body: switch ((job, editor)) {
         (AsyncValue(:final error?), _) ||

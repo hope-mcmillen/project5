@@ -9,9 +9,9 @@ import { skillKey } from "./profile.ts";
 
 /**
  * Cosine-similarity cutoff for step 2. Tuned on supabase/tests/fixtures/alias_pairs.json
- * with `deno task tune:threshold` (2026-10-18): 0.89 → 96% correct with no non-skill mapped;
- * 0.88 maps "Auth" to Auth0, 0.90 starts missing real matches. Re-tune if the taxonomy or
- * skillEmbedText changes.
+ * with `deno task tune:threshold` (2026-10-18, re-checked 2026-10-22 at 933 skills): 0.89 → 96%
+ * correct with no non-skill mapped; 0.88 maps "Auth" to Auth0, 0.90 starts missing real matches.
+ * Re-tune if the taxonomy or skillEmbedText changes.
  */
 export const MATCH_THRESHOLD = 0.89;
 
@@ -106,7 +106,7 @@ const round3 = (n: number) => Math.round(n * 1000) / 1000;
 // Index implementations
 // ---------------------------------------------------------------------------
 
-/** Brute-force cosine search over unit vectors. 343 skills × 1536 dims is instant. */
+/** Brute-force cosine search over unit vectors. ~900 skills × 1536 dims is instant. */
 export class MemorySkillIndex implements SkillIndex {
   constructor(private taxonomy: TaxonomySkill[], private vectors: Map<string, number[]>) {}
 

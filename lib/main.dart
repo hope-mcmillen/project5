@@ -9,6 +9,8 @@ import 'app/env.dart';
 import 'app/fake_overrides.dart';
 import 'core/errors/app_failure.dart';
 import 'core/logging/app_log.dart';
+import 'core/logging/logging_http_client.dart';
+import 'core/logging/provider_logger.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,11 +34,18 @@ Future<void> main() async {
     return;
   }
 
-  await Supabase.initialize(url: Env.supabaseUrl, publishableKey: Env.anonKey);
+  // Every Supabase request (database, auth, functions, storage) is logged.
+  await Supabase.initialize(
+    url: Env.supabaseUrl,
+    publishableKey: Env.anonKey,
+    httpClient: LoggingHttpClient(),
+  );
+  logAppLifecycle();
   runApp(
     ProviderScope(
       retry: noAutomaticRetry,
-      overrides: candidateRepositoryOverrides(includeApplications: false),
+      observers: appProviderObservers,
+      overrides: feedAndApplicationOverrides(includeApplications: false),
       child: const ResuRhombusApp(),
     ),
   );

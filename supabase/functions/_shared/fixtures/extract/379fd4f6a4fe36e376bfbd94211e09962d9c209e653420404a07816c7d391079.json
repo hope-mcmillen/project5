@@ -1,9 +1,14 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Android Developer",
+      "organization": null,
       "start": "2023-01",
       "end": "present",
+      "highlights": [
+        "Android Developer, Jefferson Parish Digital — Jan 2023 – Present"
+      ],
       "skills_used": [
         "Jetpack Compose",
         "Kotlin",
@@ -13,9 +18,14 @@
       "evidence": "Android Developer, Jefferson Parish Digital — Jan 2023 – Present"
     },
     {
+      "kind": "job",
       "title": "Senior Accountant",
+      "organization": null,
       "start": "1996-06",
       "end": "2022-12",
+      "highlights": [
+        "Senior Accountant, Crescent City CPAs — Jun 1996 – Dec 2022"
+      ],
       "skills_used": [
         "Microsoft Excel"
       ],

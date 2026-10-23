@@ -4,6 +4,7 @@ export 'job_status.dart';
 export 'application_status.dart';
 export 'breakdown_item.dart';
 export 'candidate_enums.dart';
+export 'candidate_experience.dart';
 export 'candidate_skill.dart';
 export 'candidate_tile.dart';
 export 'education.dart';

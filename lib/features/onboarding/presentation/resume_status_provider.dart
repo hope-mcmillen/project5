@@ -6,8 +6,9 @@ import '../../../core/errors/app_failure.dart';
 import '../../../core/models/candidate_models.dart';
 import '../data/resume_repository.dart';
 
+/// A little longer than parse-resume's own 75 s deadline plus the upload.
 final resumeParseTimeoutProvider = Provider<Duration>(
-  (ref) => const Duration(seconds: 60),
+  (ref) => const Duration(seconds: 90),
 );
 
 /// One subscription per screen, with a hard deadline and automatic cleanup.

@@ -13,11 +13,15 @@ class BrandedPage extends StatelessWidget {
     required this.child,
     this.preferMenuButton = false,
     this.footer,
+    this.actions = const [],
   });
   final String title, description;
   final Widget child;
   final bool preferMenuButton;
   final Widget? footer;
+
+  /// Extra app bar actions, after the menu button.
+  final List<Widget> actions;
   @override
   Widget build(BuildContext context) {
     final menu = CandidateMenuScope.maybeOf(context);
@@ -55,7 +59,7 @@ class BrandedPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         leading: showBack ? null : menuButton,
-        actions: [if (showBack && menuButton != null) menuButton],
+        actions: [if (showBack && menuButton != null) menuButton, ...actions],
       ),
       body: SafeArea(
         child: Align(

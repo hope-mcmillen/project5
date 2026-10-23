@@ -4,8 +4,28 @@
     {
       "name": "web-build",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8765", "--directory", "build/web"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "build/web"
+      ],
       "port": 8765
+    },
+    {
+      "name": "web-debug-fake",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": [
+        "run",
+        "-d",
+        "web-server",
+        "--web-port",
+        "8766",
+        "-t",
+        "lib/main_fake.dart"
+      ],
+      "port": 8766
     }
   ]
 }

@@ -1,9 +1,14 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Data Engineer",
+      "organization": null,
       "start": "2021-08",
       "end": "present",
+      "highlights": [
+        "Aug 2021 – Present Data Engineer, Atchafalaya Logistics • Built PySpark jobs that process 400GB of shipment telemetry nightly. • Orchestrated 60+ DAGs in Apache Airflow. • Modeled a Snowflake warehouse with dbt using a star schema. • Streamed GPS events through Apache Kafka into Snowflake."
+      ],
       "skills_used": [
         "PySpark",
         "Apache Airflow",
@@ -14,9 +19,14 @@
       "evidence": "Aug 2021 – Present Data Engineer, Atchafalaya Logistics • Built PySpark jobs that process 400GB of shipment telemetry nightly. • Orchestrated 60+ DAGs in Apache Airflow. • Modeled a Snowflake warehouse with dbt using a star schema. • Streamed GPS events through Apache Kafka into Snowflake."
     },
     {
+      "kind": "job",
       "title": "Data Analyst",
+      "organization": null,
       "start": "2019-05",
       "end": "2021-07",
+      "highlights": [
+        "May 2019 – Jul 2021 Data Analyst, Acadiana Rail Co. • Wrote SQL reports and Tableau dashboards for the operations team. • Automated Excel reporting with Python and Pandas."
+      ],
       "skills_used": [
         "SQL",
         "Tableau",

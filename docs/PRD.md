@@ -1,10 +1,16 @@
 # ResuRhombus: Product Requirements & Architecture
 
-**Version:** 0.8 · **Updated:** 2026-10-19 · **Owner:** Kameron Arceneaux
+**Version:** 0.9 · **Updated:** 2026-10-22 · **Owner:** Kameron Arceneaux
 
 ---
 
 ## 0. Changelog
+
+### v0.9 decisions
+- **Resumes are read in memory and never stored.** The app sends the file straight to `parse-resume` (multipart), which extracts, verifies, and saves only the result: a draft profile version with its skills, education, and experiences. Nothing goes to Storage and no `resumes` row is written, which removes a store of sensitive files and the upload → Realtime → invoke round trips. Progress streams back as server-sent events instead of Realtime. The `resumes` table and bucket stay for seed data and older uploads. See §5.1, §8.1, §9.4.
+- **Experiences are saved as structured rows** (`candidate_experiences`: kind, title, organization, dates, verbatim highlights, skills used), not just as a JSON blob on the resume. Schema v3 adds `kind`, `organization`, and `highlights` to each role. Projects and volunteering are kept for display, but only jobs, internships, and research count toward years. See §8.2.
+- **Extraction is a bounded agent loop:** extract (structured output) → code verifier → at most one repair call with the previous answer and the verifier's findings → keep the best verified answer. Everything that still fails verification is dropped, so the guarantees in §8.5 are unchanged. See §8.1.
+- **Why onboarding looped:** the Supabase build still used the fake resume and profile repositories, so `confirm_profile` never ran, `active_version_id` stayed null, and the route guard sent candidates back to Upload. The app now uses real Supabase repositories for both (the deck and pipeline are still fakes).
 
 ### v0.8 decisions
 - **The feed prefilters by skill overlap, not vector distance.** Measured on 600 jobs, averaged ("centroid") vectors were too generic: score-0 DevOps jobs sat closer to a Flutter developer than a score-100 Flutter job, so the best match fell outside the "nearest 500". `get_feed` now keeps the 500 jobs whose requirement weight the candidate covers best (exact or related skills), and uses vector distance only as a tie-break. A job sharing no skill would score 0, so it's never shown, even with "show stretch roles". Q14 (profile vectors) matters less as a result. See §8.4 and §8.6.
@@ -165,10 +171,10 @@ flowchart TD
     C --> D[Upload resume<br/>PDF / DOCX, ≤ 5 MB, ≤ 6 pages]
     D --> E{Valid file?}
     E -- No --> D1[Error: unsupported / too large / scanned unreadable] --> D
-    E -- Yes --> F[Upload to storage<br/>show animated 'prism' progress]
-    F --> G[Async parse job<br/>OCR → LLM extract → normalize]
+    E -- Yes --> F[Send to parse-resume, file not stored<br/>show animated 'prism' progress]
+    F --> G[Agent: extract → verify → repair<br/>→ normalize → save draft]
     G --> H{Parse OK?}
-    H -- Fail / timeout 60s --> H1[Fallback: manual quick-add skills] --> I
+    H -- Fail / timeout 75s --> H1[Fallback: manual quick-add skills] --> I
     H -- OK --> I[Review & Confirm screen]
     I --> I1[Edit/remove skills, fix years,<br/>add missing skills from taxonomy]
     I1 --> J[Preferences: location, remote,<br/>work auth, job type, salary floor optional]
@@ -178,12 +184,13 @@ flowchart TD
 
 **Requirements**
 - **C-ON-1** Accept PDF and DOCX. Reject image-only files below an OCR confidence threshold, and tell the user why.
-- **C-ON-2** Parsing runs asynchronously. The client gets progress through polling or a push. Target p95 is 20 s or less.
+- **C-ON-2** Parsing doesn't block the UI. The client gets progress as the function streams each step (v0.9). Target p95 is 20 s or less without a repair round.
 - **C-ON-3** Every extracted skill shows its **evidence** (the source snippet) on tap. Skills without evidence are discarded.
 - **C-ON-4** Users can add, remove, and rename skills, and change years. Edited fields are marked `source: user` and survive later re-parses.
 - **C-ON-5** A profile can't be submitted to any job until the Review & Confirm screen is accepted.
 - **C-ON-6** Uploading a new resume creates a new profile version. All open applications keep a snapshot of the version they were submitted with.
 - **C-ON-7** Candidates can skip resume setup and navigate through Resume, Profile, Applications, and the job deck using the sidebar. Cancelling an upload clears the current selection and prevents a late result from opening progress. Skipping does not mark a profile confirmed or remove the confirmation requirement for applying.
+- **C-ON-7** The resume file is never stored. Only verified experiences, skills, and education are saved, on the candidate's draft profile version, and the upload screen says so.
 
 ### 5.2 Flow: Swipe Deck & Apply
 
@@ -331,32 +338,36 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant App as Flutter App
-    participant ST as Supabase Storage
-    participant DB as Supabase Postgres (+pgvector)
     participant EF as Edge Function: parse-resume
     participant LLM as Gemini API (or mock)
+    participant DB as Supabase Postgres (+pgvector)
 
-    App->>ST: upload resumes/{user_id}/{uuid}.pdf (RLS: own folder only)
-    App->>DB: insert resume row (status=UPLOADED)
-    App->>EF: invoke parse-resume {resume_id} with user JWT
-    EF->>DB: status=PARSING
-    EF->>ST: download file (service role)
-    EF->>EF: extract text in code (PDF text layer via unpdf, DOCX XML)
+    App->>EF: POST multipart file with user JWT (Accept: text/event-stream)
+    EF->>DB: caller is a candidate?
+    EF-->>App: event PARSING_LAYOUT
+    EF->>EF: extract text in memory (PDF text layer via unpdf, DOCX XML)
     opt image-only PDF (no text layer)
         EF->>LLM: transcribe visible text
         LLM-->>EF: plain text
     end
     EF->>EF: sanitize (strip hidden/tiny/white text, cap length)
+    EF-->>App: event EXTRACTING
     EF->>LLM: extract → strict JSON schema
-    LLM-->>EF: roles[], skills[] with evidence spans
-    EF->>EF: validate evidence, compute years from role dates
+    LLM-->>EF: roles[], skills[], education[] with evidence
+    EF->>EF: verifier: evidence, dates, highlights, skills_used
+    opt findings and time left (max 1 round)
+        EF->>LLM: repair: previous answer + findings
+        LLM-->>EF: corrected extraction (kept only if better)
+    end
+    EF-->>App: event NORMALIZING
+    EF->>EF: drop unverified items, compute years from role dates
     EF->>LLM: embed unmapped skill strings
     EF->>DB: rpc match_skills() → nearest canonical skill
-    EF->>DB: insert profile_version (status=NEEDS_REVIEW)
-    DB-->>App: Realtime: resume.status = READY
+    EF->>DB: rpc save_parsed_profile() → draft version + skills + experiences
+    EF-->>App: event READY {profile_version_id}
 ```
 
-The app subscribes to its `resumes` row through **Supabase Realtime**, so the "prism" progress animation reacts to status changes without polling. Job descriptions go through the same steps with a `parse-job` Edge Function, without the text-extraction step because the input is already plain text.
+The file only lives in the function's memory for the length of the request. Progress events stream on mobile and desktop; on web the browser client delivers them together when the request ends. Job descriptions go through the same extraction steps with a `parse-job` Edge Function, without the text-extraction step because the input is already plain text.
 
 **Text extraction (v0.5).** No layout service is used. Code pulls the text and keeps the formatting facts needed to spot hidden text:
 
@@ -376,9 +387,12 @@ The LLM returns **facts with evidence**. It never returns scores and never does 
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Software Engineer",
+      "organization": "Acme Analytics",
       "start": "2021-06",
       "end": "present",
+      "highlights": ["Built REST services in FastAPI backed by PostgreSQL..."],
       "skills_used": ["Python", "FastAPI", "PostgreSQL"],
       "evidence": "Built REST services in FastAPI backed by PostgreSQL..."
     }
@@ -393,7 +407,8 @@ The LLM returns **facts with evidence**. It never returns scores and never does 
 ```
 
 - **Excluded on purpose:** name, contact info, photos, age, graduation year, gender, nationality, and addresses. Contact info comes from the account record, not the LLM. Graduation year is left out because it's a proxy for age.
-- **Years per skill** are computed in code. Take the union of date ranges for roles that list that skill, merge overlaps, and round to 0.5 years. Skills seen only in a "Skills" section get `years = null`, shown as "listed, not evidenced".
+- **Roles are every experience entry** (schema v3): `kind` is `job`, `internship`, `research`, `project`, `volunteer`, or `other`. `organization` and each of up to 6 `highlights` are saved only when they're verbatim in the resume.
+- **Years per skill** are computed in code. Take the union of date ranges for job, internship, and research roles that list that skill, merge overlaps, and round to 0.5 years. Projects and volunteering don't add years. Skills seen only in a "Skills" section get `years = null`, shown as "listed, not evidenced".
 - Education is extracted only as level and field. It counts toward the score only if the job explicitly lists a degree requirement.
 
 ### 8.3 Skill normalization
@@ -483,7 +498,7 @@ flowchart LR
 | Simple reads and writes (profile edits, swipes, job edits) | Direct table access from `supabase_flutter`, protected by **RLS** | No custom API to build or host |
 | Match Score, feed, board | **Postgres functions** called with `rpc()`: `compute_match()`, `get_feed()`, `get_board()` | Deterministic, runs next to the data, and triggers can re-score automatically when requirements change |
 | Anything that calls the LLM or needs secrets | **Edge Functions** (Deno/TypeScript) | The Gemini key stays in Edge Function secrets and **never ships in the Flutter app** |
-| Status changes to UI | **Realtime** subscriptions | Live pipeline and board updates, and the parse progress screen |
+| Status changes to UI | **Realtime** subscriptions | Live pipeline and board updates. Parse progress streams from `parse-resume` itself (v0.9). |
 
 ### 9.2 Stack decisions
 
@@ -501,7 +516,7 @@ flowchart LR
 | LLM | **Google Gemini API** with an AI Studio key (structured output with a JSON schema, `gemini-embedding-001` at 1536 dims) | The team's available key. One provider for extraction, embeddings, and scan OCR. See §9.3. |
 | Push | FCM, sent from the `notify` Edge Function | Optional for MVP. Realtime covers in-app updates. |
 
-**Edge Function limits to design around:** Edge Functions have a wall-clock limit (minutes, which depends on plan) and a memory limit. Text extraction runs in-process and a typical resume needs one or two Gemini calls, so parsing runs **inline in one function call** for MVP. If timeouts show up on scans, split it into two steps: `parse-resume` stores the extracted text, and a `pg_cron` job runs the LLM step.
+**Edge Function limits to design around:** Edge Functions have a wall-clock limit (minutes, which depends on plan) and a memory limit. Text extraction runs in-process and a typical resume needs one to three Gemini calls (OCR for scans, extraction, at most one repair), so parsing runs **inline in one function call** with a 75 s deadline. The repair call is skipped when under 25 s remain. Because the file isn't stored, a two-step split would have to keep the extracted text instead; verify plan limits before launch.
 
 ### 9.3 LLM provider configuration
 
@@ -546,8 +561,10 @@ erDiagram
     COMPANIES ||--o{ COMPANY_INVITES : issues
     COMPANIES ||--o{ JOBS : posts
     CANDIDATES ||--o{ RESUMES : uploads
-    RESUMES ||--o| PROFILE_VERSIONS : produces
+    RESUMES ||--o| PROFILE_VERSIONS : "produces (seed and older uploads)"
+    CANDIDATES ||--o{ PROFILE_VERSIONS : owns
     PROFILE_VERSIONS ||--o{ CANDIDATE_SKILLS : lists
+    PROFILE_VERSIONS ||--o{ CANDIDATE_EXPERIENCES : lists
     JOBS ||--o{ JOB_REQUIREMENTS : requires
     SKILLS ||--o{ CANDIDATE_SKILLS : canonical
     SKILLS ||--o{ JOB_REQUIREMENTS : canonical
@@ -564,6 +581,7 @@ erDiagram
     RESUMES { uuid id PK text storage_path text status text file_hash }
     PROFILE_VERSIONS { uuid id PK int version bool confirmed vector embedding }
     CANDIDATE_SKILLS { uuid skill_id FK float years text evidence text source }
+    CANDIDATE_EXPERIENCES { int sort_order text kind text title text organization text start_month text end_month text highlights }
     JOBS { uuid id PK text raw_description text status vector embedding }
     JOB_REQUIREMENTS { uuid skill_id FK float min_years bool required int weight }
     SKILLS { uuid id PK text name text category text aliases vector embedding }
@@ -583,7 +601,7 @@ erDiagram
 | `profiles` | Read/update own | Read/update own |
 | `companies` | Read (for job cards) | Read all. Update own company if `owner`. |
 | `jobs`, `job_requirements` | Read where `status = 'OPEN'` | Full CRUD where `company_id` = own company |
-| `resumes`, `profile_versions`, `candidate_skills` | CRUD own | **No direct access.** Read only through `get_board()` / `get_candidate_detail()`, which return blind fields until the application is `INTERVIEW_REQUESTED` |
+| `resumes`, `profile_versions`, `candidate_skills`, `candidate_experiences` | Read own (writes go through RPCs and `parse-resume`) | **No direct access.** Read only through `get_board()` / `get_candidate_detail()`, which return blind fields until the application is `INTERVIEW_REQUESTED` |
 | `swipes` | Insert/read own | None |
 | `applications` | Read own. Insert via swipe. Update to `WITHDRAWN` only. | Read and update status for own company's jobs, via RPC |
 | Storage `resumes/{uid}/*` | Read/write own folder | Signed URL from RPC, only after advancing |
@@ -592,7 +610,8 @@ erDiagram
 
 | Name | Type | Caller | Purpose |
 |---|---|---|---|
-| `parse-resume` | Edge Fn | Candidate | Text extraction (Gemini OCR for scans) → sanitize → LLM → normalize → `profile_versions` |
+| `parse-resume` | Edge Fn | Candidate | In-memory file → text extraction (Gemini OCR for scans) → sanitize → extract/verify/repair → normalize → `save_parsed_profile` (draft version, skills, experiences) |
+| `create_review_draft()` | RPC | Candidate | Copy the active version (skills, experiences) into a new draft for editing |
 | `parse-job` | Edge Fn | Recruiter | Raw JD → LLM → draft `job_requirements` |
 | `notify` | Edge Fn | DB webhook | Status event → FCM push |
 | `confirm_profile(version_id)` | RPC | Candidate | Lock the reviewed profile and compute its embedding-backed feed |
@@ -681,6 +700,7 @@ The demo must work right away, with a populated recruiter board, before anyone u
 | Q12 | Is the in-code white-text check (PDF operator list) worth the effort, or is the font-size check enough? | Build both. The `r09` fixture uses both tricks, and the injection test (AI-19) must pass on it. |
 | Q13 | Should the Match Score support true "one of" groups (coverage = best member) instead of demoting alternatives to preferred? | Yes, in B8 if time allows: add a nullable `either_of_group` column to `job_requirements` and score each group as one requirement. Until then, preferred is the safe approximation. |
 | Q15 | How do we stop basics that resumes imply but don't state ("code review", "unit testing", "HTML/CSS") from counting as missing required skills? | In B12, measure extraction recall on these, then try (a) prompting for practices as well as tools, or (b) letting `parse-job` mark such basics preferred. Check each change against `match_pairs.json`. |
+| Q16 | Recruiters can no longer open a resume file for profiles parsed without storage (`resume-url` returns `resume_not_available`). Is the structured profile enough after an interview request? | Yes for MVP: show the confirmed experiences and skills on the candidate detail once identities unlock, and let candidates attach a file later only if recruiters ask for it. |
 | Q14 | Who sets `profile_versions.embedding`? | `confirm_profile` (A) sets it with `skills_centroid(confirmed skill ids)`, just as `save_job_draft` does for jobs. That keeps profile and job vectors comparable and needs no AI call. |
 
 ### Backend foundation implementation note (A2, October 20, 2026)

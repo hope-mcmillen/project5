@@ -53,3 +53,7 @@ inspector_port = 8083
 deno_version = 2
 [analytics]
 enabled = false
+
+# Mock parsing uses synthetic fixtures read at runtime, outside the import graph.
+[functions.parse-resume]
+static_files = ["./functions/_shared/fixtures/extract/*.json", "./functions/_shared/fixtures/transcribe/*.txt"]

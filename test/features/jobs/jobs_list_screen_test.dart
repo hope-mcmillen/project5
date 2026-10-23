@@ -131,6 +131,50 @@ void main() {
     expect((await jobs.get(draftJob.id)).status, JobStatus.draft);
   });
 
+  testWidgets('only drafts offer Delete draft', (tester) async {
+    await pump(tester);
+    await tester.tap(find.byTooltip('Actions for Flutter Developer'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete draft'), findsNothing);
+  });
+
+  testWidgets('deleting a draft asks first, then removes the row', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.byTooltip('Actions for Backend Engineer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete draft'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete "Backend Engineer"?'), findsOneWidget);
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Backend Engineer'), findsOneWidget);
+    expect((await jobs.get(draftJob.id)).status, JobStatus.draft);
+
+    await tester.tap(find.byTooltip('Actions for Backend Engineer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete draft'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete draft'));
+    await tester.pumpAndSettle();
+    expect(find.text('Backend Engineer'), findsNothing);
+    expect(find.text('"Backend Engineer" deleted.'), findsOneWidget);
+    expect(find.text('Flutter Developer'), findsOneWidget);
+  });
+
+  testWidgets('wide table offers Delete draft too', (tester) async {
+    await pump(tester, width: 1280);
+    await tester.tap(find.byTooltip('Actions for Backend Engineer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete draft'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilledButton, 'Delete draft'));
+    await tester.pumpAndSettle();
+    expect(find.text('Backend Engineer'), findsNothing);
+  });
+
   testWidgets('empty state offers New job', (tester) async {
     jobs = FakeJobRepository(latency: Duration.zero, seedDemoJobs: false);
     final router = await pump(tester);

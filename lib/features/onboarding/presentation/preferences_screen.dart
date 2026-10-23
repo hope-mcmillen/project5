@@ -14,6 +14,7 @@ import '../../../ui/components/branded_page.dart';
 import '../../../ui/components/error_banner.dart';
 import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/theme/rr_tokens.dart';
+import 'onboarding_sign_out.dart';
 import 'preferences_controller.dart';
 
 class PreferencesScreen extends ConsumerStatefulWidget {
@@ -39,6 +40,7 @@ class _PreferencesScreenState extends ConsumerState<PreferencesScreen> {
     final text = Theme.of(context).textTheme;
     return BrandedPage(
       title: 'Job preferences',
+      actions: const [OnboardingSignOutAction()],
       description: 'Choose the locations and work arrangements that fit your next move. Empty choices mean no restriction.',
       footer: value == null
           ? null

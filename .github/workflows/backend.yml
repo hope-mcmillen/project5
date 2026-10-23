@@ -2,7 +2,7 @@ name: Backend checks
 on:
   pull_request:
   push:
-    branches: [master, 'feat/**', 'codex/**']
+    branches: [master, 'feat/**', 'codex/**', resume-parsing]
 permissions:
   contents: read
 concurrency:
@@ -20,7 +20,7 @@ jobs:
           version: 2.121.0
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.5.4
+          deno-version: v2.9.6
       - name: Edge function unit tests
         working-directory: supabase/functions
         run: deno test --allow-read=..,. --allow-env _shared/ parse-resume/ parse-job/ resume-url/ delete-account/
@@ -42,7 +42,7 @@ jobs:
         run: python3 supabase/tests/deletion_concurrency.py
       - name: Verify secure resume links, Realtime isolation and account deletion
         run: |
-          echo 'PUBLIC_SUPABASE_URL=http://127.0.0.1:54321' > /tmp/project5-edge-public.env
+          printf 'PUBLIC_SUPABASE_URL=http://127.0.0.1:54321\nLLM_PROVIDER=mock\n' > /tmp/project5-edge-public.env
           supabase functions serve --env-file /tmp/project5-edge-public.env > /tmp/project5-edge.log 2>&1 &
           for attempt in $(seq 1 30); do
             curl -fsS -X OPTIONS http://127.0.0.1:54321/functions/v1/resume-url > /dev/null && break
@@ -50,5 +50,6 @@ jobs:
           done
           curl -fsS -X OPTIONS http://127.0.0.1:54321/functions/v1/resume-url > /dev/null
           deno test --allow-env --allow-net --allow-run supabase/tests/privacy_integration.ts
+          python3 supabase/tests/parsed_profile_api_smoke.py
       - if: always()
         run: supabase stop --no-backup

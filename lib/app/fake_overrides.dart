@@ -59,6 +59,28 @@ List<Override> candidateRepositoryOverrides({
   profileRepositoryProvider.overrideWith(
     (ref) => FakeProfileRepository(latency: latency),
   ),
+  resumeRepositoryProvider.overrideWith((ref) {
+    final repository = FakeResumeRepository(
+      latency: latency,
+      simulateParsing: simulateParsing,
+    );
+    ref.onDispose(repository.dispose);
+    return repository;
+  }),
+  resumeSimulationProvider.overrideWithValue(true),
+  ...feedAndApplicationOverrides(
+    latency: latency,
+    includeApplications: includeApplications,
+  ),
+];
+
+/// The deck feed still runs on fakes in the Supabase build: it has no
+/// Supabase repository yet. Resume parsing and profiles are real there, and
+/// so are applications (C10) when [includeApplications] is false.
+List<Override> feedAndApplicationOverrides({
+  Duration latency = const Duration(milliseconds: 300),
+  bool includeApplications = true,
+}) => [
   feedRepositoryProvider.overrideWith((ref) {
     final createdApplications = <String>{};
     return FakeFeedRepository(
@@ -94,15 +116,6 @@ List<Override> candidateRepositoryOverrides({
       },
     );
   }),
-  resumeRepositoryProvider.overrideWith((ref) {
-    final repository = FakeResumeRepository(
-      latency: latency,
-      simulateParsing: simulateParsing,
-    );
-    ref.onDispose(repository.dispose);
-    return repository;
-  }),
-  resumeSimulationProvider.overrideWithValue(true),
   if (includeApplications)
     applicationRepositoryProvider.overrideWith((ref) {
       final repository = FakeApplicationRepository(latency: latency);

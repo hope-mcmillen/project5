@@ -1,16 +1,29 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Mobile Developer",
+      "organization": null,
       "start": "2022-03",
       "end": "present",
+      "highlights": [
+        "Built a field-inspection app in Flutter and Dart used by 1,200 inspectors.",
+        "Migrated state management from Provider to Riverpod, cutting rebuild bugs by half.",
+        "Integrated Firebase Auth and Cloud Firestore with an offline-first sync queue."
+      ],
       "skills_used": ["Flutter", "Dart", "Riverpod", "Firebase Auth", "Cloud Firestore", "Codemagic"],
       "evidence": "Built a field-inspection app in Flutter and Dart used by 1,200 inspectors."
     },
     {
+      "kind": "job",
       "title": "Junior Flutter Developer",
+      "organization": null,
       "start": "2020-06",
       "end": "2022-02",
+      "highlights": [
+        "Implemented screens from Figma designs using the Bloc pattern.",
+        "Consumed REST APIs for a restaurant ordering app."
+      ],
       "skills_used": ["Flutter", "Bloc", "Figma", "REST APIs", "Git"],
       "evidence": "Implemented screens from Figma designs using the Bloc pattern."
     }

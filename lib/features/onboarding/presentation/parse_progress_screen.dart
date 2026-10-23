@@ -12,6 +12,7 @@ import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/theme/rr_tokens.dart';
 import '../../profile/data/profile_repository.dart';
 import '../data/resume_repository.dart';
+import 'onboarding_sign_out.dart';
 import 'resume_status_provider.dart';
 
 class ParseProgressScreen extends ConsumerStatefulWidget {
@@ -65,6 +66,9 @@ class _ParseProgressScreenState extends ConsumerState<ParseProgressScreen> {
     'unreadable_scan' => 'We could not read the text in this resume. Try a clearer file or add your skills manually.',
     'too_long' => 'This resume is too long to read. Try a shorter version or add your skills manually.',
     'budget_exceeded' => 'Resume reading is temporarily unavailable. You can add your skills manually.',
+    'network' => 'We could not reach the server to read your resume. Check your connection and try again.',
+    'invalid_file' => 'This file is not a PDF or DOCX we can read. Try another file or add your skills manually.',
+    'not_candidate' => 'Only candidate accounts can read a resume.',
     _ => 'We could not read this resume. Try another file or add your skills manually.',
   };
 
@@ -208,6 +212,7 @@ class _ParseProgressScreenState extends ConsumerState<ParseProgressScreen> {
     }
     return BrandedPage(
       title: 'Reading your resume',
+      actions: const [OnboardingSignOutAction()],
       description: 'Follow each step as we prepare your experience for review.',
       child: Card(
         child: Padding(

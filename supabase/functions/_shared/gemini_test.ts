@@ -77,6 +77,24 @@ Deno.test("extract sends structured-output config and returns parsed JSON with u
   assert(!String(config.systemInstruction).includes("3+ years of SQL"));
 });
 
+Deno.test("extract sends repair feedback as a second user part, never in the system instruction", async () => {
+  const { client, calls } = fakeClient([{ text: JSON.stringify(JOB), candidates: [{ finishReason: "STOP" }] }]);
+  await provider(client).extract({
+    schemaName: "job",
+    schema: EXTRACTION_SCHEMAS.job.jsonSchema,
+    system: JOB_SYSTEM_PROMPT,
+    untrustedText: wrapUntrusted("job", "Must have: 3+ years of SQL."),
+    feedback: "<previous_extraction>{}</previous_extraction>\nProblems found by the checker:\n- title: missing",
+  });
+  const { params } = calls[0];
+  const contents = params.contents as Array<{ role: string; parts: Array<{ text: string }> }>;
+  assertEquals(contents.length, 1);
+  assertEquals(contents[0].role, "user");
+  assert(contents[0].parts[0].text.startsWith("<job>"));
+  assert(contents[0].parts[1].text.startsWith("<previous_extraction>"));
+  assertEquals((params.config as Record<string, unknown>).systemInstruction, JOB_SYSTEM_PROMPT);
+});
+
 Deno.test("extract estimates usage when Gemini omits usageMetadata", async () => {
   const { client } = fakeClient([{ text: JSON.stringify(JOB) }]);
   const res = await extractJob(provider(client));

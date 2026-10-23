@@ -83,7 +83,7 @@ no usable password. Do not reuse these passwords elsewhere.
 | recruiter | recruiter@demo.resurhombus.test | LocalDemo-4330! |
 
 The candidate has a confirmed profile and sample applications. The recruiter is
-Pelican Path Health's owner. Demo data includes 343 skills, 132 relations,
+Pelican Path Health's owner. Demo data includes 933 skills, 579 relations,
 3 companies (one verified), 4 recruiters, 30 candidates, 6 jobs and 60 applications
 covering every status. All people/resumes are synthetic. See
 `supabase/seed/demo_manifest.json` for fixture IDs and expected match scores.
@@ -139,6 +139,29 @@ deno task check
 `deno task test:live` is opt-in and uses real Gemini calls. The committed vectors
 make both seeding and SQL matching work offline. To stop the local stack:
 `supabase stop`.
+
+## Logging
+
+Debug builds log what the app is doing to the console (`flutter run` output,
+or the browser console on web). Release builds log nothing. Every line is
+tagged, so you can filter it, for example `flutter run ... | grep '\[http\]'`:
+
+| Tag | What it shows |
+|---|---|
+| `page` | Every page the user lands on, with its route pattern |
+| `route` | Route-guard redirects and the session behind them (e.g. `signedIn candidate onboarded=false`) |
+| `tap` | Each tap: the control, its label, and the page, e.g. `FilledButton "Read description" on /r/jobs/new` |
+| `http` | Every Supabase request (database, auth, functions, storage): method, path, the data sent, status, time, and the response. Streamed `parse-resume` progress is logged event by event. |
+| `provider` | Providers that failed, with the error |
+| `app` | Startup and lifecycle (resumed, paused, …) |
+| `auth`, `resume` | Sign-in steps, chosen resume files, and parse status changes |
+
+Logged data goes through `AppLog.redact`: passwords, tokens and keys are
+replaced with `[redacted]`, emails are masked (`j***@example.com`), request
+headers (the JWT and API key) are never logged, and uploaded files appear
+only as name and size. Choose how much to see with
+`--dart-define=LOG_LEVEL=debug|info|warn|error|off`. The default, `debug`,
+includes successful response bodies; `info` leaves them out.
 
 ## Working together
 

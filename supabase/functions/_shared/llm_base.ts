@@ -22,6 +22,12 @@ export interface ExtractOptions {
   system: string;
   /** Sanitized resume/JD text. Callers wrap it in <resume>…</resume> or <job>…</job>. */
   untrustedText: string;
+  /**
+   * Optional second user-message part for a repair pass: the previous output and
+   * the verifier's findings. It's derived from untrusted text, so it never goes
+   * in the system prompt either.
+   */
+  feedback?: string;
 }
 
 export interface ExtractResult<T> {

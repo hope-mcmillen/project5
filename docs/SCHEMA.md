@@ -33,6 +33,7 @@ erDiagram
     CANDIDATES ||--o{ PROFILE_VERSIONS : versions
     RESUMES |o--o| PROFILE_VERSIONS : produces
     PROFILE_VERSIONS ||--o{ CANDIDATE_SKILLS : lists
+    PROFILE_VERSIONS ||--o{ CANDIDATE_EXPERIENCES : lists
     SKILLS ||--o{ CANDIDATE_SKILLS : "canonical (nullable)"
     SKILLS ||--o{ JOB_REQUIREMENTS : canonical
     SKILLS ||--o{ SKILL_RELATIONS : relates
@@ -53,6 +54,7 @@ erDiagram
     RESUMES { uuid id PK text storage_path text status text file_hash jsonb extraction }
     PROFILE_VERSIONS { uuid id PK int version bool confirmed vector embedding }
     CANDIDATE_SKILLS { uuid id PK uuid skill_id FK text raw_name numeric years text evidence text source }
+    CANDIDATE_EXPERIENCES { uuid id PK int sort_order text kind text title text organization text start_month text end_month }
     SKILLS { uuid id PK text name text category vector embedding }
     SKILL_RELATIONS { uuid skill_id PK uuid related_skill_id PK numeric credit }
     JOBS { uuid id PK uuid company_id FK text status text remote int salary_min vector embedding }
@@ -83,9 +85,10 @@ erDiagram
 | `skills` | Canonical taxonomy, seeded (AI-01) | Unique `name`, `category`, `aliases text[]` (GIN index), `embedding` (HNSW cosine index) |
 | `skill_relations` | Curated partial credit between related skills | `(skill_id, related_skill_id)` with `credit` between 0 and 1, e.g. MySQL → PostgreSQL = 0.6 |
 | `candidates` | Candidate-specific data | `active_version_id` points to the confirmed profile used for matching. `preferences jsonb` holds the hard filters (shape below). `discoverable` is for Phase 2. |
-| `resumes` | One row per uploaded file | `storage_path` = `{uid}/{uuid}.pdf\|docx` inside the `resumes` bucket. `file_hash` (sha256, extraction cache). `status` is UPLOADED → PARSING_LAYOUT → EXTRACTING → NORMALIZING → READY / FAILED. `failure_reason`. `extraction` holds the validated LLM JSON. |
-| `profile_versions` | Versioned candidate profile | Unique `(candidate_id, version)`. `source` is `resume` or `manual`. `confirmed` is required before swiping. `total_years`, `education`, `embedding`. |
+| `resumes` | One row per stored file (seed data and uploads before October 22, 2026; `parse-resume` no longer writes here) | `storage_path` = `{uid}/{uuid}.pdf\|docx` inside the `resumes` bucket. `file_hash` (sha256, extraction cache). `status` is UPLOADED → PARSING_LAYOUT → EXTRACTING → NORMALIZING → READY / FAILED. `failure_reason`. `extraction` holds the validated LLM JSON. |
+| `profile_versions` | Versioned candidate profile | Unique `(candidate_id, version)`. `source` is `resume` or `manual`. `confirmed` is required before swiping. `total_years`, `education`, `embedding`. `resume_id` is null for in-memory parses. `schema_version` and `llm_model` record which extraction produced an AI draft. |
 | `candidate_skills` | Skills in one profile version | `skill_id` is null when unmapped (kept but not scored). `raw_name`. `years` is null when the skill is only listed, not evidenced. `evidence` is a quote from the resume. `source` is `ai` or `user`. Unique per version and skill. |
+| `candidate_experiences` | Experience entries read from a resume, per profile version | `sort_order` (0 = most recent, unique per version), `kind` (`experience_kind`), `title` (1–200 chars), `organization` (null or 1–200), `start_month` (`YYYY-MM` or `YYYY`), `end_month` (same, or `present`), `highlights text[]` (≤ 6, verbatim), `skills_used text[]`, `evidence`. Written only by `save_parsed_profile` and copied by `create_review_draft`. |
 
 ### Jobs & the loop (PL-06)
 
@@ -118,6 +121,7 @@ erDiagram
 | `resume_status` | UPLOADED, PARSING_LAYOUT, EXTRACTING, NORMALIZING, READY, FAILED |
 | `parse_status` | PENDING, READY, FAILED |
 | `profile_source` | resume, manual |
+| `experience_kind` | job, internship, research, project, volunteer, other |
 | `skill_source` | ai, user |
 | `job_status` | DRAFT, OPEN, PAUSED, CLOSED |
 | `remote_type` | onsite, hybrid, remote |
@@ -152,8 +156,8 @@ Helper: `public.current_app_role()` is a `security definer` function that return
 | `app_config`, `skills`, `skill_relations` | select | select | Written only by migrations and the seed |
 | `candidates` | select/update own | **none** | Recruiters never read candidate rows directly |
 | `resumes` | select/insert own | **none** | Status is updated by Edge Functions (service role) |
-| `profile_versions`, `candidate_skills` | select own. Edit via `confirm_profile`. | **none** | Blind board data comes only from `get_board` / `get_candidate_detail` |
-| `jobs` | select where `status = 'OPEN'` **or** they have an application to it | full CRUD on own company | The second candidate rule keeps closed jobs visible in their pipeline |
+| `profile_versions`, `candidate_skills`, `candidate_experiences` | select own. Edit via `confirm_profile`. | **none** | Blind board data comes only from `get_board` / `get_candidate_detail` |
+| `jobs` | select where `status = 'OPEN'` **or** they have an application to it | select/insert/update own company; delete only DRAFT via `delete_draft_job` | The second candidate rule keeps closed jobs visible in their pipeline |
 | `job_requirements` | select for jobs they can see | CRUD on own company's jobs (via `save_requirements`) | |
 | `swipes` | select own. Insert via `swipe`. | none | |
 | `applications` | select own (through `my_applications`) | select own company's jobs where `committed_at <= now()` | All status changes go through RPCs |
@@ -189,6 +193,8 @@ All are `security definer` with `set search_path = public`, and each checks the 
 | `join_company(p_code) → companies` | recruiter | A | Errors: `invalid_invite`, `already_in_company` |
 | `confirm_profile(p_version_id, p_skills jsonb)` | candidate | A | Saves edits, confirms the version, and sets `active_version_id` |
 | `create_manual_profile() → profile_versions` | candidate | A | Fallback when parsing fails |
+| `create_review_draft() → profile_versions` | candidate | B | Copies the active version (skills with provenance, experiences, totals) into a new draft for editing. Without an active version it is `create_manual_profile()`. Error: `not_candidate` |
+| `save_parsed_profile(p_candidate_id, p_schema_version, p_llm_model, p_total_years, p_education, p_skills, p_experiences) → {profile_version_id, version}` | `parse-resume` (service role) | B | Next draft version, merged skills, and experiences in one transaction. Error: `not_candidate` |
 | `save_preferences(p_prefs jsonb)` | candidate | A | Validates the shape (§6) |
 | `swipe(p_job_id, p_direction, p_reason = null) → {swipe_id, application_id, committed_at}` | candidate | A | Error: `daily_cap_reached`, `profile_not_confirmed`, `job_not_open` |
 | `undo_swipe(p_swipe_id)` | candidate | A | Error: `undo_window_expired` |
@@ -197,6 +203,7 @@ All are `security definer` with `set search_path = public`, and each checks the 
 | `get_application_contact(p_application_id) → {name, email, note}` | candidate | A | Only when the status is INTERVIEW_REQUESTED |
 | `save_requirements(p_job_id, p_requirements jsonb)` | recruiter | A | Enforces 15 total / 8 required, recomputes the job embedding, and re-scores if the job is live (AI-18) |
 | `set_job_status(p_job_id, p_status)` | recruiter | A | Validates the lifecycle and cascades JOB_CLOSED |
+| `delete_draft_job(p_job_id)` | recruiter | A | Deletes a DRAFT job and its requirements. Errors: `not_company_recruiter`, `job_not_found`, `job_not_draft` |
 | `get_board(p_job_id, p_filters jsonb = '{}', p_limit = 50, p_offset = 0) → jsonb[]` | recruiter | A | Returns **blind** tiles, sorted by score |
 | `get_candidate_detail(p_application_id) → jsonb` | recruiter | A | Blind until INTERVIEW_REQUESTED |
 | `open_application(p_application_id)` | recruiter | A | APPLIED → UNDER_REVIEW (idempotent) |
@@ -212,7 +219,7 @@ All are `security definer` with `set search_path = public`, and each checks the 
 
 | Function | Caller | Owner | Purpose |
 |---|---|---|---|
-| `parse-resume` `{resume_id}` | candidate | B | Text extraction (Gemini OCR for scans) → sanitize → LLM extract → normalize → `profile_versions` |
+| `parse-resume` multipart `file` | candidate | B | Reads the file in memory (never stored): text extraction (Gemini OCR for scans) → sanitize → extract → verify → repair (≤ 1 round) → normalize → `save_parsed_profile`. Streams progress with `Accept: text/event-stream` (API_CONTRACT §2) |
 | `parse-job` `{job_id}` | recruiter | B | JD → draft `job_requirements` |
 | `resume-url` `{application_id}` → `{url}` | recruiter | A | 10-minute signed URL, only after advance |
 | `notify` (DB webhook) | system | A | *(Later)* FCM push on status events |
@@ -334,3 +341,14 @@ Real local socket tests cover application, resume parse and job event delivery
 and cross-user/company isolation; they replace a manual Studio-only check with
 repeatable CI evidence. Hosted delivery and C/D screen integration still require
 separate acceptance. A11 notifications remain excluded.
+
+### Resume parsing without storage (B, October 22, 2026)
+
+Migration `20261022200000_parsed_profiles_without_storage.sql` adds
+`candidate_experiences`, the `experience_kind` enum, `profile_versions.schema_version`
+and `.llm_model`, `save_parsed_profile()` (service role only) and
+`create_review_draft()` (candidates). `parse-resume` now takes the file as
+multipart and never writes Storage or `resumes`; the old `save_resume_draft` and
+parse-status RPCs stay for compatibility but nothing calls them. New parsed
+profiles have no file, so `resume-url` returns `resume_not_available` for them
+(PRD Q16). Tests: `supabase/tests/parsed_profiles.test.sql`.

@@ -7,8 +7,8 @@ import { EMBED_DIMS, getProvider } from "./llm.ts";
 import { MATCH_THRESHOLD, normalizeSkills } from "./normalize.ts";
 import { parseJob } from "./job_pipeline.ts";
 import { MemoryJobRepo } from "./job_repo.ts";
-import { parseResume } from "./resume_pipeline.ts";
-import { MemoryResumeRepo } from "./resume_repo_memory.ts";
+import { MemoryProfileStore } from "./profile_store.ts";
+import { parseResume } from "./resume_agent.ts";
 import { seedSkillIndex } from "./seed_taxonomy.ts";
 import { JOB_SYSTEM_PROMPT, wrapUntrusted } from "./prompts.ts";
 import { EXTRACTION_SCHEMAS, validateExtraction } from "./schemas.ts";
@@ -87,17 +87,19 @@ Deno.test(
     const labels = JSON.parse(await Deno.readTextFile(new URL("fixtures/labels.json", seed("")))).resumes;
     const index = await seedSkillIndex();
     for (const file of ["r09_hidden_white_text.pdf", "r10_visible_injection_age.pdf"]) {
-      const repo = new MemoryResumeRepo();
       const user = crypto.randomUUID();
-      const id = crypto.randomUUID();
-      repo.add({ id, candidate_id: user }, await Deno.readFile(seed(`resumes/${file}`)));
-      const res = await parseResume({ repo, llm: getProvider(), index, log: () => {} }, { resumeId: id, userId: user });
+      const store = new MemoryProfileStore(new Set([user]));
+      const res = await parseResume({ store, llm: getProvider(), index, log: () => {} }, {
+        userId: user,
+        filename: file,
+        bytes: await Deno.readFile(seed(`resumes/${file}`)),
+      });
       assertEquals(res.status, "READY", file);
-      const names = repo.versions[0].skills.map((s) => s.skill_id).filter(Boolean) as string[];
+      const names = store.versions[0].skills.map((s) => s.skill_id).filter(Boolean) as string[];
       const leaked = (labels[file].forbidden_skills as string[]).filter((s) => names.includes(s));
       console.log(`${file}: ${names.join(", ")} | forbidden leaked: ${leaked.join(", ") || "none"}`);
       assertEquals(leaked, [], file);
-      const saved = JSON.stringify({ e: repo.resumes.get(id)!.extraction, v: repo.versions });
+      const saved = JSON.stringify(store.versions);
       for (const pii of ["@example.com", "555-01", "Age", "1974", "Married", "Hebert", "Landry"]) {
         assert(!saved.includes(pii), `${file} saved ${pii}`);
       }

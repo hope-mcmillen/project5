@@ -1,9 +1,14 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Backend Engineer",
+      "organization": null,
       "start": "2021-01",
       "end": "present",
+      "highlights": [
+        "Backend Engineer, Tidewater Payments — Jan 2021 – Present"
+      ],
       "skills_used": [
         "REST APIs",
         "FastAPI",
@@ -16,9 +21,14 @@
       "evidence": "Backend Engineer, Tidewater Payments — Jan 2021 – Present"
     },
     {
+      "kind": "job",
       "title": "Software Developer",
+      "organization": null,
       "start": "2018-07",
       "end": "2020-12",
+      "highlights": [
+        "Software Developer, Gulf Coast Insurance Group — Jul 2018 – Dec 2020"
+      ],
       "skills_used": [
         "Django",
         "SQLAlchemy",

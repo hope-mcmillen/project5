@@ -7,7 +7,7 @@ select is((select count(*)::int from pg_tables where schemaname = 'public'
   and tablename in ('profiles','companies','recruiters','company_invites','app_config',
     'skills','skill_relations','candidates','resumes','profile_versions','candidate_skills',
     'jobs','job_requirements','swipes','applications','application_reject_reasons',
-    'status_events','llm_usage','device_tokens') and rowsecurity), 19, 'all 19 tables enforce RLS');
+    'status_events','llm_usage','device_tokens','candidate_experiences') and rowsecurity), 20, 'all 20 tables enforce RLS');
 select ok(not has_column_privilege('authenticated', 'public.profiles', 'role', 'UPDATE'), 'client cannot change role');
 select ok(not has_column_privilege('authenticated', 'public.candidates', 'active_version_id', 'UPDATE'), 'client cannot activate an unconfirmed profile');
 select ok(not has_column_privilege('authenticated', 'public.resumes', 'status', 'INSERT'), 'client cannot forge parse status');

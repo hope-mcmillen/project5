@@ -64,6 +64,21 @@ enum SkillSource {
       values.firstWhere((v) => v.db == value);
 }
 
+enum ExperienceKind {
+  job('job'),
+  internship('internship'),
+  research('research'),
+  project('project'),
+  volunteer('volunteer'),
+  other('other');
+
+  const ExperienceKind(this.db);
+  final String db;
+  String toDb() => db;
+  static ExperienceKind fromDb(String value) =>
+      values.firstWhere((v) => v.db == value);
+}
+
 enum ProfileSource {
   resume('resume'),
   manual('manual');

@@ -14,8 +14,6 @@ import {
 } from "./llm_base.ts";
 import { TRANSCRIBE_PROMPT } from "./prompts.ts";
 
-const SDK = "npm:@google/genai@2.27.0";
-
 /** The only embedding model whose vectors may be stored (PRD §9.3). */
 export const PINNED_EMBED_MODEL = "gemini-embedding-001";
 /** Every embed call uses this task type; changing it means a full re-embed. */
@@ -98,7 +96,9 @@ export class GeminiProvider implements LlmProvider {
     const res = await this.call((c) =>
       c.models.generateContent({
         model: this.extractModel,
-        contents: opts.untrustedText,
+        contents: opts.feedback
+          ? [{ role: "user", parts: [{ text: opts.untrustedText }, { text: opts.feedback }] }]
+          : opts.untrustedText,
         config: {
           systemInstruction: opts.system,
           temperature: 0,
@@ -116,7 +116,7 @@ export class GeminiProvider implements LlmProvider {
     }
     return {
       data,
-      usage: usageOf(res, opts.system + opts.untrustedText, text),
+      usage: usageOf(res, opts.system + opts.untrustedText + (opts.feedback ?? ""), text),
       provider: this.name,
       model: this.extractModel,
     };
@@ -169,7 +169,9 @@ export class GeminiProvider implements LlmProvider {
   // --- internals ------------------------------------------------------------
 
   private client(): Promise<GeminiClient> {
-    this.clientPromise ??= import(SDK).then(({ GoogleGenAI }) =>
+    // The specifier must be a string literal: deploys bundle only imports they
+    // can see, so `import(variable)` works locally but fails on Supabase.
+    this.clientPromise ??= import("npm:@google/genai@2.27.0").then(({ GoogleGenAI }) =>
       new GoogleGenAI({ apiKey: this.opts.apiKey }) as unknown as GeminiClient
     );
     return this.clientPromise;

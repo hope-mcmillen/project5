@@ -1,9 +1,14 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Java Developer",
+      "organization": null,
       "start": "2019",
       "end": "2023",
+      "highlights": [
+        "Built Spring Boot services on MySQL."
+      ],
       "skills_used": [
         "Spring Boot",
         "MySQL"

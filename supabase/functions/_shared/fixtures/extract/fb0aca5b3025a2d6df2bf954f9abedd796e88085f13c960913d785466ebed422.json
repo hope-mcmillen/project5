@@ -1,9 +1,14 @@
 {
   "roles": [
     {
+      "kind": "job",
       "title": "Frontend Engineer",
+      "organization": null,
       "start": "2022-09",
       "end": "present",
+      "highlights": [
+        "Frontend Engineer, Bluebonnet Retail — Sep 2022 – Present"
+      ],
       "skills_used": [
         "React",
         "TypeScript",
@@ -16,9 +21,14 @@
       "evidence": "Frontend Engineer, Bluebonnet Retail — Sep 2022 – Present"
     },
     {
+      "kind": "job",
       "title": "Web Developer",
+      "organization": null,
       "start": "2021-06",
       "end": "2022-08",
+      "highlights": [
+        "Web Developer, Hill Country Media — Jun 2021 – Aug 2022"
+      ],
       "skills_used": [
         "HTML",
         "CSS",

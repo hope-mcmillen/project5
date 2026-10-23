@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../../../core/errors/app_failure.dart';
 import '../../../core/models/job_status.dart';
+import '../../../core/testing/seed_taxonomy.dart';
 import '../domain/job.dart';
 import '../domain/job_summary.dart';
 import '../domain/requirement.dart';
@@ -176,6 +177,16 @@ class FakeJobRepository implements JobRepository {
 
   static SkillRef skillByName(String name) =>
       taxonomy.firstWhere((s) => s.name == name);
+
+  /// Everything skill search offers: [taxonomy], then the rest of the seeded
+  /// taxonomy. The fake parser only looks for [taxonomy], since substring
+  /// matching short names like "C" or "Go" over every skill finds noise.
+  static final searchableTaxonomy = [
+    ...taxonomy,
+    for (final (name, category, _) in seedTaxonomy)
+      if (!taxonomy.any((s) => s.name == name))
+        SkillRef(id: name.toLowerCase(), name: name, category: category),
+  ];
 
   final Duration latency;
 
@@ -403,10 +414,22 @@ class FakeJobRepository implements JobRepository {
   }
 
   @override
+  Future<void> deleteDraft(String jobId) async {
+    await _call();
+    final job = _job(jobId);
+    if (job.status != JobStatus.draft) throw const AppFailure('job_not_draft');
+    _jobs.remove(jobId);
+    _requirements.remove(jobId);
+    _counts.remove(jobId);
+  }
+
+  @override
   Future<List<SkillRef>> searchSkills(String query) async {
     await _call();
     final q = query.trim().toLowerCase();
     if (q.isEmpty) return const [];
-    return taxonomy.where((s) => s.name.toLowerCase().contains(q)).toList();
+    return searchableTaxonomy
+        .where((s) => s.name.toLowerCase().contains(q))
+        .toList();
   }
 }

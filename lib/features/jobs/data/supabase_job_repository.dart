@@ -148,6 +148,11 @@ class SupabaseJobRepository implements JobRepository {
   );
 
   @override
+  Future<void> deleteDraft(String jobId) => _guard(
+    () => _client.rpc<void>('delete_draft_job', params: {'p_job_id': jobId}),
+  );
+
+  @override
   Future<List<SkillRef>> searchSkills(String query) => _guard(() async {
     // Strip PostgREST filter syntax characters from user input.
     final text = query.trim().replaceAll(RegExp(r'[,()*{}%\\."]'), ' ').trim();
