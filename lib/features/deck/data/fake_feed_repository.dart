@@ -28,6 +28,8 @@ class FakeFeedRepository extends FakeRepository implements FeedRepository {
   final Set<String> _pending = {};
   final List<JobCard> _cards;
   @override
+  bool get isDemo => true;
+  @override
   Future<FeedPage> getFeed({int limit = 20, String? cursor}) async {
     await call();
     final prefs = await preferences?.call() ?? Preferences();

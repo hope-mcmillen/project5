@@ -6,7 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app.dart';
 import 'app/env.dart';
-import 'app/fake_overrides.dart';
 import 'core/errors/app_failure.dart';
 import 'core/logging/app_log.dart';
 import 'core/logging/logging_http_client.dart';
@@ -45,7 +44,6 @@ Future<void> main() async {
     ProviderScope(
       retry: noAutomaticRetry,
       observers: appProviderObservers,
-      overrides: feedAndApplicationOverrides(includeApplications: false),
       child: const ResuRhombusApp(),
     ),
   );

@@ -9,8 +9,8 @@ class JobCard {
     required this.title,
     required this.company,
     this.location,
-    required this.remote,
-    required this.jobType,
+    this.remote,
+    this.jobType,
     required this.sponsorship,
     this.salaryMin,
     this.salaryMax,
@@ -29,8 +29,10 @@ class JobCard {
   final String title;
   final JobCompany company;
   final String? location;
-  final RemoteType remote;
-  final JobType jobType;
+
+  /// Null when the recruiter left it unset (the feed lets unknowns through).
+  final RemoteType? remote;
+  final JobType? jobType;
   final bool sponsorship;
   final int? salaryMin;
   final int? salaryMax;
@@ -43,11 +45,15 @@ class JobCard {
   final List<BreakdownItem> breakdown;
   factory JobCard.fromJson(Map<String, dynamic> json) => JobCard(
     jobId: json['job_id'] as String,
-    title: json['title'] as String,
+    title: json['title'] as String? ?? 'Untitled role',
     company: JobCompany.fromJson(json['company'] as Map<String, dynamic>),
     location: json['location'] == null ? null : json['location'] as String,
-    remote: RemoteType.fromDb(json['remote'] as String),
-    jobType: JobType.fromDb(json['job_type'] as String),
+    remote: json['remote'] == null
+        ? null
+        : RemoteType.fromDb(json['remote'] as String),
+    jobType: json['job_type'] == null
+        ? null
+        : JobType.fromDb(json['job_type'] as String),
     sponsorship: json['sponsorship'] as bool,
     salaryMin: json['salary_min'] == null
         ? null
@@ -76,8 +82,8 @@ class JobCard {
     'title': title,
     'company': company.toJson(),
     'location': location,
-    'remote': remote.toDb(),
-    'job_type': jobType.toDb(),
+    'remote': remote?.toDb(),
+    'job_type': jobType?.toDb(),
     'sponsorship': sponsorship,
     'salary_min': salaryMin,
     'salary_max': salaryMax,

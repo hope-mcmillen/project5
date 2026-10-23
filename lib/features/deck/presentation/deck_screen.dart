@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
+import '../../../core/errors/app_failure.dart';
 import '../../../core/models/candidate_models.dart';
 import '../../../ui/components/branded_page.dart';
 import '../../../ui/components/collage.dart';
@@ -13,6 +14,7 @@ import '../../../ui/components/error_banner.dart';
 import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/components/swipe_deck.dart';
 import '../../../ui/theme/rr_tokens.dart';
+import '../data/feed_repository.dart';
 import 'feed_controller.dart';
 import 'swipe_feedback.dart';
 import '../domain/swipe_receipt.dart';
@@ -97,15 +99,28 @@ class _DeckScreenState extends ConsumerState<DeckScreen> {
       ),
       child: state.when(
         loading: () => const ShimmerShape(height: RRSpace.badgeLarge * 4),
-        error: (_, _) => Column(
-          children: [
-            const ErrorBanner(message: 'We could not load your job deck.'),
-            TextButton(
-              onPressed: () => ref.invalidate(feedControllerProvider),
-              child: const Text('Retry jobs'),
-            ),
-          ],
-        ),
+        // A live deck needs a confirmed profile first (get_feed refuses).
+        error: (error, _) =>
+            error is AppFailure && error.code == 'profile_not_confirmed'
+            ? EmptyState(
+                title: 'Confirm your skills first',
+                message: error.message,
+                actionLabel: 'Review skills',
+                onAction: () => context.go(Routes.candidateReview),
+              )
+            : Column(
+                children: [
+                  ErrorBanner(
+                    message: error is AppFailure && error.code != 'unknown'
+                        ? error.message
+                        : 'We could not load your job deck.',
+                  ),
+                  TextButton(
+                    onPressed: () => ref.invalidate(feedControllerProvider),
+                    child: const Text('Retry jobs'),
+                  ),
+                ],
+              ),
         data: (value) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -173,11 +188,12 @@ class _DeckScreenState extends ConsumerState<DeckScreen> {
               ),
               const SizedBox(height: RRSpace.xxl),
             ],
-            Text(
-              'Demo jobs · Apply saves a local application. No applications are sent to employers.',
-              style: Theme.of(context).textTheme.bodySmall
-                  ?.copyWith(color: RRColors.inkMuted),
-            ),
+            if (ref.watch(feedRepositoryProvider).isDemo)
+              Text(
+                'Demo jobs · Apply saves a local application. No applications are sent to employers.',
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: RRColors.inkMuted),
+              ),
           ],
         ),
       ),

@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/candidate_models.dart';
+import '../../../core/supabase/supabase_providers.dart';
 import '../domain/swipe_receipt.dart';
+import 'supabase_feed_repository.dart';
 
 class FeedPage {
   FeedPage({required List<JobCard> cards, this.nextCursor})
@@ -21,6 +23,9 @@ class FeedPage {
 }
 
 abstract interface class FeedRepository {
+  /// True for the in-memory demo deck, whose applications never reach a
+  /// recruiter.
+  bool get isDemo;
   Future<FeedPage> getFeed({int limit = 20, String? cursor});
   Future<JobCard> getJob(String jobId);
   Future<SwipeReceipt> swipe(String jobId, SwipeDirection direction);
@@ -28,7 +33,9 @@ abstract interface class FeedRepository {
   Future<void> setPassReason(String swipeId, PassReason reason);
 }
 
+/// The live deck; `main_fake.dart` and tests override it with the fake.
 final feedRepositoryProvider = Provider<FeedRepository>(
-  (ref) =>
-      throw UnimplementedError('FeedRepository: use main_fake.dart until C8.'),
+  (ref) => SupabaseFeedRepository(
+    SupabaseFeedSource(ref.watch(supabaseClientProvider)),
+  ),
 );

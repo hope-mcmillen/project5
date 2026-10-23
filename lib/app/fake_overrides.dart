@@ -74,9 +74,9 @@ List<Override> candidateRepositoryOverrides({
   ),
 ];
 
-/// The deck feed still runs on fakes in the Supabase build: it has no
-/// Supabase repository yet. Resume parsing and profiles are real there, and
-/// so are applications (C10) when [includeApplications] is false.
+/// The demo deck, plus demo applications unless [includeApplications] is
+/// false (then a right swipe on a demo card is refused, since there is no
+/// real job to apply to).
 List<Override> feedAndApplicationOverrides({
   Duration latency = const Duration(milliseconds: 300),
   bool includeApplications = true,

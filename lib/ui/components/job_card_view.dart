@@ -103,12 +103,16 @@ class JobCardView extends StatelessWidget {
                               children: [
                                 _Meta(
                                   icon: Icons.location_on_outlined,
-                                  text:
-                                      '${job.location ?? 'Location not listed'} · ${job.remote.label}',
+                                  text: [
+                                    job.location ?? 'Location not listed',
+                                    ?job.remote?.label,
+                                  ].join(' · '),
                                 ),
                                 _Meta(
                                   icon: Icons.work_outline,
-                                  text: job.jobType.label,
+                                  text:
+                                      job.jobType?.label ??
+                                      'Job type not listed',
                                 ),
                                 _Meta(
                                   icon: Icons.payments_outlined,
