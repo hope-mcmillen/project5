@@ -1,9 +1,9 @@
 begin;
 set local search_path=public,extensions;
 select plan(12);
-select is((select count(*)::int from public.skills where is_seed),343,'all taxonomy skills seeded');
-select is((select count(*)::int from public.skill_relations),132,'all taxonomy relations seeded');
-select is((select count(*)::int from public.skills where embedding is not null and embedding_model='gemini-embedding-001@1536'),343,'all taxonomy vectors precomputed');
+select is((select count(*)::int from public.skills where is_seed),933,'all taxonomy skills seeded');
+select is((select count(*)::int from public.skill_relations),579,'all taxonomy relations seeded');
+select is((select count(*)::int from public.skills where embedding is not null and embedding_model='gemini-embedding-001@1536'),933,'all taxonomy vectors precomputed');
 select is((select count(*)::int from public.companies where is_seed),3,'three demo companies');
 select is((select count(*)::int from public.companies where is_seed and verified),1,'one verified demo company');
 select is((select count(*)::int from public.candidates where is_seed),30,'thirty demo candidates');

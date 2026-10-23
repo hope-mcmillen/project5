@@ -33,14 +33,13 @@ class RequirementEditorScreen extends ConsumerWidget {
     final editor = ref.watch(requirementsControllerProvider(jobId));
     return Scaffold(
       appBar: AppBar(
-        actions: [?EmployerMenuScope.button(context)],
-
         title: Text(
           job.value == null
               ? 'Requirements'
               : 'Requirements · ${job.value!.displayTitle}',
         ),
         actions: [
+          ?EmployerMenuScope.button(context),
           // An abandoned New job flow leaves a draft; let it go from here.
           if (job.value case final j? when j.status == JobStatus.draft)
             IconButton(
