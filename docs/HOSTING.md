@@ -48,4 +48,4 @@ Open the hosted URL in a private window and confirm:
 
 1. Sign in as a recruiter, refresh on a board URL: the same board reloads.
 2. "Forgot password" sends an email whose link opens the reset page.
-3. The layout works at phone width and on a laptop (rail from 900 px).
+3. The layout works at phone width and on a laptop. The employer menu opens a left sidebar with Interviews, Company Profiles, and Job Postings, preserving each section's navigation state.

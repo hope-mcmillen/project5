@@ -1,3 +1,5 @@
+import '../../../app/employer_menu.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -132,7 +134,10 @@ class _NewJobScreenState extends ConsumerState<NewJobScreen> {
     final busy = _stage == _Stage.saving || _stage == _Stage.reading;
     final length = _text.text.length;
     return Scaffold(
-      appBar: AppBar(title: const Text('New job')),
+      appBar: AppBar(
+        actions: [?EmployerMenuScope.button(context)],
+        title: const Text('New job'),
+      ),
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 860),
