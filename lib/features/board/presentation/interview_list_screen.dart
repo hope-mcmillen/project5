@@ -12,6 +12,7 @@ import '../data/board_repository.dart';
 import '../domain/candidate_detail.dart';
 import 'candidate_actions.dart';
 import 'widgets/board_marks.dart';
+import '../../../app/account_menu.dart';
 
 /// One advanced candidate and the job they were advanced for.
 class InterviewEntry {
@@ -84,6 +85,7 @@ class _InterviewListScreenState extends ConsumerState<InterviewListScreen> {
       appBar: AppBar(
         leading: EmployerMenuScope.button(context),
         title: const Text('Interviews'),
+        actions: const [AccountMenuButton()],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

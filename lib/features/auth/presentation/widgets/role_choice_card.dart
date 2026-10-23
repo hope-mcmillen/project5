@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/models/app_role.dart';
+import '../../../../ui/components/collage.dart';
+import '../../../../ui/theme/rr_tokens.dart';
 
 /// One of the two large sign-up cards: "I'm looking for a job" or
 /// "I'm hiring" (PRD §4). Selected cards get a 2 px border and a check.
@@ -29,12 +31,15 @@ class RoleChoiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final candidate = role == AppRole.candidate;
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: const BorderRadius.horizontal(
+        left: RRRadius.sm,
+        right: RRRadius.xl,
+      ),
       side: BorderSide(
-        color: selected ? colors.primary : colors.outlineVariant,
-        width: selected ? 2 : 1,
+        color: selected ? RRColors.ink : Colors.transparent,
+        width: 3,
       ),
     );
     return Semantics(
@@ -42,28 +47,34 @@ class RoleChoiceCard extends StatelessWidget {
       selected: selected,
       child: Card(
         shape: shape,
+        color: candidate ? RRColors.deck : RRColors.pink,
         margin: EdgeInsets.zero,
         child: InkWell(
           customBorder: shape,
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(RRSpace.lg),
             child: Row(
               children: [
-                Icon(
-                  role == AppRole.candidate
-                      ? Icons.style_outlined
-                      : Icons.grid_view_outlined,
-                  size: 40,
-                  color: colors.primary,
+                CollageTile(
+                  color: candidate ? RRColors.lemon : RRColors.violet,
+                  shape: candidate ? TileShape.circle : TileShape.halfRight,
+                  width: RRSpace.xxxl + RRSpace.sm,
+                  height: RRSpace.xxxl + RRSpace.sm,
+                  padding: EdgeInsets.zero,
+                  child: Icon(
+                    candidate ? Icons.style_outlined : Icons.grid_view_outlined,
+                    size: RRSpace.xxl,
+                    color: candidate ? RRColors.ink : RRColors.surface,
+                  ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: RRSpace.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(titleFor(role), style: theme.textTheme.titleMedium),
-                      const SizedBox(height: 4),
+                      Text(titleFor(role), style: theme.textTheme.titleLarge),
+                      const SizedBox(height: RRSpace.xs),
                       Text(
                         subtitleFor(role),
                         style: theme.textTheme.bodyMedium,
@@ -71,7 +82,8 @@ class RoleChoiceCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (selected) Icon(Icons.check_circle, color: colors.primary),
+                if (selected)
+                  const Icon(Icons.check_circle, color: RRColors.ink),
               ],
             ),
           ),

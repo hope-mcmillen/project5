@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../core/models/candidate_models.dart';
 import '../../../ui/components/branded_page.dart';
+import '../../../ui/components/collage.dart';
 import '../../../ui/components/empty_state.dart';
 import '../../../ui/components/error_banner.dart';
 import '../../../ui/components/shimmer_shape.dart';
@@ -40,6 +41,9 @@ class _DeckScreenState extends ConsumerState<DeckScreen> {
 
     return BrandedPage(
       title: 'Your deck',
+      headline: 'swipe.',
+      accent: RRColors.violet,
+      motif: TileMotif.ring,
       description: 'Swipe right to apply or left to pass. Every gesture also has a button.',
       footer: ConstrainedBox(
         constraints: BoxConstraints(

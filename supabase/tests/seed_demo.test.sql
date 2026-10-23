@@ -4,8 +4,9 @@ select plan(12);
 select is((select count(*)::int from public.skills where is_seed),933,'all taxonomy skills seeded');
 select is((select count(*)::int from public.skill_relations),579,'all taxonomy relations seeded');
 select is((select count(*)::int from public.skills where embedding is not null and embedding_model='gemini-embedding-001@1536'),933,'all taxonomy vectors precomputed');
-select is((select count(*)::int from public.companies where is_seed),3,'three demo companies');
-select is((select count(*)::int from public.companies where is_seed and verified),1,'one verified demo company');
+-- Houston demo companies (prefix 484f5553, houston_jobs.test.sql) are counted separately.
+select is((select count(*)::int from public.companies where is_seed and id::text not like '484f5553-%'),3,'three demo companies');
+select is((select count(*)::int from public.companies where is_seed and verified and id::text not like '484f5553-%'),1,'one verified demo company');
 select is((select count(*)::int from public.candidates where is_seed),30,'thirty demo candidates');
 select is((select count(*)::int from public.profile_versions where is_seed and confirmed),30,'demo profiles confirmed');
 select is((select count(*)::int from public.applications where is_seed),60,'sixty demo applications');

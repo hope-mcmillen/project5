@@ -14,6 +14,7 @@ import 'board_screen.dart';
 import 'candidate_actions.dart';
 import 'widgets/board_marks.dart';
 import 'widgets/match_radar.dart';
+import '../../../app/account_menu.dart';
 
 /// Opening marks the application Under Review (`open_application`), then
 /// loads `get_candidate_detail`.
@@ -58,8 +59,10 @@ class CandidateDetailScreen extends ConsumerWidget {
     });
     return Scaffold(
       appBar: AppBar(
-        actions: [?EmployerMenuScope.button(context)],
-
+        actions: [
+          ?EmployerMenuScope.button(context),
+          const AccountMenuButton(),
+        ],
         title: Text(
           detail.value?.identity?.label ??
               detail.value?.tile.handle ??

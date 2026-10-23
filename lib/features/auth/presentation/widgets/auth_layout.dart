@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../app/account_menu.dart';
 import '../../../../core/errors/app_failure.dart';
+import '../../../../ui/components/collage.dart';
+import '../../../../ui/theme/rr_tokens.dart';
 
 /// Loading/error state for a screen's one-shot actions (submit, Google).
 mixin ActionStatus<T extends StatefulWidget> on State<T> {
@@ -24,7 +27,8 @@ mixin ActionStatus<T extends StatefulWidget> on State<T> {
   }
 }
 
-/// Centered, single-column layout shared by every auth page.
+/// Centered, single-column layout shared by every auth page, on the grey
+/// collage canvas with ribbons behind it.
 class AuthLayout extends StatelessWidget {
   const AuthLayout({
     super.key,
@@ -33,6 +37,8 @@ class AuthLayout extends StatelessWidget {
     this.subtitle,
     this.showBack = true,
     this.maxWidth = 440,
+    this.accountMenu = false,
+    this.hero,
   });
 
   final double maxWidth;
@@ -41,33 +47,52 @@ class AuthLayout extends StatelessWidget {
   final List<Widget> children;
   final bool showBack;
 
+  /// Signed-in pages (role choice, company onboarding) show the account
+  /// menu so Sign out is always one tap away.
+  final bool accountMenu;
+
+  /// Optional artwork above the title, e.g. the Welcome tile collage.
+  final Widget? hero;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: showBack ? AppBar() : null,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxWidth),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.headlineMedium,
-                    // The page title doubles as the screen's heading.
-                    semanticsLabel: title,
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 8),
-                    Text(subtitle!, style: theme.textTheme.bodyLarge),
+      appBar: showBack || accountMenu
+          ? AppBar(
+              automaticallyImplyLeading: showBack,
+              backgroundColor: Colors.transparent,
+              actions: [if (accountMenu) const AccountMenuButton()],
+            )
+          : null,
+      body: RibbonBackdrop(
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(RRSpace.xl),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (hero != null) ...[
+                      hero!,
+                      const SizedBox(height: RRSpace.xl),
+                    ],
+                    Text(
+                      title,
+                      style: theme.textTheme.headlineMedium,
+                      // The page title doubles as the screen's heading.
+                      semanticsLabel: title,
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: RRSpace.sm),
+                      Text(subtitle!, style: theme.textTheme.bodyLarge),
+                    ],
+                    const SizedBox(height: RRSpace.xl),
+                    ...children,
                   ],
-                  const SizedBox(height: 24),
-                  ...children,
-                ],
+                ),
               ),
             ),
           ),

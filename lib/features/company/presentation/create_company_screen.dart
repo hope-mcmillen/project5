@@ -69,6 +69,7 @@ class _CreateCompanyScreenState extends ConsumerState<CreateCompanyScreen>
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     return AuthLayout(
+      accountMenu: true,
       title: 'Create company',
       subtitle: 'Candidates see this name and logo on your jobs.',
       children: [

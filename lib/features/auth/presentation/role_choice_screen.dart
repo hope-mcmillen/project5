@@ -31,6 +31,7 @@ class _RoleChoiceScreenState extends ConsumerState<RoleChoiceScreen>
   @override
   Widget build(BuildContext context) {
     return AuthLayout(
+      accountMenu: true,
       title: 'How will you use ResuRhombus?',
       subtitle: 'You can\'t change this later.',
       showBack: false,

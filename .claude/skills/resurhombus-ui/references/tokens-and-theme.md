@@ -11,21 +11,29 @@
 
 ## 1. Color tokens
 
+**Collage palette (Oct 2026).** Flat grey canvas, navy ink, saturated tiles, inspired by a geometric marketing collage. Rhombus and triangle motifs stay. Source of truth: `lib/ui/theme/rr_tokens.dart`.
+
 | Token | Hex | Role | Text on it |
 |---|---|---|---|
-| `canvas` | `#FCF7F8` | App background | `ink` |
-| `surface` | `#FFFFFF` | Sheets, dialogs, recruiter tiles | `ink` |
-| `framework` | `#CED3DC` | Dividers, inactive icons, empty placeholders, shadow tint, wireframes | n/a (not a text background) |
-| `deck` | `#90C2E7` | Job card surface | `ink` only (white is about 1.9:1 and fails) |
-| `deckDeep` | `#6FA8D6` | Card edge, stacked-card back layers | `ink` |
-| `match` | `#4E8098` | Apply, advance, strong match, primary CTA fill | white **only if large or bold** (about 4.3:1) |
-| `matchStrong` | `#3D6A80` | Teal for small text, links, focus rings, small labels | white OK |
-| `matchTint` | `#4E8098` at 12% alpha | Selected chip and row backgrounds | `ink` |
-| `pass` | `#A31621` | Pass, reject, destructive actions, errors | white (about 7.8:1) |
-| `passTint` | `#A31621` at 10% alpha | Error banners | `ink` or `pass` text |
-| `ink` | `#1F2A33` | Primary text and icons | n/a |
-| `inkMuted` | `#5B6670` | Secondary text, captions | n/a |
-| `stretch` | `#8A94A3` | "Stretch" score band | white large only, `ink` otherwise |
+| `canvas` | `#E6E6E3` | App background (light grey) | `ink` (12:1) |
+| `canvasDeep` | `#D6D7D1` | Shimmer, loading blocks, wells on canvas | `ink` |
+| `surface` | `#FFFFFF` | Cards, sheets, dialogs, recruiter tiles | `ink` |
+| `framework` | `#C4C5BF` | Dividers, input outlines, inactive elements | n/a |
+| `deck` | `#2D9CEB` | Job card header tile (sky); decorative tiles | `ink` only (5.1:1) |
+| `deckDeep` | `#1B7FCC` | Card edge, stacked back layers | `ink` |
+| `match` | `#1F8A3B` | Apply/advance/strong (green) | white **large or bold only** (4.4:1) |
+| `matchStrong` | `#17702F` | Primary buttons, small green text, links | white OK (6.2:1) |
+| `pass` | `#A31621` | Pass, reject, destructive, errors | white (7.8:1) |
+| `ink` | `#14215A` | Navy text, icons, ribbons, outlined buttons | n/a |
+| `inkMuted` | `#4A5275` | Secondary text | 6.1:1 on canvas |
+| `stretch` | `#6B7187` | "Stretch" band | `ink` |
+| `violet` | `#5B2BC9` | Decorative tile | white or lemon |
+| `pink` | `#FF7AA2` | Decorative tile, recruiter header tiles | `ink` (6.1:1) |
+| `lemon` | `#FFE14D` | Decorative tile, selected drawer item, avatar, FAB | `ink` (11.6:1) |
+
+Green and crimson keep their meaning: never use them for decoration. Decorative tiles use violet, pink, lemon, sky and navy. `onTile(color)` in `branded_page.dart` picks AA text for a tile.
+
+**Collage components** (`lib/ui/components/collage.dart`): `CollageTile` (square, circle, pill, half-circle "D" shapes, leaf), `TileMotif` (rhombus, triangle, asterisk, arrow, ring, squiggle), `TileMosaic` (rows of butting tiles), `HeadlineTile` (big lowercase "word." header tile), `TileCluster` (empty-state illustration), `RibbonBackdrop` (navy/pink/lemon ribbons, auth pages only), `CollageWordmark`. Candidate pages get a colourful `HeadlineTile`; recruiter pages keep white cards on grey with one pink header tile.
 
 **Score band to visual** (PRD §3.3):
 
@@ -50,14 +58,14 @@
 
 Use the `google_fonts` package. For release builds, bundle the font files under `assets/fonts/` and set `GoogleFonts.config.allowRuntimeFetching = false` so the app works offline.
 
-- **Display and headings:** *Space Grotesk*. Its geometric shapes match the brand.
+- **Display and headings:** *Poppins Black* (900), bundled at `assets/fonts/Poppins-Black.ttf`. Headlines are lowercase with a trailing period on header tiles ("swipe.", "hire."). Space Grotesk is still bundled but no longer used by the theme.
 - **Body and UI:** *Inter*. Highly legible at small sizes.
 
 | Style | Font | Size / line height | Weight | Use |
 |---|---|---|---|---|
-| displaySmall | Space Grotesk | 32/40 | 700 | Score number on Deep-Dive |
-| headlineSmall | Space Grotesk | 24/32 | 700 | Screen titles |
-| titleLarge | Space Grotesk | 20/28 | 600 | Card job title |
+| displaySmall | Poppins | 36/42 | 900 | Score number on Deep-Dive |
+| headlineSmall | Poppins | 24/32 | 900 | Screen titles |
+| titleLarge | Poppins | 20/28 | 900 | Card job title |
 | titleMedium | Inter | 16/24 | 600 | Company name, section headers |
 | bodyLarge | Inter | 16/24 | 400 | Descriptions |
 | bodyMedium | Inter | 14/20 | 400 | Default text |

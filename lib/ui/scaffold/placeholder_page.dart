@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 import '../theme/rr_tokens.dart';
-import '../components/rhombus_mark.dart';
+import '../components/branded_page.dart';
+import '../components/collage.dart';
 import '../components/action_button.dart';
 
 import 'package:go_router/go_router.dart';
 
+import '../../app/account_menu.dart';
 import '../../app/candidate_menu.dart';
 
 /// How a scaffold link navigates.
@@ -77,28 +79,17 @@ class PlaceholderPage extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: RRSpace.pageWidth),
           child: ListView(
-            padding: const EdgeInsets.all(RRSpace.xl),
+            padding: const EdgeInsets.fromLTRB(
+              RRSpace.lg,
+              RRSpace.sm,
+              RRSpace.lg,
+              RRSpace.xl,
+            ),
             children: [
-              Row(
-                children: [
-                  const RhombusMark(size: RRSpace.xl),
-                  const SizedBox(width: RRSpace.sm),
-                  Expanded(
-                    child: Text(
-                      'RESURHOMBUS',
-                      style: theme.textTheme.labelLarge,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: RRSpace.xxl),
-              Text(title, style: theme.textTheme.displaySmall),
-              const SizedBox(height: RRSpace.md),
-              Text(
-                description,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: RRColors.inkMuted,
-                ),
+              HeadlineTile(
+                headline: collageHeadline(title),
+                message: description,
+                color: RRColors.pink,
               ),
               const SizedBox(height: RRSpace.xl),
               Card(
@@ -175,6 +166,7 @@ class PlaceholderPage extends StatelessWidget {
         actions: [
           if (showBackButton && menuButton != null) menuButton,
           ...actions,
+          const AccountMenuButton(),
         ],
       ),
       body: body,

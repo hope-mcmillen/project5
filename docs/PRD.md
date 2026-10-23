@@ -654,6 +654,7 @@ The demo must work right away, with a populated recruiter board, before anyone u
 | Candidates | about 30 | Confirmed profiles with skills, years, and evidence snippets. Deliberately spread across Strong, Good, Stretch, and low match bands for each job. |
 | Applications | about 60 | Spread across **every** state (`APPLIED`, `UNDER_REVIEW`, `INTERVIEW_REQUESTED`, `NOT_SELECTED`, `WITHDRAWN`, `JOB_CLOSED`), with `status_events` history |
 | Swipes | about 150 | Including left swipes with pass reasons, so Feed Rank has signal |
+| Houston demo jobs | 18 companies, 80 jobs | `supabase/seed/houston_jobs.sql`: fictional Greater Houston employers with `OPEN` jobs across every job type and remote mode, so a live candidate has a full deck. No users, so it is safe to load into the dev project. |
 
 **Demo accounts:** 1 recruiter (company owner), 1 recruiter (member), and 1 candidate with a partly used deck. Credentials live **only in `seed.sql` and the README's local-dev section**. They're for local and dev projects only, and never seeded into a production project.
 

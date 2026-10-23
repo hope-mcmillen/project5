@@ -10,6 +10,8 @@ class DeckActionBar extends StatelessWidget {
     required this.onApply,
   });
   final VoidCallback? onPass, onDetails, onApply;
+
+  static const _padding = EdgeInsets.symmetric(horizontal: RRSpace.lg);
   @override
   Widget build(BuildContext context) => Wrap(
     alignment: WrapAlignment.center,
@@ -19,19 +21,27 @@ class DeckActionBar extends StatelessWidget {
       OutlinedButton.icon(
         style: OutlinedButton.styleFrom(
           foregroundColor: RRColors.pass,
-          minimumSize: const Size(72, 56),
+          side: const BorderSide(color: RRColors.pass, width: 2),
+          minimumSize: const Size(88, 56),
+          padding: _padding,
         ),
         onPressed: onPass,
         icon: const Icon(Icons.close),
         label: const Text('Pass'),
       ),
       OutlinedButton(
-        style: OutlinedButton.styleFrom(minimumSize: const Size(72, 56)),
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(72, 56),
+          padding: _padding,
+        ),
         onPressed: onDetails,
         child: const Text('Details'),
       ),
       FilledButton.icon(
-        style: FilledButton.styleFrom(minimumSize: const Size(72, 56)),
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(104, 56),
+          padding: _padding,
+        ),
         onPressed: onApply,
         icon: const Icon(Icons.check),
         label: const Text('Apply'),

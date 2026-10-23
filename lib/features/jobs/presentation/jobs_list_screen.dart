@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../app/widgets/state_views.dart';
 import '../../../core/models/job_status.dart';
+import '../../../ui/components/collage.dart';
 import '../../../ui/theme/rr_tokens.dart';
 import '../../company/presentation/widgets/company_header.dart';
 
@@ -14,6 +15,7 @@ import '../data/job_repository.dart';
 import '../domain/job_summary.dart';
 import 'job_actions.dart';
 import 'widgets/job_status_chip.dart';
+import '../../../app/account_menu.dart';
 
 /// Jobs: every job in the company with new/total applicant counts, and
 /// publish / pause / close actions, plus delete for drafts (RC-06, US-37,
@@ -32,6 +34,7 @@ class JobsListScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: EmployerMenuScope.button(context),
         title: const Text('Jobs'),
+        actions: const [AccountMenuButton()],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(RRSpace.xxxl),
           child: Padding(
@@ -118,10 +121,11 @@ class _JobsList extends StatelessWidget {
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
-      itemCount: jobs.length,
+      itemCount: jobs.length + 1,
       separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (context, i) {
-        final job = jobs[i];
+      itemBuilder: (context, index) {
+        if (index == 0) return _JobsHeader(jobs: jobs);
+        final job = jobs[index - 1];
         return Card(
           margin: EdgeInsets.zero,
           clipBehavior: Clip.antiAlias,
@@ -180,44 +184,71 @@ class _JobsTable extends StatelessWidget {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(24),
-      child: Card(
-        margin: EdgeInsets.zero,
-        clipBehavior: Clip.antiAlias,
-        child: SizedBox(
-          width: double.infinity,
-          child: DataTable(
-            showCheckboxColumn: false,
-            columns: const [
-              DataColumn(label: Text('Title')),
-              DataColumn(label: Text('Status')),
-              DataColumn(label: Text('New'), numeric: true),
-              DataColumn(label: Text('Total'), numeric: true),
-              DataColumn(label: Text('Actions')),
-            ],
-            rows: [
-              for (final job in jobs)
-                DataRow(
-                  cells: [
-                    DataCell(
-                      Text(_title(job)),
-                      onTap: () => _open(context, job),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _JobsHeader(jobs: jobs),
+          const SizedBox(height: RRSpace.lg),
+          Card(
+            margin: EdgeInsets.zero,
+            clipBehavior: Clip.antiAlias,
+            child: SizedBox(
+              width: double.infinity,
+              child: DataTable(
+                showCheckboxColumn: false,
+                columns: const [
+                  DataColumn(label: Text('Title')),
+                  DataColumn(label: Text('Status')),
+                  DataColumn(label: Text('New'), numeric: true),
+                  DataColumn(label: Text('Total'), numeric: true),
+                  DataColumn(label: Text('Actions')),
+                ],
+                rows: [
+                  for (final job in jobs)
+                    DataRow(
+                      cells: [
+                        DataCell(
+                          Text(_title(job)),
+                          onTap: () => _open(context, job),
+                        ),
+                        DataCell(JobStatusChip(status: job.status)),
+                        DataCell(
+                          CountBadge(
+                            count: job.newCount,
+                            label: 'new',
+                            highlight: true,
+                          ),
+                        ),
+                        DataCell(Text('${job.totalCount}')),
+                        DataCell(_JobMenu(job: job)),
+                      ],
                     ),
-                    DataCell(JobStatusChip(status: job.status)),
-                    DataCell(
-                      CountBadge(
-                        count: job.newCount,
-                        label: 'new',
-                        highlight: true,
-                      ),
-                    ),
-                    DataCell(Text('${job.totalCount}')),
-                    DataCell(_JobMenu(job: job)),
-                  ],
-                ),
-            ],
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
+    );
+  }
+}
+
+/// "hire." header tile with open-role and new-applicant totals.
+class _JobsHeader extends StatelessWidget {
+  const _JobsHeader({required this.jobs});
+
+  final List<JobSummary> jobs;
+
+  @override
+  Widget build(BuildContext context) {
+    final open = jobs.where((j) => j.status == JobStatus.open).length;
+    final fresh = jobs.fold(0, (sum, j) => sum + j.newCount);
+    return HeadlineTile(
+      headline: 'hire.',
+      message:
+          '$open open ${open == 1 ? 'role' : 'roles'} · '
+          '$fresh new ${fresh == 1 ? 'applicant' : 'applicants'} to review',
+      color: RRColors.pink,
     );
   }
 }

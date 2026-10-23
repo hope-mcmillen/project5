@@ -1,7 +1,7 @@
 # Visual baselines
 
 These PNGs use **Flutter 3.47.1 on Windows** with bundled Inter, Space Grotesk,
-and Material Icons fonts. Keep the Flutter version in `.github/workflows/main.yml`
+Poppins Black and Material Icons fonts. Keep the Flutter version in `.github/workflows/main.yml`
 in sync when intentionally updating the baselines.
 
 Native font rasterization and Flutter engine changes can produce pixel differences

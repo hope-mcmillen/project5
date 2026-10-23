@@ -9,7 +9,8 @@
     "record:fixtures": "deno run --env-file=.env --allow-read=../.. --allow-write=_shared/fixtures/extract --allow-env --allow-net=generativelanguage.googleapis.com ../../scripts/record_fixtures.ts",
     "build:match-pairs": "deno run --allow-read=../.. --allow-write=../tests/fixtures --allow-env ../../scripts/build_match_pairs.ts",
     "tune:score": "deno run --allow-read=../.. --allow-env ../../scripts/tune_score.ts",
-    "generate:seed": "deno run --allow-read=../.. --allow-write=../seed --allow-env ../../scripts/generate_seed.ts"
+    "generate:seed": "deno run --allow-read=../.. --allow-write=../seed --allow-env ../../scripts/generate_seed.ts",
+    "generate:houston": "deno run --allow-read=../.. --allow-write=../seed --allow-env ../../scripts/generate_houston_seed.ts"
   },
   "fmt": {
     "lineWidth": 120,

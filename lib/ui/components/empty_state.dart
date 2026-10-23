@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/rr_tokens.dart';
-import 'rhombus_mark.dart';
+import 'collage.dart';
 
 class EmptyState extends StatelessWidget {
   const EmptyState({
@@ -20,7 +20,7 @@ class EmptyState extends StatelessWidget {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const RhombusMark(size: RRSpace.badgeLarge, color: RRColors.framework),
+        const TileCluster(),
         const SizedBox(height: RRSpace.lg),
         Text(
           title,
@@ -28,7 +28,11 @@ class EmptyState extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: RRSpace.sm),
-        Text(message, textAlign: TextAlign.center),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
         if (actionLabel != null && onAction != null) ...[
           const SizedBox(height: RRSpace.lg),
           FilledButton(onPressed: onAction, child: Text(actionLabel!)),

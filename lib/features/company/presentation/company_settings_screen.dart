@@ -5,10 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/app_failure.dart';
-import '../../auth/data/auth_repository.dart';
 import '../data/company_repository.dart';
 import '../domain/company.dart';
 import 'widgets/company_badge.dart';
+import '../../../app/account_menu.dart';
 
 /// Company tab: company info and verified badge, invite codes for owners
 /// (generate, copy, revoke) and sign out (RC-18, US-31, US-33).
@@ -22,6 +22,7 @@ class CompanySettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: EmployerMenuScope.button(context),
         title: const Text('Company'),
+        actions: const [AccountMenuButton()],
       ),
       body: switch (membership) {
         AsyncValue(:final value?) => _Content(membership: value),
@@ -47,7 +48,7 @@ class _Content extends ConsumerWidget {
     final signOut = Align(
       alignment: Alignment.centerLeft,
       child: OutlinedButton.icon(
-        onPressed: () => ref.read(authRepositoryProvider).signOut(),
+        onPressed: () => signOutToWelcome(context, ref),
         icon: const Icon(Icons.logout),
         label: const Text('Sign out'),
       ),

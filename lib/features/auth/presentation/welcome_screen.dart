@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../core/models/app_role.dart';
 import 'widgets/auth_layout.dart';
+import '../../../ui/components/collage.dart';
+import '../../../ui/theme/rr_tokens.dart';
 import 'widgets/role_choice_card.dart';
 
 /// Welcome: pick "I'm looking for a job" or "I'm hiring", then sign up
@@ -27,6 +29,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       subtitle: 'Matches built on skills. How will you use it?',
       showBack: false,
       maxWidth: 720,
+      hero: const WelcomeCollage(),
       children: [
         RoleChoicePicker(
           selected: _role,
@@ -58,4 +61,66 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       ],
     );
   }
+}
+
+/// The Welcome hero: butting colour tiles in the collage language, with the
+/// rhombus and triangle kept from the original brand.
+class WelcomeCollage extends StatelessWidget {
+  const WelcomeCollage({super.key});
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => TileMosaic(
+      cell: constraints.maxWidth >= 600 ? 96 : 64,
+      rows: const [
+        [
+          TileSpec(
+            color: RRColors.violet,
+            flex: 2,
+            label: 'match.',
+            labelColor: RRColors.surface,
+          ),
+          TileSpec(
+            color: RRColors.lemon,
+            shape: TileShape.circle,
+            motif: TileMotif.rhombus,
+          ),
+          TileSpec(
+            color: RRColors.deck,
+            shape: TileShape.halfRight,
+            motif: TileMotif.ring,
+            motifColor: RRColors.lemon,
+          ),
+        ],
+        [
+          TileSpec(color: RRColors.lemon, motif: TileMotif.arrow),
+          TileSpec(
+            color: RRColors.pink,
+            shape: TileShape.pill,
+            flex: 3,
+            motif: TileMotif.squiggle,
+          ),
+        ],
+        [
+          TileSpec(
+            color: RRColors.deck,
+            shape: TileShape.halfBottom,
+            motif: TileMotif.triangle,
+          ),
+          TileSpec(
+            color: RRColors.canvas,
+            motif: TileMotif.asterisk,
+            motifColor: RRColors.violet,
+          ),
+          TileSpec(
+            color: RRColors.match,
+            shape: TileShape.leaf,
+            flex: 2,
+            label: 'apply.',
+            labelColor: RRColors.surface,
+          ),
+        ],
+      ],
+    ),
+  );
 }

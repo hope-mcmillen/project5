@@ -15,6 +15,7 @@ import 'job_actions.dart';
 import 'requirements_controller.dart';
 import 'widgets/description_panel.dart';
 import 'widgets/skill_search_dialog.dart';
+import '../../../app/account_menu.dart';
 
 /// Requirements: review the skills parse-job extracted, mark each required
 /// or preferred, set minimum years and weight, add or map skills, and save
@@ -55,6 +56,7 @@ class RequirementEditorScreen extends ConsumerWidget {
                 if (deleted && context.mounted) context.go(Routes.jobs);
               },
             ),
+          const AccountMenuButton(),
         ],
       ),
       body: switch ((job, editor)) {

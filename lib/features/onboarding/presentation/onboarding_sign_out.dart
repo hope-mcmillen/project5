@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/dev_session.dart';
-import '../../../app/routes.dart';
-import '../../auth/data/auth_repository.dart';
+import '../../../app/account_menu.dart';
 
 /// App bar "Sign out" for candidate onboarding.
 ///
@@ -24,13 +22,7 @@ class OnboardingSignOutAction extends ConsumerWidget {
       return const SizedBox.shrink();
     }
     return TextButton(
-      onPressed: () async {
-        await ref.read(authRepositoryProvider).signOut();
-        if (context.mounted) {
-          DevSessionScope.maybeOf(context)?.signOut();
-          context.go(Routes.welcome);
-        }
-      },
+      onPressed: () => signOutToWelcome(context, ref),
       child: const Text('Sign out'),
     );
   }

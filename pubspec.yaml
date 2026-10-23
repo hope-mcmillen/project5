@@ -76,6 +76,10 @@ flutter:
     - family: Space Grotesk
       fonts:
         - asset: assets/fonts/SpaceGrotesk.ttf
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Black.ttf
+          weight: 900
 
   # To add assets to your application, add an assets section, like this:
   # assets:

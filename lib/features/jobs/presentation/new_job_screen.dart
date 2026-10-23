@@ -12,6 +12,8 @@ import '../../../app/widgets/state_views.dart';
 import '../data/job_repository.dart';
 import '../domain/job.dart';
 import 'requirements_controller.dart';
+import '../../../app/account_menu.dart';
+import '../../../ui/components/collage.dart';
 
 /// New job: paste a description (≤ 20k chars). Creating it inserts a DRAFT
 /// job, invokes `parse-job` and watches `jobs.parse_status` over Realtime,
@@ -140,16 +142,20 @@ class _NewJobScreenState extends ConsumerState<NewJobScreen> {
     final theme = Theme.of(context);
     final busy = _stage == _Stage.saving || _stage == _Stage.reading;
     final length = _text.text.length;
-    final header = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Paste the job description', style: theme.textTheme.titleLarge),
-        const SizedBox(height: 4),
-        const Text(
-          'We\'ll pull out the title, details and skills. You\'ll '
-          'review everything before it goes live.',
-        ),
-      ],
+    final header = HeadlineTile(
+      headline: 'post.',
+      motif: TileMotif.arrow,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Paste the job description', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 4),
+          const Text(
+            'We\'ll pull out the title, details and skills. You\'ll '
+            'review everything before it goes live.',
+          ),
+        ],
+      ),
     );
     // Fills the space it's given and scrolls its own text, so a long paste
     // never pushes the buttons off screen.
@@ -163,7 +169,6 @@ class _NewJobScreenState extends ConsumerState<NewJobScreen> {
       maxLength: NewJobScreen.maxLength,
       keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
-        border: const OutlineInputBorder(),
         alignLabelWithHint: true,
         labelText: 'Job description',
         errorText: _validation,
@@ -219,7 +224,10 @@ class _NewJobScreenState extends ConsumerState<NewJobScreen> {
     );
     return Scaffold(
       appBar: AppBar(
-        actions: [?EmployerMenuScope.button(context)],
+        actions: [
+          ?EmployerMenuScope.button(context),
+          const AccountMenuButton(),
+        ],
         title: const Text('New job'),
       ),
       body: Center(

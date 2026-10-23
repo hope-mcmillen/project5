@@ -17,6 +17,9 @@ class RRTheme extends ThemeExtension<RRTheme> {
     required this.ink,
     required this.inkMuted,
     required this.stretch,
+    required this.violet,
+    required this.pink,
+    required this.lemon,
   });
 
   final Color canvas,
@@ -28,7 +31,10 @@ class RRTheme extends ThemeExtension<RRTheme> {
       pass,
       ink,
       inkMuted,
-      stretch;
+      stretch,
+      violet,
+      pink,
+      lemon;
 
   static const light = RRTheme(
     canvas: RRColors.canvas,
@@ -41,27 +47,31 @@ class RRTheme extends ThemeExtension<RRTheme> {
     ink: RRColors.ink,
     inkMuted: RRColors.inkMuted,
     stretch: RRColors.stretch,
+    violet: RRColors.violet,
+    pink: RRColors.pink,
+    lemon: RRColors.lemon,
   );
 
+  /// Flat collage shadows: a hard navy offset rather than a soft blur.
   List<BoxShadow> shadow(int level) => switch (level) {
     1 => [
       BoxShadow(
-        color: framework.withValues(alpha: .6),
-        blurRadius: 3,
+        color: ink.withValues(alpha: .10),
+        blurRadius: 2,
         offset: const Offset(0, 1),
       ),
     ],
     2 => [
       BoxShadow(
-        color: framework.withValues(alpha: .7),
-        blurRadius: 12,
+        color: ink.withValues(alpha: .14),
+        blurRadius: 10,
         offset: const Offset(0, 4),
       ),
     ],
     _ => [
       BoxShadow(
-        color: framework.withValues(alpha: .8),
-        blurRadius: 28,
+        color: ink.withValues(alpha: .20),
+        blurRadius: 24,
         offset: const Offset(0, 12),
       ),
     ],
@@ -79,6 +89,9 @@ class RRTheme extends ThemeExtension<RRTheme> {
     Color? ink,
     Color? inkMuted,
     Color? stretch,
+    Color? violet,
+    Color? pink,
+    Color? lemon,
   }) => RRTheme(
     canvas: canvas ?? this.canvas,
     framework: framework ?? this.framework,
@@ -90,6 +103,9 @@ class RRTheme extends ThemeExtension<RRTheme> {
     ink: ink ?? this.ink,
     inkMuted: inkMuted ?? this.inkMuted,
     stretch: stretch ?? this.stretch,
+    violet: violet ?? this.violet,
+    pink: pink ?? this.pink,
+    lemon: lemon ?? this.lemon,
   );
 
   @override
@@ -106,6 +122,9 @@ class RRTheme extends ThemeExtension<RRTheme> {
       ink: Color.lerp(ink, other.ink, t)!,
       inkMuted: Color.lerp(inkMuted, other.inkMuted, t)!,
       stretch: Color.lerp(stretch, other.stretch, t)!,
+      violet: Color.lerp(violet, other.violet, t)!,
+      pink: Color.lerp(pink, other.pink, t)!,
+      lemon: Color.lerp(lemon, other.lemon, t)!,
     );
   }
 }

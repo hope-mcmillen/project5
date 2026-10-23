@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
-import '../../../app/dev_session.dart';
-import '../../auth/data/auth_repository.dart';
+import '../../../app/account_menu.dart';
 import '../../../ui/components/branded_page.dart';
+import '../../../ui/components/collage.dart';
 import '../../../ui/components/shimmer_shape.dart';
 import '../../../ui/theme/rr_tokens.dart';
 import '../data/profile_repository.dart';
@@ -15,6 +15,8 @@ class CandidateProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => BrandedPage(
     title: 'Profile',
+    accent: RRColors.deck,
+    motif: TileMotif.rhombus,
     description:
         'Your skills and preferences, ready for your next opportunity.',
     child: Column(
@@ -73,15 +75,10 @@ class CandidateProfileScreen extends ConsumerWidget {
           child: const Text('Update resume'),
         ),
         const SizedBox(height: RRSpace.md),
-        TextButton(
-          onPressed: () async {
-            await ref.read(authRepositoryProvider).signOut();
-            if (context.mounted) {
-              DevSessionScope.maybeOf(context)?.signOut();
-              context.go(Routes.welcome);
-            }
-          },
-          child: const Text('Sign out'),
+        TextButton.icon(
+          onPressed: () => signOutToWelcome(context, ref),
+          icon: const Icon(Icons.logout),
+          label: const Text('Sign out'),
         ),
       ],
     ),

@@ -12,6 +12,7 @@ import '../data/job_repository.dart';
 import '../domain/job.dart';
 import 'job_actions.dart';
 import 'widgets/job_status_chip.dart';
+import '../../../app/account_menu.dart';
 
 /// Job details: title, location, remote, job type, sponsorship and salary,
 /// pre-filled from parse-job, plus publish / pause / close (RC-10, RC-11,
@@ -26,7 +27,10 @@ class JobDetailsScreen extends ConsumerWidget {
     final job = ref.watch(jobProvider(jobId));
     return Scaffold(
       appBar: AppBar(
-        actions: [?EmployerMenuScope.button(context)],
+        actions: [
+          ?EmployerMenuScope.button(context),
+          const AccountMenuButton(),
+        ],
         title: const Text('Job details'),
       ),
       body: switch (job) {

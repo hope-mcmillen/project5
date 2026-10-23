@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 
+import '../../app/account_menu.dart';
 import '../../app/candidate_menu.dart';
 import '../theme/rr_tokens.dart';
-import 'rhombus_mark.dart';
+import 'collage.dart';
+
+/// The collage headline for a title: "Your deck" becomes "your deck.".
+String collageHeadline(String title) {
+  final lower = title.toLowerCase();
+  return RegExp(r'[.?!]$').hasMatch(lower) ? lower : '$lower.';
+}
+
+/// Text colour that stays AA on a decorative tile colour.
+Color onTile(Color tile) =>
+    tile == RRColors.violet || tile == RRColors.ink || tile == RRColors.pass
+    ? RRColors.surface
+    : RRColors.ink;
 
 /// Shared shell for real feature screens; supports the existing candidate menu.
 class BrandedPage extends StatelessWidget {
@@ -14,6 +27,9 @@ class BrandedPage extends StatelessWidget {
     this.preferMenuButton = false,
     this.footer,
     this.actions = const [],
+    this.headline,
+    this.accent = RRColors.lemon,
+    this.motif = TileMotif.asterisk,
   });
   final String title, description;
   final Widget child;
@@ -22,6 +38,14 @@ class BrandedPage extends StatelessWidget {
 
   /// Extra app bar actions, after the menu button.
   final List<Widget> actions;
+
+  /// Big lowercase headline on the header tile; defaults to the title.
+  final String? headline;
+
+  /// Header tile colour (decorative: lemon, pink, sky, violet).
+  final Color accent;
+  final TileMotif motif;
+
   @override
   Widget build(BuildContext context) {
     final menu = CandidateMenuScope.maybeOf(context);
@@ -34,7 +58,7 @@ class BrandedPage extends StatelessWidget {
             icon: const Icon(Icons.menu),
             onPressed: menu.openMenu,
           );
-    final text = Theme.of(context).textTheme;
+    final ink = onTile(accent);
     return Scaffold(
       bottomNavigationBar: footer == null
           ? null
@@ -59,7 +83,11 @@ class BrandedPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         leading: showBack ? null : menuButton,
-        actions: [if (showBack && menuButton != null) menuButton, ...actions],
+        actions: [
+          if (showBack && menuButton != null) menuButton,
+          ...actions,
+          const AccountMenuButton(),
+        ],
       ),
       body: SafeArea(
         child: Align(
@@ -67,25 +95,22 @@ class BrandedPage extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: RRSpace.pageWidth),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(RRSpace.xl),
+              padding: const EdgeInsets.fromLTRB(
+                RRSpace.lg,
+                RRSpace.sm,
+                RRSpace.lg,
+                RRSpace.xl,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Row(
-                    children: [
-                      const RhombusMark(size: RRSpace.xl),
-                      const SizedBox(width: RRSpace.sm),
-                      Expanded(
-                        child: Text('RESURHOMBUS', style: text.labelLarge),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: RRSpace.xxl),
-                  Text(title, style: text.displaySmall),
-                  const SizedBox(height: RRSpace.md),
-                  Text(
-                    description,
-                    style: text.bodyLarge?.copyWith(color: RRColors.inkMuted),
+                  HeadlineTile(
+                    headline: headline ?? collageHeadline(title),
+                    message: description,
+                    color: accent,
+                    textColor: ink,
+                    motif: motif,
+                    motifColor: ink,
                   ),
                   const SizedBox(height: RRSpace.xl),
                   child,

@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
-import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/widgets/auth_layout.dart';
+import '../../../app/account_menu.dart';
 
 /// Set up your company: every recruiter belongs to exactly one company, so
 /// they create a workspace or join one with an invite code (US-30, US-32).
@@ -28,6 +28,7 @@ class CompanyOnboardingScreen extends ConsumerWidget {
       ),
     ];
     return AuthLayout(
+      accountMenu: true,
       title: 'Set up your company',
       subtitle:
           'You\'ll post jobs and review applicants from one shared workspace.',
@@ -55,7 +56,7 @@ class CompanyOnboardingScreen extends ConsumerWidget {
         const SizedBox(height: 24),
         Center(
           child: TextButton(
-            onPressed: () => ref.read(authRepositoryProvider).signOut(),
+            onPressed: () => signOutToWelcome(context, ref),
             child: const Text('Sign out'),
           ),
         ),

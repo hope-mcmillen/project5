@@ -41,6 +41,7 @@ class _JoinCompanyScreenState extends ConsumerState<JoinCompanyScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return AuthLayout(
+      accountMenu: true,
       title: 'Join company',
       subtitle: 'Enter the 8-character code a teammate shared with you.',
       children: [

@@ -17,6 +17,7 @@ void main() {
     for (final (family, file) in [
       ('Inter', 'Inter'),
       ('Space Grotesk', 'SpaceGrotesk'),
+      ('Poppins', 'Poppins-Black'),
     ]) {
       await (FontLoader(
         family,

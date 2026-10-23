@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/errors/app_failure.dart';
+import '../../ui/components/collage.dart';
 
 /// Loading / empty / error views shared by the recruiter screens (every
 /// data screen has these four states; resurhombus-ui principle 6).
@@ -30,7 +31,7 @@ class LoadingBlocks extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: color,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(20),
               ),
             ),
         ],
@@ -63,11 +64,11 @@ class EmptyView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 64, color: theme.colorScheme.outline),
+            TileCluster(icon: icon),
             const SizedBox(height: 16),
             Text(
               title,
-              style: theme.textTheme.titleMedium,
+              style: theme.textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 4),

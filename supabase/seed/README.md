@@ -19,6 +19,7 @@ All people, companies, emails, and phone numbers here are invented.
 | `skills.sql` | 933 skills + 579 relations from the CSVs | `deno task embed:taxonomy --no-embed` (from `supabase/functions`) |
 | `skills_embeddings.sql` | One `gemini-embedding-001@1536` vector per skill, so seeding never calls the AI | `deno task embed:taxonomy` (about 10 Gemini calls) |
 | `demo_data.sql` | The demo world (PRD §9.8), below | `deno task generate:seed` (no AI, deterministic) |
+| `houston_jobs.sql` | 18 Houston-area companies and 80 OPEN jobs for the live deck, [below](#houston-demo-jobs-live-project) | `deno task generate:houston` (no AI, deterministic) |
 
 `demo_data.sql` needs the B-side migrations (`compute_match`, `skills_centroid`) and the two files above. It runs in one transaction and is safe to re-run. Scores, breakdowns, and vectors are computed in SQL at load time, so they always match the live functions.
 
@@ -35,3 +36,57 @@ All people, companies, emails, and phone numbers here are invented.
 `demo_manifest.json` lists every id (companies, recruiters, jobs, candidates, profile versions) and each candidate's expected score against every job.
 
 Verified on Postgres 17 + pgvector: loads in under a second, re-runs cleanly, SQL `compute_match` equals the generator's TypeScript scores on all 180 candidate × job pairs, and every application's history starts at `APPLIED` and ends on its status.
+
+## Houston demo jobs (live project)
+
+`houston_jobs.sql` gives a real candidate a full deck to swipe. It holds **18 fictional companies and 80 OPEN jobs**, mostly in Greater Houston. Unlike `demo_data.sql`, it adds no users, recruiters, candidates, swipes, or applications, so it is safe to load into the linked dev project (`ehgogfdaxmwnqfogjvmk`).
+
+| | |
+|---|---|
+| Companies | Energy, renewables, a Texas Medical Center–style hospital system, biotech, aerospace (Clear Lake), a spaceport startup, port logistics, a regional bank, fintech, a software studio, consulting, retail, a public water authority, IoT (Sugar Land), subsea robotics (The Woodlands), insurance (Katy), plus Austin data/AI and San Antonio cyber. 10 are verified. All names are invented and websites use `example.com`. |
+| Jobs | 56 full-time, 11 internships, 8 contract, 5 part-time. 39 hybrid, 27 on-site, 14 remote. 52 are in Houston and 23 more in The Woodlands, Sugar Land, Katy, Pasadena, Pearland, La Porte, or Webster. Software, data, ML/AI, design, IT, networking, security, embedded, robotics, GIS, healthcare IT, BI, and project management, from intern to senior. |
+| Requirements | 503 total, 3–10 per job (1–8 required), all real taxonomy skills. Core required skills weigh 3, other required skills 2, and preferred skills 1. Each job's vector is `skills_centroid()` of its requirements, like `save_requirements()`. |
+| Dates | `published_at` is 0–14 days ago and `expires_at = published_at + 60 days` (R-JOB-4), both relative to load time. Loading on 2026-10-22 keeps every job open until at least 2026-12-07. Re-running the file refreshes the dates. |
+| Ids | Fixed prefix `484f5553` ("HOUS"): companies `484f5553-0000-…`, jobs `484f5553-0001-…`. `houston_manifest.json` lists them all, with the TypeScript scorer's match score for four sample profiles. |
+
+**Edit the data** in `scripts/houston_jobs_data.ts`, then run `deno task generate:houston` from `supabase/functions`. The generator rejects unknown skill names and requirement counts outside R-JOB-2 or the 3–10 range. It also reports how many jobs each sample profile matches at 50 or above. A typical CS student (Python, Java, C++, SQL, Git, JavaScript, HTML/CSS, Flutter/Dart, Linux, DSA, OOP) gets **18** cards by default and **47** with "include stretch" on.
+
+**Feed caveats** (from `get_feed`, not this data):
+- Cards below a 50 match are hidden unless the candidate turns on `include_stretch`, and jobs sharing no skill with the profile never appear.
+- The location filter is an exact, case-insensitive match. A candidate whose locations are `Houston, TX` sees Houston jobs plus every remote job, but not Katy or Sugar Land. Leave locations empty to see all of them.
+
+**Locally,** `supabase db reset` loads this file last (after `seed.sql`, whose verified-company reset would otherwise clear these companies' badges), and `supabase/tests/houston_jobs.test.sql` checks it.
+
+### Load into the linked project (Kameron only)
+
+Run these from the repo root. Each one changes or reads the shared project, so only the project owner runs them.
+
+1. Check the taxonomy is there (expect `933 | 933`):
+   ```bash
+   npx -y supabase db query --linked "select count(*) as skills, count(*) filter (where embedding_model = 'gemini-embedding-001@1536') as vectors from public.skills"
+   ```
+   If it isn't, load `skills.sql` (92 KB) with `npx -y supabase db query --linked -f supabase/seed/skills.sql`. `skills_embeddings.sql` is 15 MB, which is likely too big for the Management API, so pass the database connection string with `--db-url` instead of `--linked`. `houston_jobs.sql` refuses to load (and writes nothing) while any skill it uses is missing or has no vector.
+2. Load the jobs. It runs in one transaction, is safe to re-run, and ends by printing `companies | open_jobs | requirements | vectors` = `18 | 80 | 503 | 80`:
+   ```bash
+   npx -y supabase db query --linked -f supabase/seed/houston_jobs.sql
+   ```
+   Pasting the file into the dashboard's SQL editor works too.
+3. Check again at any time:
+   ```sql
+   select
+     (select count(*) from public.companies where id::text like '484f5553-0000-%') as companies,
+     (select count(*) from public.jobs where id::text like '484f5553-0001-%' and status = 'OPEN' and expires_at > now()) as open_jobs,
+     (select count(*) from public.job_requirements where job_id::text like '484f5553-0001-%') as requirements,
+     (select count(*) from public.jobs where id::text like '484f5553-0001-%' and embedding is not null) as vectors;
+   ```
+4. Optional: see how many of these jobs a candidate will get, using their confirmed profile (`get_feed` itself needs a signed-in user):
+   ```sql
+   select count(*) filter (where (public.compute_match(c.active_version_id, j.id) ->> 'score')::int >= 50) as cards_50_plus,
+          count(*) as jobs, max(c.preferences::text) as preferences
+   from auth.users u
+   join public.candidates c on c.profile_id = u.id
+   cross join public.jobs j
+   where u.email = 'CANDIDATE_EMAIL' and j.id::text like '484f5553-0001-%' and j.status = 'OPEN';
+   ```
+
+**Reset a rehearsal:** `delete from public.swipes where job_id::text like '484f5553-0001-%' and candidate_id = '<candidate uuid>';` puts the swiped jobs back in that candidate's deck. It also deletes their applications to these jobs (cascade). **Remove everything:** `delete from public.companies where id::text like '484f5553-0000-%';` cascades to the jobs, requirements, swipes, and applications.

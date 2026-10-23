@@ -31,7 +31,7 @@ cp env/example.json env/dev.json
 `db reset --local` replaces this project's local database with the committed
 schema and synthetic demo data. It loads, in order, the skill taxonomy,
 precomputed vectors, Person B's generated demo world and Person A's demo-account
-setup through `supabase/config.toml`. It makes no AI calls. Do not run the local
+setup, then the Houston demo jobs, through `supabase/config.toml`. It makes no AI calls. Do not run the local
 demo seed against a production database.
 
 Run `supabase status` locally and copy its **anon/publishable key**, never its
@@ -87,6 +87,9 @@ Pelican Path Health's owner. Demo data includes 933 skills, 579 relations,
 3 companies (one verified), 4 recruiters, 30 candidates, 6 jobs and 60 applications
 covering every status. All people/resumes are synthetic. See
 `supabase/seed/demo_manifest.json` for fixture IDs and expected match scores.
+`supabase/seed/houston_jobs.sql` adds 18 fictional Houston-area companies and
+80 OPEN jobs (no users), and it is safe to load into the dev project. See
+`supabase/seed/README.md#houston-demo-jobs-live-project` for the command.
 
 ### Local Edge Functions and AI provider
 

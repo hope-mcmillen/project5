@@ -14,6 +14,9 @@ import '../domain/board_tile.dart';
 import 'board_controller.dart';
 import 'widgets/candidate_tile.dart';
 import 'widgets/mosaic_grid.dart';
+import '../../../app/account_menu.dart';
+import '../../../ui/theme/rr_tokens.dart';
+import '../../../ui/components/collage.dart';
 
 /// The job's requirements, for the skill filter chips.
 final boardRequirementsProvider =
@@ -148,6 +151,7 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
             icon: const Icon(Icons.keyboard_outlined),
             onPressed: () => showShortcutHelp(context),
           ),
+          const AccountMenuButton(),
         ],
       ),
       body: switch (board) {
@@ -315,30 +319,31 @@ class _Header extends StatelessWidget {
         : '$shown of $total${more ? '+' : ''} applicants';
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      child: Wrap(
-        spacing: 12,
-        runSpacing: 4,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Text(count, style: theme.textTheme.titleMedium),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.sort,
-                size: 16,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 4),
-              Flexible(
-                child: Text(
-                  'Sorted by Match',
-                  style: theme.textTheme.bodySmall,
+      child: HeadlineTile(
+        headline: 'triage.',
+        color: RRColors.pink,
+        motif: TileMotif.triangle,
+        body: Wrap(
+          spacing: 12,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            Text(count, style: theme.textTheme.titleMedium),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.sort, size: 16, color: RRColors.ink),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    'Sorted by Match',
+                    style: theme.textTheme.bodySmall,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

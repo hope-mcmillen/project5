@@ -19,6 +19,7 @@ void main() {
     for (final (family, path) in [
       ('Inter', 'assets/fonts/Inter.ttf'),
       ('Space Grotesk', 'assets/fonts/SpaceGrotesk.ttf'),
+      ('Poppins', 'assets/fonts/Poppins-Black.ttf'),
       ('MaterialIcons', 'fonts/MaterialIcons-Regular.otf'),
     ]) {
       await (FontLoader(family)..addFont(rootBundle.load(path))).load();
