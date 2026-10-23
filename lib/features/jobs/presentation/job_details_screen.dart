@@ -1,3 +1,5 @@
+import '../../../app/employer_menu.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -23,7 +25,10 @@ class JobDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final job = ref.watch(jobProvider(jobId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Job details')),
+      appBar: AppBar(
+        actions: [?EmployerMenuScope.button(context)],
+        title: const Text('Job details'),
+      ),
       body: switch (job) {
         AsyncValue(:final value?) => _DetailsForm(
           key: ValueKey(value.id),

@@ -1,3 +1,5 @@
+import '../../../app/employer_menu.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,8 +7,9 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 import '../../../app/widgets/state_views.dart';
 import '../../../core/models/job_status.dart';
+import '../../../ui/theme/rr_tokens.dart';
 import '../../company/presentation/widgets/company_header.dart';
-import '../../../app/shells.dart';
+
 import '../data/job_repository.dart';
 import '../domain/job_summary.dart';
 import 'job_actions.dart';
@@ -27,23 +30,29 @@ class JobsListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        // On phones there's no rail, so the company shows under the title.
-        title: MediaQuery.sizeOf(context).width < RecruiterShell.railBreakpoint
-            ? const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text('Jobs'), CompanySubtitle()],
-              )
-            : const Text('Jobs'),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: FilledButton.icon(
-              onPressed: () => context.push(Routes.newJob),
-              icon: const Icon(Icons.add),
-              label: const Text('New job'),
+        leading: EmployerMenuScope.button(context),
+        title: const Text('Jobs'),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(RRSpace.xxxl),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: RRSpace.xl,
+              vertical: RRSpace.md,
             ),
+            child: CompanySubtitle(),
           ),
-        ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.all(RRSpace.lg),
+          child: FilledButton.icon(
+            onPressed: () => context.push(Routes.newJob),
+            icon: const Icon(Icons.add),
+            label: const Text('New job'),
+          ),
+        ),
       ),
       body: switch (jobs) {
         AsyncValue(:final value?) when value.isEmpty => RefreshIndicator(

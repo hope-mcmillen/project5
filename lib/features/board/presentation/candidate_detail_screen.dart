@@ -1,3 +1,5 @@
+import '../../../app/employer_menu.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -56,6 +58,8 @@ class CandidateDetailScreen extends ConsumerWidget {
     });
     return Scaffold(
       appBar: AppBar(
+        actions: [?EmployerMenuScope.button(context)],
+
         title: Text(
           detail.value?.identity?.label ??
               detail.value?.tile.handle ??

@@ -45,13 +45,15 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('the extended rail shows the company and its status', (
+  testWidgets('the employer drawer shows the company and its status', (
     tester,
   ) async {
     await pump(tester, 1280);
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
     expect(find.byType(CompanyHeader), findsOneWidget);
-    expect(find.text('Rhombus Labs'), findsOneWidget);
-    expect(find.text('Unverified'), findsOneWidget);
+    expect(find.text('Rhombus Labs'), findsWidgets);
+    expect(find.text('Unverified'), findsWidgets);
   });
 
   testWidgets('verified companies say so', (tester) async {
@@ -61,11 +63,14 @@ void main() {
     expect(find.byIcon(Icons.verified), findsOneWidget);
   });
 
-  testWidgets('the collapsed rail keeps the status in a tooltip', (
+  testWidgets('the drawer keeps company status at medium widths', (
     tester,
   ) async {
     await pump(tester, 1000);
-    expect(find.byTooltip('Rhombus Labs · Unverified'), findsOneWidget);
+    await tester.tap(find.byTooltip('Open navigation menu'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CompanyHeader), findsOneWidget);
+    expect(find.text('Unverified'), findsWidgets);
   });
 
   testWidgets('phones show it under the Jobs title', (tester) async {

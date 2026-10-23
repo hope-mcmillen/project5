@@ -372,30 +372,44 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('phones get a bottom bar', (tester) async {
-      await pumpAt(tester, 360);
-      expect(find.byType(NavigationBar), findsOneWidget);
-      expect(find.byType(NavigationRail), findsNothing);
-    });
-
-    testWidgets('laptops get a rail, extended from 1200 px', (tester) async {
-      await pumpAt(tester, 1000);
-      expect(find.byType(NavigationBar), findsNothing);
-      var rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.extended, isFalse);
-
-      await pumpAt(tester, 1280);
-      rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.extended, isTrue);
-    });
-
-    testWidgets('selecting a tab keeps the rail in sync', (tester) async {
-      await pumpAt(tester, 1280);
-      await tester.tap(find.text('Company'));
-      await tester.pumpAndSettle();
-      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
-      expect(rail.selectedIndex, 2);
-      expect(find.byType(RecruiterShell), findsOneWidget);
-    });
+    for (final width in [360.0, 1280.0]) {
+      testWidgets('employer drawer switches sections at $width', (
+        tester,
+      ) async {
+        await pumpAt(tester, width);
+        expect(find.byType(NavigationBar), findsNothing);
+        expect(find.byType(NavigationRail), findsNothing);
+        final router = GoRouter.of(tester.element(find.byType(RecruiterShell)));
+        for (final destination in [
+          ('Interviews', Routes.interviews),
+          ('Company Profiles', Routes.companySettings),
+          ('Job Postings', Routes.jobs),
+        ]) {
+          await tester.tap(find.byTooltip('Open navigation menu'));
+          await tester.pumpAndSettle();
+          expect(find.text('Interviews'), findsWidgets);
+          expect(find.text('Company Profiles'), findsOneWidget);
+          expect(find.text('Job Postings'), findsOneWidget);
+          await tester.tap(find.text(destination.$1).last);
+          await tester.pumpAndSettle();
+          expect(router.state.uri.path, destination.$2);
+          expect(find.byTooltip('Open navigation menu'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        }
+        router.go(Routes.newJob);
+        await tester.pumpAndSettle();
+        expect(find.byType(BackButton), findsOneWidget);
+        await tester.tap(find.byTooltip('Open navigation menu'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Interviews').last);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Open navigation menu'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Job Postings'));
+        await tester.pumpAndSettle();
+        expect(router.state.uri.path, Routes.newJob);
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 }

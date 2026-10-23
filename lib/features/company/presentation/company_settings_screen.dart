@@ -1,3 +1,5 @@
+import '../../../app/employer_menu.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -17,7 +19,10 @@ class CompanySettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final membership = ref.watch(myCompanyProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Company')),
+      appBar: AppBar(
+        leading: EmployerMenuScope.button(context),
+        title: const Text('Company'),
+      ),
       body: switch (membership) {
         AsyncValue(:final value?) => _Content(membership: value),
         AsyncValue(hasError: true, isLoading: false) => _ErrorState(

@@ -1,3 +1,5 @@
+import '../../../app/employer_menu.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -79,7 +81,10 @@ class _InterviewListScreenState extends ConsumerState<InterviewListScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Interviews')),
+      appBar: AppBar(
+        leading: EmployerMenuScope.button(context),
+        title: const Text('Interviews'),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
